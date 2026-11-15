@@ -15,34 +15,34 @@
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" tabindex="-1">
       <div class="sidebar-top">
         <a class="brand" href="#home" aria-label="Paperly beranda"><span class="brand-icon"><svg viewBox="0 0 32 32" fill="none"><path d="M9 4.5h9l6 6V26a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2Z" fill="currentColor" opacity=".18"/><path d="M18 5v6h6M11 16h10M11 20h10M11 24h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="brand-name">paperly<span class="brand-dot">.</span></span></a>
-        <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Tutup menu">×</button>
+        <p class="sidebar-tagline">Alat PDF yang ringan &amp; privat.</p>
       </div>
       <div class="sidebar-scroll" id="sidebarScroll">
-      <div class="workspace-label">RUANG KERJA</div>
+      <div class="workspace-label">MENU</div>
       <nav class="main-nav" aria-label="Navigasi utama">
         <a class="nav-link active" href="#home" data-nav="home"><span class="nav-icon" data-icon="grid"></span>Beranda</a>
-        <a class="nav-link" href="#tools" data-nav="tools"><span class="nav-icon" data-icon="wand"></span>Semua alat <span class="nav-count">8</span></a>
+        <a class="nav-link" href="#tools" data-nav="tools"><span class="nav-icon" data-icon="wand"></span>Semua alat</a>
         <a class="nav-link" href="#recent" data-nav="recent"><span class="nav-icon" data-icon="clock"></span>Terakhir dipakai</a>
       </nav>
       <div class="sidebar-divider"></div>
       <div class="workspace-label tools-label">ALAT POPULER</div>
       <nav class="quick-nav" aria-label="Alat populer">
-        <button class="quick-link" data-tool="split"><span class="quick-icon lilac" data-icon="scissors"></span>Pisah PDF</button>
-        <button class="quick-link" data-tool="compress"><span class="quick-icon mint" data-icon="compress"></span>Kompres PDF</button>
-        <button class="quick-link" data-tool="merge"><span class="quick-icon peach" data-icon="merge"></span>Gabungkan PDF</button>
-        <button class="quick-link" data-tool="images"><span class="quick-icon blue" data-icon="image"></span>Gambar ke PDF</button>
+        <button class="quick-link" data-tool="split"><span class="quick-icon lilac" data-icon="scissors"></span><span class="quick-label">Pisah PDF</span></button>
+        <button class="quick-link" data-tool="compress"><span class="quick-icon mint" data-icon="compress"></span><span class="quick-label">Kompres PDF</span></button>
+        <button class="quick-link" data-tool="merge"><span class="quick-icon peach" data-icon="merge"></span><span class="quick-label">Gabungkan PDF</span></button>
+        <button class="quick-link" data-tool="images"><span class="quick-icon blue" data-icon="image"></span><span class="quick-label">Gambar ke PDF</span></button>
       </nav>
       <div class="sidebar-bottom">
+        <p class="sidebar-dismiss-hint"><span class="hint-dot"></span>Ketuk area gelap untuk menutup</p>
         <div class="privacy-card"><span class="privacy-mark" data-icon="shield"></span><div><strong>File tetap privat</strong><p>Semua proses di browser Anda.</p></div><span class="privacy-sparkle">✦</span></div>
-        <div class="profile"><div class="avatar">P</div><div class="profile-info"><strong>Ruang pribadi</strong><span>Gratis selamanya</span></div><button class="more-button" aria-label="Pengaturan">···</button></div>
       </div>
       </div>
     </aside>
     <main class="main-content">
-      <header class="topbar"><div class="breadcrumb"><span>Ruang kerja</span><span class="crumb-slash">/</span><strong id="crumbTitle">Beranda</strong></div><div class="topbar-actions"><button class="help-button" id="helpButton"><span data-icon="help"></span><span>Bantuan</span></button><button class="theme-toggle" id="themeToggle" type="button" aria-label="Aktifkan mode gelap" title="Mode gelap"><span class="theme-toggle-icon" aria-hidden="true">☾</span></button><button class="mobile-menu" id="mobileMenu" type="button" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false"><span></span><span></span></button></div></header>
+      <header class="topbar"><div class="topbar-left"><a class="topbar-brand" href="#home" aria-label="Paperly beranda"><span class="topbar-brand-dot"></span>paperly<span class="brand-dot">.</span></a><div class="local-status"><span class="local-status-dot"></span><span>Diproses lokal di perangkat</span></div></div><div class="topbar-actions"><button class="help-button" id="helpButton"><span data-icon="help"></span><span>Bantuan</span></button><button class="theme-toggle" id="themeToggle" type="button" aria-label="Aktifkan mode gelap" title="Mode gelap"><span class="theme-toggle-icon" aria-hidden="true">☾</span></button><button class="mobile-menu" id="mobileMenu" type="button" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false"><span></span><span></span></button></div></header>
       <div class="page-wrap" id="pageContent">
         <section class="welcome-row" id="homeSection"><div><div class="eyebrow"><span class="eyebrow-dot"></span>RUANG KERJA PDF ANDA</div><h1>Semua jadi <span>lebih sederhana.</span></h1><p class="welcome-copy">Alat PDF harian, tanpa ribet. Pilih alat dan mulai dalam hitungan detik.</p></div><div class="date-chip"><span class="date-sun">☼</span><span id="todayLabel">Hari yang cerah untuk beres-beres</span></div></section>
         <section class="hero-card"><div class="hero-copy"><span class="hero-kicker"><span class="hero-kicker-dot"></span>RUANG KERJA BARU ANDA</span><h2>Dokumen rapi,<br><em>pikiran pun lega.</em></h2><p>Pisahkan, rapikan, dan kelola PDF dengan cara yang terasa ringan. Semua file diproses langsung di perangkat Anda.</p><button class="hero-cta" data-scroll-tools>Jelajahi alat <span>↗</span></button></div><div class="hero-art" aria-hidden="true"><div class="art-glow"></div><div class="art-sparkle spark-a">✳</div><div class="art-sparkle spark-b">✦</div><div class="art-page page-back"><div></div><i></i><i></i><i></i></div><div class="art-page page-mid"><div></div><i></i><i></i><i></i></div><div class="art-page page-front"><span class="art-pdf">PDF</span><div></div><i></i><i></i><i></i><b></b></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-orb"></div></div><div class="hero-stats"><div><span class="stats-icon" data-icon="zap"></span><strong>100%</strong><span>di browser</span></div><i></i><div><span class="stats-icon green" data-icon="lock"></span><strong>0 file</strong><span>ke server</span></div><i></i><div><span class="stats-icon violet" data-icon="heart"></span><strong>Gratis</strong><span>selamanya</span></div></div></section>
