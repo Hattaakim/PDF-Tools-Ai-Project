@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f6ff">
+  <meta name="description" content="Ruang kerja PDF yang ringan, aman, dan bekerja langsung di browser Anda.">
+  <title>Paperly — Ruang kerja PDF</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" tabindex="-1">
+      <div class="sidebar-top">
+        <a class="brand" href="#home" aria-label="Paperly beranda"><span class="brand-icon"><svg viewBox="0 0 32 32" fill="none"><path d="M9 4.5h9l6 6V26a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2Z" fill="currentColor" opacity=".18"/><path d="M18 5v6h6M11 16h10M11 20h10M11 24h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="brand-name">paperly<span class="brand-dot">.</span></span></a>
+        <p class="sidebar-tagline">Alat PDF yang ringan &amp; privat.</p>
+      </div>
+      <div class="sidebar-scroll" id="sidebarScroll">
+      <div class="workspace-label">MENU</div>
+      <nav class="main-nav" aria-label="Navigasi utama">
+        <a class="nav-link active" href="#home" data-nav="home"><span class="nav-icon" data-icon="grid"></span>Beranda</a>
+        <a class="nav-link" href="#tools" data-nav="tools"><span class="nav-icon" data-icon="wand"></span>Semua alat</a>
+        <a class="nav-link" href="#recent" data-nav="recent"><span class="nav-icon" data-icon="clock"></span>Terakhir dipakai</a>
+      </nav>
+      <div class="sidebar-divider"></div>
+      <div class="workspace-label tools-label">ALAT POPULER</div>
+      <nav class="quick-nav" aria-label="Alat populer">
+        <button class="quick-link" data-tool="split"><span class="quick-icon lilac" data-icon="scissors"></span><span class="quick-label">Pisah PDF</span></button>
+        <button class="quick-link" data-tool="compress"><span class="quick-icon mint" data-icon="compress"></span><span class="quick-label">Kompres PDF</span></button>
+        <button class="quick-link" data-tool="merge"><span class="quick-icon peach" data-icon="merge"></span><span class="quick-label">Gabungkan PDF</span></button>
+        <button class="quick-link" data-tool="images"><span class="quick-icon blue" data-icon="image"></span><span class="quick-label">Gambar ke PDF</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <p class="sidebar-dismiss-hint"><span class="hint-dot"></span>Ketuk area gelap untuk menutup</p>
+        <div class="privacy-card"><span class="privacy-mark" data-icon="shield"></span><div><strong>File tetap privat</strong><p>Semua proses di browser Anda.</p></div><span class="privacy-sparkle">✦</span></div>
+      </div>
+      </div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div class="topbar-left"><a class="topbar-brand" href="#home" aria-label="Paperly beranda"><span class="topbar-brand-dot"></span>paperly<span class="brand-dot">.</span></a><div class="local-status"><span class="local-status-dot"></span><span>Diproses lokal di perangkat</span></div></div><div class="topbar-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Aktifkan mode gelap" title="Mode gelap"><span class="theme-toggle-icon" aria-hidden="true">☾</span></button><button class="mobile-menu" id="mobileMenu" type="button" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false"><span></span><span></span></button></div></header>
+      <div class="page-wrap" id="pageContent">
+        <section class="welcome-row" id="homeSection"><div><div class="eyebrow"><span class="eyebrow-dot"></span>RUANG KERJA PDF ANDA</div><h1>Semua jadi <span>lebih sederhana.</span></h1><p class="welcome-copy">Alat PDF harian, tanpa ribet. Pilih alat dan mulai dalam hitungan detik.</p></div><div class="date-chip"><span class="date-sun">☼</span><span id="todayLabel">Hari yang cerah untuk beres-beres</span></div></section>
+        <section class="hero-card"><div class="hero-copy"><span class="hero-kicker"><span class="hero-kicker-dot"></span>RUANG KERJA BARU ANDA</span><h2>Dokumen rapi,<br><em>pikiran pun lega.</em></h2><p>Pisahkan, rapikan, dan kelola PDF dengan cara yang terasa ringan. Semua file diproses langsung di perangkat Anda.</p><button class="hero-cta" data-scroll-tools>Jelajahi alat <span>↗</span></button></div><div class="hero-art" aria-hidden="true"><div class="art-glow"></div><div class="art-sparkle spark-a">✳</div><div class="art-sparkle spark-b">✦</div><div class="art-page page-back"><div></div><i></i><i></i><i></i></div><div class="art-page page-mid"><div></div><i></i><i></i><i></i></div><div class="art-page page-front"><span class="art-pdf">PDF</span><div></div><i></i><i></i><i></i><b></b></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-orb"></div></div><div class="hero-stats"><div><span class="stats-icon" data-icon="zap"></span><strong>100%</strong><span>di browser</span></div><i></i><div><span class="stats-icon green" data-icon="lock"></span><strong>0 file</strong><span>ke server</span></div><i></i><div><span class="stats-icon violet" data-icon="heart"></span><strong>Gratis</strong><span>selamanya</span></div></div></section>
+        <section class="section-heading tools-heading" id="toolsSection"><div><div class="eyebrow"><span class="eyebrow-dot"></span>SIAP MEMBANTU</div><h2>Alat yang Anda butuhkan</h2><p>Semua yang penting, ada di satu tempat.</p></div><label class="search-box"><span data-icon="search"></span><input id="toolSearch" type="search" placeholder="Cari alat PDF..." aria-label="Cari alat PDF"><kbd>⌘ K</kbd></label></section>
+        <section class="tools-grid" id="toolsGrid" aria-label="Daftar alat PDF"></section>
+        <section class="bottom-banner"><div class="banner-icon" data-icon="sparkles"></div><div><strong>File Anda, tetap milik Anda.</strong><span>Tidak ada unggahan. Tidak ada akun. Hanya alat yang membantu.</span></div><span class="banner-check" data-icon="check"></span></section>
+        <footer><span>© 2025 Paperly Studio</span><span>Dibuat dengan <b>♥</b> untuk hari yang lebih rapi.</span></footer>
+      </div>
+    </main>
+  </div>
+  <div class="sidebar-scrim" id="sidebarScrim" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="toolModal" aria-hidden="true"><section class="tool-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" id="modalClose" aria-label="Tutup">×</button><div class="modal-top-icon" id="modalIcon"></div><div class="modal-eyebrow" id="modalEyebrow">ALAT PDF</div><h2 id="modalTitle">Pisah PDF</h2><p class="modal-description" id="modalDescription"></p><div class="modal-content" id="modalContent"></div><div class="modal-error" id="modalError" role="alert"></div><div class="modal-actions"><button class="button-quiet" id="modalCancel">Batal</button><button class="button-primary" id="modalAction"><span>Mulai proses</span><span>↗</span></button></div><div class="modal-privacy"><span data-icon="shield"></span>Proses aman, file tidak pernah meninggalkan perangkat Anda</div></section></div>
+  <input type="file" id="fileInput" hidden>
+  <script src="vendor/pdf-lib.min.js"></script>
+  <script src="vendor/pdf-lib-cantoo.min.js"></script>
+  <script src="vendor/pdf.min.js"></script>
+  <script src="vendor/fflate.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
