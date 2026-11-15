@@ -356,3 +356,18 @@ body[data-theme="dark"] .editor-empty{background:#20263a;color:#8b96b3}
 .editor-page-label{font:600 10.5px 'DM Sans',sans-serif;color:var(--muted)}
 .editor-hint{font:500 10px 'DM Sans',sans-serif;color:var(--muted);opacity:.9;flex-basis:100%;text-align:center}
 @media(prefers-reduced-motion:reduce){.editor-btn,.editor-item{transition:none!important}}
+
+/* ===== Progress bar gradien dan tombol mulai beranimasi ===== */
+.modal-progress{display:none;height:7px;margin-top:12px;border-radius:999px;background:#e9edf6;overflow:hidden}
+.modal-progress.show{display:block}
+body[data-theme="dark"] .modal-progress{background:#2c344a}
+.modal-progress-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#5676e8,#9b8cf2,#3ec9a7,#5676e8);background-size:300% 100%;animation:progress-flow 2.2s linear infinite;transition:width .25s ease}
+.modal-progress-fill.indeterminate{width:100%!important;transform-origin:left center;animation:progress-flow 2.2s linear infinite,progress-indeterminate 1.35s ease-in-out infinite}
+@keyframes progress-flow{0%{background-position:0 0}100%{background-position:300% 0}}
+@keyframes progress-indeterminate{0%{transform:translateX(-105%) scaleX(.5)}55%{transform:translateX(40%) scaleX(.65)}100%{transform:translateX(110%) scaleX(.5)}}
+.modal-progress-label{display:none;margin-top:6px;font:500 10px 'DM Sans',sans-serif;color:var(--muted);text-align:center}
+.modal-progress-label.show{display:block}
+.button-spinner{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:button-spin .8s linear infinite}
+@keyframes button-spin{to{transform:rotate(360deg)}}
+.button-primary.loading{pointer-events:none}
+@media(prefers-reduced-motion:reduce){.modal-progress-fill,.button-spinner{animation-duration:.01ms!important;animation-iteration-count:1!important}}
