@@ -482,3 +482,125 @@ body[data-theme="dark"] .doc-sheet-selected{outline-color:#8fa5ff}
 .doc-sheet-bar button{white-space:nowrap}
 .doc-page.doc-drop-target{outline:2px dashed #8fa5ff;outline-offset:-6px}
 @media(prefers-reduced-motion:reduce){.doc-sheet-handle,.doc-size-input{transition:none!important}}
+
+/* ============================================================
+   AURORA GLASS — lapisan penampil (liquid glassmorphism + ceramic)
+   Semua aturan di bawah menimpa dengan halus; tema terang & gelap.
+   ============================================================ */
+
+/* --- 1. Latar aurora hidup: blob glass mengambang + aurora konik + noise --- */
+@keyframes aurora-drift-a{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(70px,50px) scale(1.18)}66%{transform:translate(-40px,90px) scale(.94)}}
+@keyframes aurora-drift-b{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(-80px,-45px) scale(1.22)}70%{transform:translate(50px,-70px) scale(.9)}}
+@keyframes aurora-spin{to{transform:rotate(360deg)}}
+.ambient{will-change:transform;transition:opacity .6s}
+.ambient-one{animation:aurora-drift-a 26s ease-in-out infinite}
+.ambient-two{animation:aurora-drift-b 31s ease-in-out infinite}
+.ambient::after{content:'';position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle at 32% 30%,rgba(255,255,255,.5),transparent 62%)}
+body::before{content:'';position:fixed;inset:-22%;z-index:-2;pointer-events:none;background:conic-gradient(from 0deg at 28% 22%,rgba(126,150,255,.14),rgba(168,132,255,.11),rgba(104,214,187,.11),rgba(126,150,255,.14));filter:blur(70px);animation:aurora-spin 46s linear infinite}
+body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.47 0 0 0 0 0.62 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+body[data-theme="dark"] body::before{background:conic-gradient(from 0deg at 28% 22%,rgba(96,124,255,.12),rgba(140,100,255,.10),rgba(70,190,160,.09),rgba(96,124,255,.12))}
+
+/* --- 2. Kaca cair pada permukaan utama --- */
+.sidebar{background:linear-gradient(165deg,rgba(255,255,255,.66),rgba(255,255,255,.44));backdrop-filter:blur(26px) saturate(170%);-webkit-backdrop-filter:blur(26px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset -18px 0 30px -24px rgba(90,110,190,.25)}
+.topbar{background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.28));backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 8px 26px -18px rgba(60,80,150,.28)}
+.date-chip,.search-box{backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 3px 12px -6px rgba(70,90,160,.18)}
+body[data-theme="dark"] .sidebar{background:linear-gradient(165deg,rgba(29,35,54,.92),rgba(24,29,45,.86));box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+body[data-theme="dark"] .topbar{background:linear-gradient(180deg,rgba(26,31,48,.9),rgba(22,27,42,.8));box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+body[data-theme="dark"] .date-chip,body[data-theme="dark"] .search-box{box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+
+/* --- 3. Kartu alat: keramik berkilau + sapuan cahaya + ikon bercincin --- */
+@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.tool-card{background:linear-gradient(150deg,rgba(255,255,255,.82),rgba(255,255,255,.58));backdrop-filter:blur(18px) saturate(155%);-webkit-backdrop-filter:blur(18px) saturate(155%);box-shadow:0 4px 14px rgba(45,58,90,.05),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(255,255,255,.25);animation:cardIn .5s cubic-bezier(.22,1,.36,1) backwards}
+.tool-group-grid .tool-card:nth-child(2){animation-delay:.04s}
+.tool-group-grid .tool-card:nth-child(3){animation-delay:.08s}
+.tool-group-grid .tool-card:nth-child(4){animation-delay:.12s}
+.tool-card::after{content:'';position:absolute;inset:-40% -30%;background:linear-gradient(62deg,transparent 44%,rgba(255,255,255,.55) 50%,transparent 56%);transform:translateX(-85%) rotate(.001deg);transition:transform .9s ease;pointer-events:none}
+.tool-card:hover{transform:translateY(-4px) scale(1.012);border-color:rgba(150,165,240,.55);box-shadow:0 18px 34px -12px rgba(61,74,130,.22),0 4px 12px rgba(61,74,130,.07),inset 0 1px 0 rgba(255,255,255,.95)}
+.tool-card:hover::after{transform:translateX(85%)}
+.tool-card:active{transform:translateY(-1px) scale(.995)}
+.tool-icon{box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 0 0 1px rgba(255,255,255,.4),0 3px 9px -3px rgba(70,90,170,.25);transition:transform .2s}
+.tool-card:hover .tool-icon{transform:scale(1.08) rotate(-3deg)}
+body[data-theme="dark"] .tool-card{background:linear-gradient(150deg,rgba(39,46,68,.95),rgba(31,37,56,.88));box-shadow:0 4px 14px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.09)}
+body[data-theme="dark"] .tool-card:hover{background:linear-gradient(150deg,rgba(46,54,80,.98),rgba(36,43,64,.94));border-color:rgba(120,138,220,.5);box-shadow:0 18px 34px -12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.12)}
+body[data-theme="dark"] .tool-card::after{background:linear-gradient(62deg,transparent 44%,rgba(190,205,255,.14) 50%,transparent 56%)}
+body[data-theme="dark"] .tool-icon{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(255,255,255,.07)}
+
+/* --- 4. Tipografi gradasi & pil navigasi --- */
+.welcome-row h1 span{background:linear-gradient(92deg,#5f77e0 8%,#9b7fe8 55%,#3ea695 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#6e82d6}
+.hero-copy h2 em{background:linear-gradient(92deg,#6b7fe2,#9b7fe8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand-icon{background:linear-gradient(135deg,#6478d9,#9b7fe8 58%,#63b9a5);color:#fff;box-shadow:0 7px 18px -4px rgba(101,113,220,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+.brand-name{background:linear-gradient(92deg,#2c3b5c,#4b5ec4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand-dot{-webkit-text-fill-color:#9b7fe8}
+body[data-theme="dark"] .brand-name{background:linear-gradient(92deg,#e8ecff,#b9c4ff);-webkit-background-clip:text;background-clip:text}
+body[data-theme="dark"] .welcome-row h1 span{background:linear-gradient(92deg,#9db1ff,#c5a8ff 55%,#7fe0c5);-webkit-background-clip:text;background-clip:text}
+body[data-theme="dark"] .hero-copy h2 em{background:linear-gradient(92deg,#a5b6ff,#c9a9ff);-webkit-background-clip:text;background-clip:text}
+.nav-link.active{background:linear-gradient(120deg,#e9ecff,#f2ecff 60%,#e6f7f1);box-shadow:inset 0 1px 0 #fff,0 4px 12px -5px rgba(101,113,220,.35)}
+body[data-theme="dark"] .nav-link.active{background:linear-gradient(120deg,#2c3350,#33294d 60%,#1f3a37);box-shadow:inset 0 1px 0 rgba(255,255,255,.09)}
+
+/* --- 5. Pulsasi mikro & hero yang bernapas --- */
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 3px #e8ebff,0 0 0 0 rgba(146,164,240,.3)}50%{box-shadow:0 0 0 5px rgba(146,164,240,0),0 0 0 3px #e8ebff}}
+.eyebrow-dot{animation:pulse-dot 2.6s ease-in-out infinite}
+.hero-kicker-dot{animation:pulse-dot 2.6s ease-in-out infinite;animation-delay:.4s}
+@keyframes hero-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero-card{background:linear-gradient(110deg,#f1f0ff 0%,#f0f3ff 34%,#eff8f6 67%,#f4efff 100%);background-size:220% 220%;animation:hero-shift 16s ease-in-out infinite}
+body[data-theme="dark"] .hero-card{background:linear-gradient(110deg,#262a43 0%,#252d46 34%,#203538 67%,#2b2748 100%);background-size:220% 220%;animation:hero-shift 16s ease-in-out infinite}
+@keyframes art-bob{0%,100%{translate:0 0}50%{translate:0 -9px}}
+.art-page{animation:art-bob 7s ease-in-out infinite}
+.page-mid{animation-delay:-2.3s}
+.page-front{animation-delay:-4.6s}
+@keyframes orb-glow{0%,100%{box-shadow:0 0 0 6px #ded8fa66,0 0 18px 4px #c9bafb55}50%{box-shadow:0 0 0 9px #ded8fa33,0 0 26px 8px #c9bafb88}}
+.art-orb{animation:orb-glow 4.5s ease-in-out infinite}
+.spark-a,.spark-b{animation:spin-spark 9s linear infinite}
+@keyframes spin-spark{0%,100%{transform:rotate(0) scale(1);opacity:.85}50%{transform:rotate(180deg) scale(1.25);opacity:1}}
+
+/* --- 6. Tombol utama gradasi keramik --- */
+.button-primary{background:linear-gradient(135deg,#6478d9,#8b6fe0 58%,#5aa8c4);box-shadow:0 7px 20px -4px rgba(101,113,220,.55),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.08);position:relative;overflow:hidden}
+.button-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.28),transparent 45%);pointer-events:none}
+.button-primary:hover{background:linear-gradient(135deg,#5f74e2,#937ae8 58%,#55b3cf);filter:brightness(1.04)}
+.button-primary:active{transform:translateY(1px) scale(.985);box-shadow:0 3px 10px -4px rgba(101,113,220,.5)}
+body[data-theme="dark"] .button-primary{box-shadow:0 7px 20px -4px rgba(101,113,220,.4),inset 0 1px 0 rgba(255,255,255,.22)}
+
+/* --- 7. Modal kaca susu --- */
+.modal-backdrop{background:radial-gradient(90% 90% at 50% 8%,rgba(86,118,232,.16),transparent 60%),rgba(24,33,53,.32);backdrop-filter:blur(12px) saturate(130%);-webkit-backdrop-filter:blur(12px) saturate(130%)}
+.tool-modal{background:linear-gradient(160deg,rgba(255,255,255,.94),rgba(250,250,255,.88));backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border:1px solid rgba(255,255,255,.75);box-shadow:0 30px 90px -18px rgba(28,41,75,.38),0 8px 30px -12px rgba(28,41,75,.18),inset 0 1px 0 rgba(255,255,255,.95)}
+.tool-modal::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(160deg,rgba(255,255,255,.5),transparent 28%);opacity:.5}
+.modal-top-icon{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 6px 16px -5px rgba(101,113,220,.35)}
+.modal-close{backdrop-filter:blur(8px);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+body[data-theme="dark"] .tool-modal{background:linear-gradient(160deg,rgba(33,39,60,.96),rgba(27,33,51,.92));border-color:rgba(255,255,255,.1);box-shadow:0 30px 90px -18px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.09)}
+body[data-theme="dark"] .tool-modal::before{background:linear-gradient(160deg,rgba(255,255,255,.09),transparent 28%)}
+body[data-theme="dark"] .modal-backdrop{background:radial-gradient(90% 90% at 50% 8%,rgba(96,124,255,.14),transparent 60%),rgba(8,11,20,.5)}
+
+/* --- 8. Toolbar penulis: pil kaca mengapung --- */
+.doc-toolbar{background:rgba(255,255,255,.74);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.85);border-radius:14px;box-shadow:0 12px 32px -10px rgba(45,58,90,.18),inset 0 1px 0 rgba(255,255,255,.95)}
+body[data-theme="dark"] .doc-toolbar{background:rgba(37,44,66,.85);border-color:rgba(255,255,255,.09);box-shadow:0 12px 32px -10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08)}
+.doc-page{box-shadow:0 1px 2px rgba(45,58,90,.05),0 14px 38px -12px rgba(45,58,90,.14);transition:box-shadow .25s,border-color .25s}
+.doc-page:focus-within{border-color:#a9b4ec;box-shadow:0 1px 2px rgba(45,58,90,.05),0 18px 44px -12px rgba(90,105,190,.24)}
+
+/* --- 9. Dropzone, chip, dan toast kaca --- */
+.dropzone{backdrop-filter:blur(10px) saturate(140%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+.toast{background:rgba(38,49,76,.88);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 40px rgba(18,28,58,.4)}
+.option-chip,.text-field,.select-field{transition:border-color .18s,box-shadow .18s,background .18s}
+.option-chip.active{box-shadow:0 3px 10px -4px rgba(101,113,220,.4),inset 0 1px 0 #fff}
+.text-field:focus,.select-field:focus{border-color:#a5abe8;box-shadow:0 0 0 4px rgba(101,120,220,.14)}
+
+/* --- 10. Scrollbar kaca --- */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#c6cff2,#a9b4e8);border-radius:9px;border:2.5px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#aeb9ea,#93a1e2);background-clip:padding-box}
+body[data-theme="dark"] ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#3c4463,#2e3550);background-clip:padding-box;border:2.5px solid transparent}
+body[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#4a5478,#384260);background-clip:padding-box}
+
+/* --- 11. Gerak minimal: hormati preferensi pengguna --- */
+@media(prefers-reduced-motion:reduce){
+.ambient-one,.ambient-two,body::before,.hero-card,.art-page,.art-orb,.spark-a,.spark-b,.eyebrow-dot,.hero-kicker-dot,.tool-card{animation:none!important}
+body::after{display:none}
+.tool-card::after{transition:none!important}
+}
+
+/* --- 12. Latar semi-transparan agar aurora tembus di halaman tulis & mode gelap --- */
+.doc-write{background:linear-gradient(160deg,rgba(244,246,251,.9),rgba(240,243,250,.86))}
+body[data-theme="dark"] .doc-write{background:linear-gradient(160deg,rgba(23,27,42,.94),rgba(21,25,40,.9))}
+body[data-theme="dark"] .main-content{background:rgba(23,27,42,.86)}
+.doc-write-topbar{backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 10px 30px -18px rgba(60,80,150,.3)}
+body[data-theme="dark"] .doc-write-topbar{box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
