@@ -441,3 +441,26 @@ body[data-theme="dark"] .modal-progress{background:#2c344a}
 @keyframes button-spin{to{transform:rotate(360deg)}}
 .button-primary.loading{pointer-events:none}
 @media(prefers-reduced-motion:reduce){.modal-progress-fill,.button-spinner{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+/* Penyisipan gambar di Pembuat PDF */
+.doc-page img.doc-img-selected{outline:2px dashed #5676e8;outline-offset:2px}
+.doc-img-bar{position:fixed;z-index:60;display:flex;gap:4px;padding:5px;background:#fff;border:1px solid #e7eaf1;border-radius:10px;box-shadow:0 10px 26px rgba(45,58,90,.18)}
+.doc-img-bar button{border:1px solid #e7eaf1;background:#fafbfe;color:#4a5a78;border-radius:7px;padding:5px 9px;font:600 11px 'DM Sans',sans-serif;cursor:pointer}
+.doc-img-bar button:hover{background:#eef1fb;color:#536fd5}
+.doc-img-bar button[data-imgact="remove"]:hover{background:#fdf1ef;border-color:#f2cfc8;color:#c25343}
+body[data-theme="dark"] .doc-img-bar{background:#252c3f;border-color:#3a4258}
+body[data-theme="dark"] .doc-img-bar button{background:#2d3449;border-color:#3a4258;color:#c9d2e6}
+body[data-theme="dark"] .doc-page img.doc-img-selected{outline-color:#8fa5ff}
+/* Editor Redact PDF */
+.editor-hint-inline{font-size:11px;color:#7b8599}
+body[data-theme="dark"] .editor-hint-inline{color:#9da8bd}
+.redact-layer{position:absolute;inset:0}
+.redact-box{position:absolute;background:rgba(0,0,0,.3);border:1.5px dashed #d47993;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.redact-box:active{cursor:grabbing}
+.redact-box.selected{background:rgba(0,0,0,.45);border-style:solid;border-color:#d47993}
+.redact-box-resize{position:absolute;right:-8px;bottom:-8px;width:15px;height:15px;border-radius:4px;background:#fff;border:1.5px solid #d47993;cursor:nwse-resize;touch-action:none}
+.redact-preview{position:absolute;background:rgba(0,0,0,.3);border:1.5px dashed #d47993;pointer-events:none}
+body[data-theme="dark"] .redact-box{border-color:#e89ab0}
+body[data-theme="dark"] .redact-box.selected{border-color:#e89ab0}
+body[data-theme="dark"] .redact-preview{border-color:#e89ab0}
+body[data-theme="dark"] .redact-box-resize{border-color:#e89ab0}
+@media(prefers-reduced-motion:reduce){.redact-box,.doc-img-bar button{transition:none!important}}
