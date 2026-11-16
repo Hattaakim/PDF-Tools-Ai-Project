@@ -385,6 +385,48 @@ body[data-theme="dark"] .doc-page:empty::before{color:#5f6b8c}
 .doc-page:empty::before{content:'Mulai menulis…';color:#b7c0d0;pointer-events:none}
 @media(prefers-reduced-motion:reduce){.doc-page,.doc-pages{scroll-behavior:auto}}
 
+/* ===== Halaman tulis khusus Pembuat PDF ===== */
+.doc-write{display:none;position:fixed;inset:0;z-index:30;background:#f4f6fb;flex-direction:column}
+.doc-write.open{display:flex}
+body.doc-writing{overflow:hidden}
+.doc-write-topbar{display:flex;align-items:center;gap:18px;padding:14px 4%;border-bottom:1px solid rgba(225,230,240,.74);background:rgba(255,255,255,.75);backdrop-filter:blur(14px);position:sticky;top:0;z-index:2}
+.doc-back-btn{height:34px;flex-shrink:0}
+.doc-write-title{min-width:0}
+.doc-write-eyebrow{display:block;font-size:8px;letter-spacing:1.5px;color:#979fb0;font-weight:700}
+.doc-write-title h2{font:700 17px Manrope,sans-serif;letter-spacing:-.5px;color:#293750;margin:2px 0 0}
+.doc-write-actions{margin-left:auto;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.doc-page-label{font-size:10px;color:#8d97a8;white-space:nowrap}
+.doc-write-body{flex:1;overflow-y:auto;padding:22px 4% 40px;display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.doc-write-body .doc-builder{width:100%;max-width:860px;display:flex;flex-direction:column;gap:12px}
+.doc-write-body .doc-toolbar{align-self:stretch;position:sticky;top:10px;z-index:1;box-shadow:0 6px 18px rgba(45,58,90,.06)}
+.doc-write-body .doc-pages{width:100%;max-height:none;overflow:visible;flex:1}
+.doc-write-body .doc-page{min-height:520px;max-width:760px;margin:0 auto;width:100%;padding:56px 64px;font-size:15px}
+.doc-write-body .modal-progress{width:100%;max-width:860px;margin:0}
+.doc-write-body .modal-progress-label,.doc-write-body .modal-error{width:100%;max-width:860px;margin:0 auto}
+@media(max-width:640px){.doc-write-topbar{flex-wrap:wrap;padding:10px 16px;gap:10px}.doc-write-title{order:2;width:100%}.doc-write-actions{margin-left:auto;width:100%;justify-content:space-between}.doc-write-body{padding:14px 12px 30px}.doc-write-body .doc-page{padding:30px 22px;min-height:420px}}
+body[data-theme="dark"] .doc-write{background:#171b2a}
+body[data-theme="dark"] .doc-write-topbar{background:rgba(27,32,48,.92);border-color:#30364a}
+body[data-theme="dark"] .doc-write-title h2{color:#edf0fa}
+body[data-theme="dark"] .doc-page-label{color:#8d97a8}
+
+/* ===== Groupbox alat di halaman utama ===== */
+.tools-groups{display:grid;gap:14px}
+.tool-group{border:1px solid rgba(226,231,240,.9);border-radius:16px;background:rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(45,58,90,.03);padding:16px 16px 15px;transition:border .18s,box-shadow .18s}
+.tool-group:hover{border-color:#d3daf3;box-shadow:0 8px 22px rgba(61,74,130,.06)}
+.tool-group-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:13px}
+.tool-group-head h3{margin:0 0 3px;font:700 13.5px Manrope,sans-serif;letter-spacing:-.3px;color:#2b3a53}
+.tool-group-head p{margin:0;font-size:10.5px;color:#8d97a8}
+.tool-group-count{flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.4px;color:#7d89cf;background:#eef1ff;border-radius:8px;padding:4px 9px}
+.tool-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.tool-group .tool-card{min-height:132px;background:rgba(255,255,255,.72)}
+@media(max-width:860px){.tool-group{padding:13px 11px 12px}.tool-group-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+body[data-theme="dark"] .tool-group{background:rgba(29,35,54,.6);border-color:#333b52}
+body[data-theme="dark"] .tool-group:hover{border-color:#465073}
+body[data-theme="dark"] .tool-group-head h3{color:#edf0fa}
+body[data-theme="dark"] .tool-group-head p{color:#8d97a8}
+body[data-theme="dark"] .tool-group-count{background:#2b3152;color:#aab6ff}
+body[data-theme="dark"] .tool-group .tool-card{background:rgba(38,45,66,.72)}
+
 /* ===== Progress bar gradien dan tombol mulai beranimasi ===== */
 .modal-progress{display:none;height:7px;margin-top:12px;border-radius:999px;background:#e9edf6;overflow:hidden}
 .modal-progress.show{display:block}
