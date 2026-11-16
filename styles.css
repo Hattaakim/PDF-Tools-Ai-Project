@@ -464,3 +464,21 @@ body[data-theme="dark"] .redact-box.selected{border-color:#e89ab0}
 body[data-theme="dark"] .redact-preview{border-color:#e89ab0}
 body[data-theme="dark"] .redact-box-resize{border-color:#e89ab0}
 @media(prefers-reduced-motion:reduce){.redact-box,.doc-img-bar button{transition:none!important}}
+/* Spinbox ukuran huruf & font kustom */
+.doc-spinbox{display:inline-flex;align-items:center;gap:3px}
+.doc-size-input{width:54px;padding:5px 4px;border:1px solid #e3e7ef;border-radius:8px;font:600 12px 'DM Sans',sans-serif;text-align:center;background:#fff;color:#17243c;appearance:textfield;-moz-appearance:textfield}
+.doc-size-input::-webkit-outer-spin-button,.doc-size-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+body[data-theme="dark"] .doc-size-input{background:#2d3449;border-color:#3a4258;color:#c9d2e6}
+/* Objek tabel / spreadsheet */
+.doc-sheet{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px;line-height:1.5}
+.doc-sheet td{border:1px solid #ccd5e5;padding:6px 9px;min-width:56px;vertical-align:top;outline:none;caret-color:#5676e8}
+.doc-sheet td:empty::before{content:'···';color:#b9c2d3;font-size:10px}
+.doc-sheet-selected{outline:2px dashed #5676e8;outline-offset:2px}
+body[data-theme="dark"] .doc-sheet td{border-color:#4a5470}
+body[data-theme="dark"] .doc-sheet td:empty::before{color:#5f6b8c}
+body[data-theme="dark"] .doc-sheet-selected{outline-color:#8fa5ff}
+.doc-sheet-handle{cursor:grab;padding:4px 6px;font-size:13px;color:#7b8599;user-select:none;-webkit-user-select:none}
+.doc-sheet-handle:active{cursor:grabbing}
+.doc-sheet-bar button{white-space:nowrap}
+.doc-page.doc-drop-target{outline:2px dashed #8fa5ff;outline-offset:-6px}
+@media(prefers-reduced-motion:reduce){.doc-sheet-handle,.doc-size-input{transition:none!important}}
