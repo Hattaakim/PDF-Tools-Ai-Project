@@ -20,20 +20,35 @@
 
 ## Office to PDF conversion service
 
-DOCX, PPTX, and XLSX conversion is handled by a separate Node.js service that runs LibreOffice. The browser sends the selected Office file to the service; the returned PDF is used for both the in-app preview and the download. The service is not required for the other browser-based PDF tools.
+DOCX, PPTX, and XLSX are converted by a server-side Node.js + LibreOffice service. The browser uses the same returned PDF for preview and download. Other PDF tools continue to run in the browser.
 
-### Requirements and startup
+### Run the complete app (recommended)
 
-- Node.js 18 or newer
-- LibreOffice installed on the machine running the service (`libreoffice` on `PATH`; use `LIBREOFFICE_PATH` if the executable is named differently)
+Docker Compose starts the static app and the conversion service together. LibreOffice is installed inside its service container; end users do not install it or enter a localhost port. The app defaults to the same-origin `/api/office` endpoint, which the included Nginx reverse proxy forwards internally to the converter.
+
+Requirements: Docker Engine and the Docker Compose plugin.
+
+```sh
+docker compose up --build
+```
+
+Open <http://localhost:8080>. To choose a different local port, set `PAPERLY_PORT` (for example, `PAPERLY_PORT=8088 docker compose up --build`). In production, serve this stack behind your HTTPS domain/reverse proxy and keep the converter container private; users then use the site normally without API configuration.
+
+The bundled proxy applies a basic per-IP request rate limit. For a public deployment, also put the app/API behind your normal access controls, abuse monitoring, and resource limits as appropriate. The converter has no built-in user authentication; CORS is not authentication.
+
+### Separate/manual setup
+
+If you host the UI separately from the Compose stack, the UI's API URL setting may be pointed to the externally reachable converter/proxy base URL. Conversion uses `POST <base-url>/convert` with a multipart field named `file`, returning `application/pdf`; `GET /health` checks service health. Browser access to a remote API requires HTTPS on a public HTTPS site and an appropriate `CORS_ORIGIN` setting.
+
+For running the Node service directly (rather than with Docker), you need Node.js 18+ and LibreOffice installed on the server:
 
 ```sh
 cd office-converter
-npm install
+npm ci
 npm start
 ```
 
-The API listens on `http://localhost:3001` by default. Check it with `GET /health`. In the Office-to-PDF dialog, enter the service's base URL; the browser saves this setting locally. Conversion uses `POST /convert` with a multipart form field named `file` and returns `application/pdf`.
+The direct service listens on port 3001 by default. This manual mode is for development/server operators, not something end users should need to set up.
 
 ### Configuration
 
@@ -41,13 +56,11 @@ The API listens on `http://localhost:3001` by default. Check it with `GET /healt
 | --- | --- | --- |
 | `PORT` | `3001` | HTTP port |
 | `LIBREOFFICE_PATH` | `libreoffice` | LibreOffice executable path/name (for example, `soffice`) |
-| `CORS_ORIGIN` | `*` | Comma-separated allowed browser origins; set this to the exact origin(s) hosting the UI when possible |
+| `CORS_ORIGIN` | `*` | Comma-separated allowed browser origins; configure exact UI origin(s) for direct cross-origin use |
 | `CONVERSION_TIMEOUT_MS` | `120000` | Per-document conversion timeout |
 | `MAX_OUTPUT_BYTES` | `262144000` (250 MiB) | Maximum generated PDF size |
 
-Uploads are limited to one DOCX/PPTX/XLSX file up to 50 MiB, and the extension must agree with the corresponding Office MIME type (or the browser may report `application/octet-stream`). Temporary input, profile, and output files are removed after the request completes. Conversion failures return a JSON object such as `{ "error": "..." }` with an appropriate HTTP status.
-
-The service has no built-in authentication or rate limiting. Do not expose it directly to the public internet; for a remote deployment, place it behind an authenticated/restricted reverse proxy, use HTTPS, and configure `CORS_ORIGIN` for the UI origin. CORS is not an authentication mechanism.
+Uploads are limited to one DOCX/PPTX/XLSX file up to 50 MiB, and the extension must agree with the corresponding Office MIME type (or the browser may report `application/octet-stream`). Temporary input, profile, and output files are removed after each request. Conversion failures return JSON such as `{ "error": "..." }` with an appropriate HTTP status.
 
 ### Text and OCR notes
 
