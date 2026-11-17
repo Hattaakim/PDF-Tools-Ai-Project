@@ -604,3 +604,32 @@ body[data-theme="dark"] .doc-write{background:linear-gradient(160deg,rgba(23,27,
 body[data-theme="dark"] .main-content{background:rgba(23,27,42,.86)}
 .doc-write-topbar{backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 10px 30px -18px rgba(60,80,150,.3)}
 body[data-theme="dark"] .doc-write-topbar{box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+
+/* Tentang aplikasi */
+.about-section{margin:48px 0 34px;padding:30px;border:1px solid rgba(222,228,240,.9);border-radius:22px;background:rgba(255,255,255,.62);box-shadow:var(--shadow)}
+.about-section>.eyebrow{margin-bottom:10px}
+.about-section h2{margin:0;color:var(--ink);font:800 25px Manrope,sans-serif;letter-spacing:-.7px}
+.about-intro{max-width:620px;margin:9px 0 23px;color:var(--muted);font-size:13px;line-height:1.7}
+.about-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.about-card{display:flex;align-items:flex-start;gap:15px;min-height:160px;padding:21px;border:1px solid var(--line);border-radius:17px;background:rgba(249,250,255,.86)}
+.about-card-icon,.creator-avatar{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border-radius:14px;background:#e8edff;color:#6178dc}
+.about-card-icon svg{width:21px;height:21px}
+.about-card h3{margin:2px 0 8px;color:var(--ink);font:700 15px Manrope,sans-serif}
+.about-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+.about-creator-card{background:linear-gradient(140deg,rgba(244,242,255,.9),rgba(247,250,255,.92))}
+.creator-avatar{border-radius:50%;background:linear-gradient(140deg,#7889ed,#aa82e7);color:white;font:800 18px Manrope,sans-serif}
+.about-label{display:block;margin-bottom:5px;color:#8b92a8;font-size:9px;font-weight:700;letter-spacing:1.4px}
+.github-link{display:inline-flex;align-items:center;gap:7px;margin-top:12px;color:#536fd5;font-size:11px;font-weight:700;text-decoration:none}
+.github-link span{display:grid;place-items:center;width:22px;height:22px;border:1px solid #dfe4f8;border-radius:7px;background:#fff;font-size:13px;transition:transform .18s}
+.github-link:hover{text-decoration:underline}
+.github-link:hover span{transform:translate(2px,-2px)}
+.github-link:focus-visible{outline:3px solid #9caaf3;outline-offset:3px;border-radius:4px}
+body[data-theme="dark"] .about-section{background:rgba(31,37,56,.78);border-color:#363d52}
+body[data-theme="dark"] .about-section h2,body[data-theme="dark"] .about-card h3{color:#e5e9f4}
+body[data-theme="dark"] .about-intro,body[data-theme="dark"] .about-card p{color:#a2acc0}
+body[data-theme="dark"] .about-card{background:rgba(37,44,65,.82);border-color:#3a4259}
+body[data-theme="dark"] .about-creator-card{background:linear-gradient(140deg,rgba(43,42,67,.88),rgba(36,43,64,.9))}
+body[data-theme="dark"] .about-card-icon{background:#292f4a;color:#aab8ff}
+body[data-theme="dark"] .github-link{color:#b1bcff}
+body[data-theme="dark"] .github-link span{background:#242b3d;border-color:#424a65}
+@media(max-width:860px){.about-section{margin:34px 0 25px;padding:21px 17px;border-radius:18px}.about-section h2{font-size:21px}.about-intro{font-size:12px}.about-grid{grid-template-columns:1fr;gap:10px}.about-card{min-height:0;padding:17px 15px}.about-card h3{font-size:14px}}
