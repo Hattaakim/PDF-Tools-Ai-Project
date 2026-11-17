@@ -38,7 +38,7 @@ The bundled proxy applies a basic per-IP request rate limit. For a public deploy
 
 ### Separate/manual setup
 
-If you host the UI separately from the Compose stack, the UI's API URL setting may be pointed to the externally reachable converter/proxy base URL. Conversion uses `POST <base-url>/convert` with a multipart field named `file`, returning `application/pdf`; `GET /health` checks service health. Browser access to a remote API requires HTTPS on a public HTTPS site and an appropriate `CORS_ORIGIN` setting.
+If you host the UI separately from the Compose stack, the UI's API URL setting may be pointed to the externally reachable converter/proxy base URL. Conversion uses `POST <base-url>/convert` with a multipart field named `file`, returning `application/pdf`; `GET /health` checks service health. Browser access to a remote API requires HTTPS on a public HTTPS site and an appropriate `CORS_ORIGIN` setting. For the bundled proxy, enter `/api/office` as the base URL (not `/api/office/convert`); the browser appends `/convert` itself. An HTTP 405 means the selected web server or reverse proxy is not forwarding that POST route to the converter. Rebuild/redeploy the proxy and verify it forwards `/api/office/` to the converter service.
 
 For running the Node service directly (rather than with Docker), you need Node.js 18+ and LibreOffice installed on the server:
 
