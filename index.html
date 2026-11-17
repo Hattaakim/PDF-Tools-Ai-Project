@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -26,6 +26,7 @@
         <a class="nav-link active" href="#home" data-nav="home"><span class="nav-icon" data-icon="grid"></span>Beranda</a>
         <a class="nav-link" href="#tools" data-nav="tools"><span class="nav-icon" data-icon="wand"></span>Semua alat</a>
         <a class="nav-link" href="#recent" data-nav="recent"><span class="nav-icon" data-icon="clock"></span>Terakhir dipakai</a>
+        <a class="nav-link" href="#about" data-nav="about"><span class="nav-icon" data-icon="help"></span>Tentang Aplikasi</a>
       </nav>
       <div class="sidebar-divider"></div>
       <div class="workspace-label tools-label">ALAT POPULER</div>
@@ -49,6 +50,21 @@
         <section class="section-heading tools-heading" id="toolsSection"><div><div class="eyebrow"><span class="eyebrow-dot"></span>SIAP MEMBANTU</div><h2>Alat yang Anda butuhkan</h2><p>Semua yang penting, ada di satu tempat.</p></div><label class="search-box"><span data-icon="search"></span><input id="toolSearch" type="search" placeholder="Cari alat PDF..." aria-label="Cari alat PDF"><kbd>⌘ K</kbd></label></section>
         <section class="tools-groups" id="toolsGrid" aria-label="Daftar alat PDF"></section>
         <section class="bottom-banner"><div class="banner-icon" data-icon="sparkles"></div><div><strong>File Anda, tetap milik Anda.</strong><span>Tidak ada unggahan. Tidak ada akun. Hanya alat yang membantu.</span></div><span class="banner-check" data-icon="check"></span></section>
+        <section class="about-section" id="aboutSection" aria-labelledby="aboutTitle">
+          <div class="eyebrow"><span class="eyebrow-dot"></span>KENALI PAPERLY</div>
+          <h2 id="aboutTitle">Tentang Aplikasi</h2>
+          <p class="about-intro">Paperly adalah ruang kerja PDF yang ringan untuk membantu Anda mengelola dokumen dengan lebih mudah.</p>
+          <div class="about-grid">
+            <article class="about-card about-app-card">
+              <span class="about-card-icon" data-icon="shield"></span>
+              <div><h3>Praktis dan menjaga privasi</h3><p>Gabungkan, pisahkan, konversi, dan rapikan PDF langsung dari browser. File Anda diproses di perangkat, tanpa perlu diunggah ke server.</p></div>
+            </article>
+            <article class="about-card about-creator-card">
+              <span class="creator-avatar" aria-hidden="true">H</span>
+              <div><span class="about-label">DIBUAT OLEH</span><h3>Hatta Akim</h3><p>Pengembang Paperly. Temukan proyek dan karya lainnya di GitHub.</p><a class="github-link" href="https://github.com/Hattaakim" target="_blank" rel="noopener noreferrer" aria-label="Kunjungi profil GitHub Hatta Akim (buka di tab baru)"><span aria-hidden="true">↗</span> github.com/Hattaakim</a></div>
+            </article>
+          </div>
+        </section>
         <footer><span>© 2025 Paperly Studio</span><span>Dibuat dengan <b>♥</b> untuk hari yang lebih rapi.</span></footer>
       </div>
     </main>
@@ -70,6 +86,6 @@
   <script src="vendor/pdf-lib-cantoo.min.js"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/fflate.js"></script>
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
