@@ -441,6 +441,11 @@ body[data-theme="dark"] .modal-progress{background:#2c344a}
 @keyframes button-spin{to{transform:rotate(360deg)}}
 .button-primary.loading{pointer-events:none}
 @media(prefers-reduced-motion:reduce){.modal-progress-fill,.button-spinner{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+/* ===== Navigasi halaman hash ===== */
+.page-section{display:none}.page-section.active{display:block;animation:page-in .22s ease-out}@keyframes page-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* ===== Panduan singkat ===== */
+.quick-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 6px}.guide-card{display:flex;gap:10px;align-items:flex-start;padding:14px;border:1px solid rgba(146,158,195,.22);border-radius:16px;background:rgba(255,255,255,.48)}.guide-card strong{display:block;font-size:13px}.guide-card span{font-size:11px;color:#7c869a;line-height:1.55}.guide-number{flex:0 0 28px;height:28px;display:grid;place-items:center;border-radius:9px;background:#eef1ff;color:#6372cf;font-weight:800}@media(max-width:860px){.quick-guide{grid-template-columns:1fr}.guide-card{padding:12px}}
+body[data-theme="dark"] .guide-card{background:rgba(36,43,64,.58);border-color:rgba(126,139,177,.2)}body[data-theme="dark"] .guide-card span{color:#a3aec1}body[data-theme="dark"] .guide-number{background:#343b5c;color:#bcc7ff}
 /* ===== Pratinjau PDF hasil Gabung, Ekstrak, dan Putar ===== */
 .processed-preview{margin-top:14px;padding:10px;border:1px solid #e1e7f1;border-radius:14px;background:rgba(248,250,254,.82);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
 .processed-preview[hidden]{display:none}

@@ -24,9 +24,8 @@
       <div class="workspace-label">MENU</div>
       <nav class="main-nav" aria-label="Navigasi utama">
         <a class="nav-link active" href="#home" data-nav="home"><span class="nav-icon" data-icon="grid"></span>Beranda</a>
-        <a class="nav-link" href="#tools" data-nav="tools"><span class="nav-icon" data-icon="wand"></span>Semua alat</a>
-        <a class="nav-link" href="#recent" data-nav="recent"><span class="nav-icon" data-icon="clock"></span>Terakhir dipakai</a>
-        <a class="nav-link" href="#about" data-nav="about"><span class="nav-icon" data-icon="help"></span>Tentang Aplikasi</a>
+        <a class="nav-link" href="#tools" data-nav="tools"><span class="nav-icon" data-icon="wand"></span>Alat per kategori</a>
+        <a class="nav-link" href="#about" data-nav="about"><span class="nav-icon" data-icon="help"></span>Tentang Pengembang</a>
       </nav>
       <div class="sidebar-divider"></div>
       <div class="workspace-label tools-label">ALAT POPULER</div>
@@ -45,14 +44,20 @@
     <main class="main-content">
       <header class="topbar"><div class="topbar-left"><a class="topbar-brand" href="#home" aria-label="Paperly beranda"><span class="topbar-brand-dot"></span>paperly<span class="brand-dot">.</span></a><div class="local-status"><span class="local-status-dot"></span><span>Diproses lokal di perangkat</span></div></div><div class="topbar-actions"><button class="theme-toggle" id="themeToggle" type="button" aria-label="Aktifkan mode gelap" title="Mode gelap"><span class="theme-toggle-icon" aria-hidden="true">☾</span></button><button class="mobile-menu" id="mobileMenu" type="button" aria-label="Buka menu" aria-controls="sidebar" aria-expanded="false"><span></span><span></span></button></div></header>
       <div class="page-wrap" id="pageContent">
-        <section class="welcome-row" id="homeSection"><div><div class="eyebrow"><span class="eyebrow-dot"></span>RUANG KERJA PDF ANDA</div><h1>Semua jadi <span>lebih sederhana.</span></h1><p class="welcome-copy">Alat PDF harian, tanpa ribet. Pilih alat dan mulai dalam hitungan detik.</p></div><div class="date-chip"><span class="date-sun">☼</span><span id="todayLabel">Hari yang cerah untuk beres-beres</span></div></section>
+        <section class="page-section active" id="homePage" data-page="home">
+        <div class="welcome-row" id="homeSection"><div><div class="eyebrow"><span class="eyebrow-dot"></span>RUANG KERJA PDF ANDA</div><h1>Semua jadi <span>lebih sederhana.</span></h1><p class="welcome-copy">Alat PDF harian, tanpa ribet. Pilih alat dan mulai dalam hitungan detik.</p></div><div class="date-chip"><span class="date-sun">☼</span><span id="todayLabel">Hari yang cerah untuk beres-beres</span></div></div>
+        <div class="quick-guide" aria-label="Panduan singkat"><div class="guide-card"><b class="guide-number">1</b><div><strong>Pilih alat</strong><span>Masuk ke Alat per kategori dan pilih kebutuhan Anda.</span></div></div><div class="guide-card"><b class="guide-number">2</b><div><strong>Tambah file</strong><span>Pilih PDF atau Office dari perangkat Anda.</span></div></div><div class="guide-card"><b class="guide-number">3</b><div><strong>Periksa &amp; simpan</strong><span>Atur hasil, lihat pratinjau, lalu unduh atau simpan.</span></div></div></div>
         <section class="hero-card"><div class="hero-copy"><span class="hero-kicker"><span class="hero-kicker-dot"></span>RUANG KERJA BARU ANDA</span><h2>Dokumen rapi,<br><em>pikiran pun lega.</em></h2><p>Pisahkan, rapikan, dan kelola PDF dengan cara yang terasa ringan. Semua file diproses langsung di perangkat Anda.</p><button class="hero-cta" data-scroll-tools>Jelajahi alat <span>↗</span></button></div><div class="hero-art" aria-hidden="true"><div class="art-glow"></div><div class="art-sparkle spark-a">✳</div><div class="art-sparkle spark-b">✦</div><div class="art-page page-back"><div></div><i></i><i></i><i></i></div><div class="art-page page-mid"><div></div><i></i><i></i><i></i></div><div class="art-page page-front"><span class="art-pdf">PDF</span><div></div><i></i><i></i><i></i><b></b></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-orb"></div></div><div class="hero-stats"><div><span class="stats-icon" data-icon="zap"></span><strong>100%</strong><span>di browser</span></div><i></i><div><span class="stats-icon green" data-icon="lock"></span><strong>0 file</strong><span>ke server</span></div><i></i><div><span class="stats-icon violet" data-icon="heart"></span><strong>Gratis</strong><span>selamanya</span></div></div></section>
+        </section>
+        <section class="page-section" id="toolsPage" data-page="tools">
         <section class="section-heading tools-heading" id="toolsSection"><div><div class="eyebrow"><span class="eyebrow-dot"></span>SIAP MEMBANTU</div><h2>Alat yang Anda butuhkan</h2><p>Semua yang penting, ada di satu tempat.</p></div><label class="search-box"><span data-icon="search"></span><input id="toolSearch" type="search" placeholder="Cari alat PDF..." aria-label="Cari alat PDF"><kbd>⌘ K</kbd></label></section>
         <section class="tools-groups" id="toolsGrid" aria-label="Daftar alat PDF"></section>
+        </section>
+        <section class="page-section" id="aboutPage" data-page="about">
         <section class="bottom-banner"><div class="banner-icon" data-icon="sparkles"></div><div><strong>File Anda, tetap milik Anda.</strong><span>Tidak ada unggahan. Tidak ada akun. Hanya alat yang membantu.</span></div><span class="banner-check" data-icon="check"></span></section>
         <section class="about-section" id="aboutSection" aria-labelledby="aboutTitle">
           <div class="eyebrow"><span class="eyebrow-dot"></span>KENALI PAPERLY</div>
-          <h2 id="aboutTitle">Tentang Aplikasi</h2>
+          <h2 id="aboutTitle">Tentang Pengembang</h2>
           <p class="about-intro">Paperly adalah ruang kerja PDF yang ringan untuk membantu Anda mengelola dokumen dengan lebih mudah.</p>
           <div class="about-grid">
             <article class="about-card about-app-card">
@@ -64,6 +69,7 @@
               <div><span class="about-label">DIBUAT OLEH</span><h3>Hatta Akim</h3><p>Pengembang Paperly. Temukan proyek dan karya lainnya di GitHub.</p><a class="github-link" href="https://github.com/Hattaakim" target="_blank" rel="noopener noreferrer" aria-label="Kunjungi profil GitHub Hatta Akim (buka di tab baru)"><span aria-hidden="true">↗</span> github.com/Hattaakim</a></div>
             </article>
           </div>
+        </section>
         </section>
         <footer><span>© 2025 Paperly Studio</span><span>Dibuat dengan <b>♥</b> untuk hari yang lebih rapi.</span></footer>
       </div>
