@@ -1,8 +1,0 @@
-services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "${PAPERLY_PORT:-8080}:80"
-    restart: unless-stopped
