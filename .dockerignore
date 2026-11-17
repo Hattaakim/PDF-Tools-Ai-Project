@@ -1,9 +1,0 @@
-.git
-**/node_modules
-.agents
-.agentsweb
-.omgithub-runtime
-.opencode-ssh
-.opencode-web
-screenshots
-*.log
