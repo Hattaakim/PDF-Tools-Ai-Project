@@ -947,3 +947,19 @@ body[data-theme="dark"] .rotate-btn{background:#4a3f27;border-color:#5c523d;colo
 body[data-theme="dark"] .rotate-btn:hover{background:#5e4f2e;border-color:#846f43}
 body[data-theme="dark"] .rotate-empty{background:linear-gradient(140deg,#3b3322,#342e20);border-color:#5d523c;color:#a39577}
 @media(max-width:860px){.rotate-head{flex-direction:column}.rotate-quick{justify-content:flex-start}.rotate-summary{flex-direction:column;align-items:flex-start;gap:2px}.rotate-summary span:last-child{text-align:left}.rotate-page-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));max-height:300px}}
+
+/* --- Pratinjau Pembuat PDF --- */
+.doc-preview{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(160deg,#fbf9f4,#faf7f0)}
+.doc-preview[hidden]{display:none}
+.doc-preview-topbar{display:flex;align-items:center;gap:18px;padding:14px 4%;border-bottom:1px solid rgba(240,235,225,.74);background:rgba(255,255,255,.78);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);flex-shrink:0;position:relative;z-index:2}
+.doc-preview-title{min-width:0}
+.doc-preview-title h2{font:700 17px Manrope,sans-serif;letter-spacing:-.5px;color:#655634;margin:2px 0 0}
+.doc-preview-body{flex:1;overflow-y:auto;padding:20px 4% 34px;display:flex;justify-content:center;align-items:flex-start;overscroll-behavior:contain}
+.doc-preview-card{width:100%;max-width:880px;margin-top:0;display:flex;flex-direction:column}
+.doc-preview-card .processed-preview-bar{margin-bottom:10px}
+.doc-preview-card .processed-preview-stage{max-height:none;overflow:visible;min-height:300px;padding:12px}
+.doc-preview-card .processed-preview-canvas{box-shadow:0 10px 30px rgba(102,86,51,.2)}
+@media(max-width:640px){.doc-preview-topbar{flex-wrap:wrap;padding:10px 16px;gap:10px}.doc-preview-title{order:2;width:100%}.doc-preview-topbar .doc-write-actions{width:100%;justify-content:space-between}.doc-preview-body{padding:14px 12px 26px}.doc-preview-card .processed-preview-stage{min-height:240px;padding:8px}}
+body[data-theme="dark"] .doc-preview{background:linear-gradient(160deg,#2a2417,#282216)}
+body[data-theme="dark"] .doc-preview-topbar{background:rgba(48,41,27,.94);border-color:#5d523c;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+body[data-theme="dark"] .doc-preview-title h2{color:#f9f6ee}
