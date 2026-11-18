@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="9" fill="#6869e8"/><path d="M9 4.5h9l6 6V26a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2Z" fill="#fff" opacity=".95"/><path d="M18 5v6h6M11 16h10M11 20h10M11 24h6" stroke="#6869e8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8a6106"/>
+      <stop offset=".34" stop-color="#cf9d1d"/>
+      <stop offset=".58" stop-color="#f3d885"/>
+      <stop offset="1" stop-color="#b07d0c"/>
+      <animate attributeName="x1" values="-8;24;-8" dur="7s" repeatCount="indefinite"/>
+      <animate attributeName="x2" values="24;56;24" dur="7s" repeatCount="indefinite"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="9" fill="url(#gold)"/>
+  <path d="M9 4.5h9l6 6V26a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2Z" fill="#fffaf0" opacity=".97"/>
+  <path d="M18 5v6h6M11 16h10M11 20h10M11 24h6" stroke="#a9790c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
