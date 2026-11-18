@@ -558,6 +558,89 @@ body[data-theme="dark"] .sheet-selinfo{background:#55492f;color:#f0d79a}
 @media(max-width:600px){.sheet-topbar{padding:9px 12px}.sheet-toolbar{padding:7px 10px}.sheet-tools{gap:5px}.sheet-tool-group{padding-right:5px}.sheet-actions{gap:6px}.sheet-dirty{display:none}.sheet-actions .button-quiet,.sheet-actions .button-primary{height:32px;padding:0 10px}.sheet-name{max-width:170px;font-size:15px}.sheet-formula-row{gap:5px}.sheet-cellref{min-width:48px}.sheet-statusbar{padding:5px 12px 8px;gap:8px}.sheet-grid-wrap{min-height:44vh}}
 @media(prefers-reduced-motion:reduce){.sheet-page,.sheet-cell,.sheet-tool{transition:none!important}}
 
+/* ===== PDF Sheet: font, gabung sel, bungkus teks, daftar rumus, pratinjau ekspor ===== */
+.sheet-formula-row{position:relative}
+.sheet-formula-help{width:30px;height:30px;flex-shrink:0;border:1px solid #eadfc4;background:#fffdf8;border-radius:7px;color:#9c7a31;cursor:pointer;font:700 14px 'DM Sans',sans-serif}
+.sheet-formula-help:hover,.sheet-formula-help[aria-expanded="true"]{background:#fbf1d8;border-color:#e5d3aa}
+.sheet-formula-menu{display:none;position:absolute;top:38px;right:0;z-index:12;width:min(560px,calc(100vw - 32px));max-height:min(58vh,430px);overflow:auto;background:#fffdf8;border:1px solid #ece5d6;border-radius:14px;box-shadow:0 24px 60px -22px rgba(53,44,23,.45);padding:12px 14px;scrollbar-width:thin;scrollbar-color:#d9c9a6 transparent}
+.sheet-formula-menu.open{display:block}
+.sheet-formula-menu-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border-bottom:1px solid #f1ebdf;padding-bottom:8px;margin-bottom:8px}
+.sheet-formula-menu-head strong{display:block;font:700 12px Manrope,sans-serif;color:#5f5338}
+.sheet-formula-menu-head span{display:block;margin-top:2px;font-size:9.5px;color:#8a7f68}
+.sheet-formula-menu-head button{border:0;background:transparent;color:#9a8a68;cursor:pointer;font-size:18px;line-height:1;padding:0 2px}
+.sheet-formula-list{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.sheet-formula-group h4{margin:0 0 5px;font:700 9px 'DM Sans',sans-serif;letter-spacing:.8px;text-transform:uppercase;color:#a58c58}
+.sheet-formula-item{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;padding:5px 6px;cursor:pointer}
+.sheet-formula-item:hover,.sheet-formula-item:focus-visible{background:#fbf5e6;border-color:#f0e6cf;outline:none}
+.sheet-formula-item code{font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace;color:#9c761f}
+.sheet-formula-item span{font-size:9px;color:#8a7f68;line-height:1.35}
+.sheet-formula-note{margin:10px 0 0;padding-top:8px;border-top:1px solid #f1ebdf;font-size:9px;line-height:1.55;color:#8b7f67}
+.sheet-formula-note code{background:#fbf1d8;border-radius:3px;padding:1px 3px;color:#9c761f}
+.sheet-select-font{max-width:118px}
+.sheet-select-size{max-width:62px;padding-right:2px}
+.sheet-cell.merged{background-clip:padding-box}
+body[data-theme="dark"] .sheet-formula-help{background:#3d3422;border-color:#665738;color:#e7c878}
+body[data-theme="dark"] .sheet-formula-help:hover,body[data-theme="dark"] .sheet-formula-help[aria-expanded="true"]{background:#4d4128}
+body[data-theme="dark"] .sheet-formula-menu{background:#3a3120;border-color:#5d523c;box-shadow:0 24px 60px -20px rgba(0,0,0,.6)}
+body[data-theme="dark"] .sheet-formula-menu-head{border-color:#53492f}
+body[data-theme="dark"] .sheet-formula-menu-head strong{color:#f0e6cc}
+body[data-theme="dark"] .sheet-formula-menu-head span,body[data-theme="dark"] .sheet-formula-item span{color:#b2a586}
+body[data-theme="dark"] .sheet-formula-item:hover,body[data-theme="dark"] .sheet-formula-item:focus-visible{background:#463c26;border-color:#5d523c}
+body[data-theme="dark"] .sheet-formula-note{border-color:#53492f;color:#a99a76}
+body[data-theme="dark"] .sheet-formula-note code{background:#55492f;color:#f0d79a}
+
+.sheet-preview-backdrop{position:fixed;inset:0;z-index:48;display:none;place-items:center;padding:18px;background:radial-gradient(90% 90% at 50% 8%,rgba(196,142,27,.18),transparent 62%),rgba(52,43,24,.42);backdrop-filter:blur(16px) saturate(135%);-webkit-backdrop-filter:blur(16px) saturate(135%)}
+.sheet-preview-backdrop.open{display:grid}
+.sheet-preview-panel{width:min(1120px,96vw);height:min(90vh,860px);display:flex;flex-direction:column;background:#fbf9f4;border:1px solid #ece5d6;border-radius:18px;box-shadow:0 40px 100px -30px rgba(53,44,23,.6);overflow:hidden;color:#3a3019}
+.sheet-preview-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #f0ebdf;background:#fffdf8;flex-shrink:0}
+.sheet-preview-heading h2{margin:2px 0 0;font:700 16px Manrope,sans-serif;letter-spacing:-.5px;color:#5c4f31}
+.sheet-preview-close{width:32px;height:32px;border:1px solid #efe9dc;border-radius:8px;background:#fff;color:#8a7f68;font-size:18px;line-height:1;cursor:pointer}
+.sheet-preview-close:hover{background:#fbf5e6;border-color:#e9d9ac;color:#8a6c25}
+.sheet-preview-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.sheet-preview-stage{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding:14px 16px 10px;background:radial-gradient(120% 120% at 50% 0%,#fffdf8,#f2ecdf)}
+.sheet-preview-canvas-wrap{flex:1;min-height:0;display:grid;place-items:center;position:relative}
+.sheet-preview-canvas-wrap canvas{max-width:100%;max-height:100%;border-radius:4px;background:#fff;box-shadow:0 18px 45px -20px rgba(83,69,35,.55)}
+.sheet-preview-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;color:#8a7f68;background:rgba(253,251,246,.72);border-radius:10px}
+.sheet-preview-loading[hidden]{display:none}
+.sheet-preview-loading .button-spinner{border-color:rgba(156,122,49,.25);border-top-color:#c48e1b}
+.sheet-preview-pager{display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;font-size:10px;color:#7d7159}
+.sheet-pager-btn{width:28px;height:26px;border:1px solid #e9e1d0;border-radius:7px;background:#fffdf8;color:#8a7f68;cursor:pointer}
+.sheet-pager-btn:hover:not(:disabled){background:#fbf5e6;color:#8a6c25}
+.sheet-pager-btn:disabled{opacity:.35;cursor:default}
+.sheet-preview-page{font-weight:700;color:#6b5b39;min-width:86px;text-align:center}
+.sheet-preview-meta{color:#96896c;padding-left:8px;border-left:1px solid #e4dbc7}
+.sheet-preview-controls{min-height:0;overflow:auto;border-left:1px solid #f0ebdf;background:#fffdf8;padding:14px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:#d9c9a6 transparent}
+.sheet-preview-section{border:1px solid #f0eadc;border-radius:12px;background:#fdfbf6;padding:10px 11px;display:flex;flex-direction:column;gap:8px}
+.sheet-preview-section h3{margin:0;font:700 9px 'DM Sans',sans-serif;letter-spacing:.9px;text-transform:uppercase;color:#a58c58}
+.sheet-preview-field{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10.5px;color:#6d6450}
+.sheet-preview-field select{height:28px;min-width:126px;border:1px solid #e9e1d0;border-radius:7px;background:#fff;color:#5f5338;font:10px 'DM Sans',sans-serif;padding:0 6px;outline:none;cursor:pointer}
+.sheet-preview-field select:focus{border-color:#dcc58c}
+.sheet-check{display:flex;align-items:center;gap:7px;font-size:10.5px;color:#6d6450;cursor:pointer}
+.sheet-check input{width:14px;height:14px;accent-color:#c48e1b}
+.sheet-preview-foot{flex-shrink:0;display:flex;align-items:center;gap:12px;justify-content:space-between;padding:11px 18px;border-top:1px solid #f0ebdf;background:#fffdf8}
+.sheet-preview-note{margin:0;font-size:10px;line-height:1.45;color:#8a7f68}
+.sheet-preview-note.error{color:#c4616d;font-weight:600}
+.sheet-preview-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sheet-preview-actions .button-quiet,.sheet-preview-actions .button-primary{height:34px}
+body[data-theme="dark"] .sheet-preview-backdrop{background:radial-gradient(90% 90% at 50% 8%,rgba(224,160,22,.18),transparent 62%),rgba(18,15,8,.6)}
+body[data-theme="dark"] .sheet-preview-panel{background:#2b2517;border-color:#5d523c;color:#f4efe5;box-shadow:0 40px 100px -30px rgba(0,0,0,.8)}
+body[data-theme="dark"] .sheet-preview-head,body[data-theme="dark"] .sheet-preview-foot,body[data-theme="dark"] .sheet-preview-controls{background:#332c1d;border-color:#5d523c}
+body[data-theme="dark"] .sheet-preview-heading h2{color:#f9f6ee}
+body[data-theme="dark"] .sheet-preview-close{background:#3d3422;border-color:#665738;color:#cabfa5}
+body[data-theme="dark"] .sheet-preview-stage{background:radial-gradient(120% 120% at 50% 0%,#3a3221,#2f291b)}
+body[data-theme="dark"] .sheet-preview-loading{background:rgba(43,37,23,.72);color:#b2a586}
+body[data-theme="dark"] .sheet-preview-section{background:#3a3120;border-color:#53492f}
+body[data-theme="dark"] .sheet-preview-field{color:#cabfa5}
+body[data-theme="dark"] .sheet-preview-field select{background:#3d3422;border-color:#5d523c;color:#f1e9d8}
+body[data-theme="dark"] .sheet-check{color:#cabfa5}
+body[data-theme="dark"] .sheet-pager-btn{background:#3d3422;border-color:#5d523c;color:#cabfa5}
+body[data-theme="dark"] .sheet-preview-page{color:#f0e6cc}
+body[data-theme="dark"] .sheet-preview-meta{color:#a99a76;border-color:#53492f}
+body[data-theme="dark"] .sheet-preview-note{color:#b2a586}
+body[data-theme="dark"] .sheet-preview-note.error{color:#f0a3ad}
+@media(max-width:980px){.sheet-preview-panel{height:min(94vh,900px)}.sheet-preview-body{grid-template-columns:1fr;grid-template-rows:minmax(220px,1fr) auto}.sheet-preview-controls{max-height:42vh;border-left:0;border-top:1px solid #f0ebdf;display:grid;grid-template-columns:1fr 1fr;align-items:start}.sheet-preview-foot{flex-wrap:wrap}.sheet-preview-note{flex:1 1 100%}}
+@media(max-width:600px){.sheet-preview-backdrop{padding:0}.sheet-preview-panel{width:100vw;height:100vh;border-radius:0;border:0}.sheet-preview-head{padding:11px 14px}.sheet-preview-controls{grid-template-columns:1fr;max-height:38vh;padding:10px 12px}.sheet-preview-stage{padding:10px}.sheet-preview-foot{padding:9px 14px}.sheet-preview-actions .button-quiet,.sheet-preview-actions .button-primary{height:32px;padding:0 12px}.sheet-formula-list{grid-template-columns:1fr}.sheet-formula-menu{max-height:64vh;left:0;right:0;width:auto}}
+
 /* ===== Groupbox alat di halaman utama ===== */
 .tools-groups{display:grid;gap:14px}
 .tool-group{border:1px solid rgba(240,236,226,.9);border-radius:16px;background:rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(102,86,51,.03);padding:16px 16px 15px;transition:border .18s,box-shadow .18s}
