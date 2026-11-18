@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=21">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -86,6 +86,112 @@
     <div class="doc-write-body"><div class="doc-builder" id="docBuilder"><div class="doc-toolbar"><button type="button" class="editor-btn" data-cmd="bold" title="Tebal" aria-label="Tebal"><b>B</b></button><button type="button" class="editor-btn" data-cmd="italic" title="Miring" aria-label="Miring"><i>I</i></button><button type="button" class="editor-btn" data-cmd="underline" title="Garis bawah" aria-label="Garis bawah"><u>U</u></button><button type="button" class="editor-btn" data-cmd="strikeThrough" title="Coret" aria-label="Coret"><s>S</s></button><button type="button" class="editor-btn" data-cmd="justifyLeft" title="Rata kiri" aria-label="Rata kiri">◧</button><button type="button" class="editor-btn" data-cmd="justifyCenter" title="Rata tengah" aria-label="Rata tengah">▣</button><button type="button" class="editor-btn" data-cmd="justifyRight" title="Rata kanan" aria-label="Rata kanan">◨</button><button type="button" class="editor-btn" data-cmd="insertUnorderedList" title="Daftar poin" aria-label="Daftar poin">• ≡</button><button type="button" class="editor-btn" data-cmd="insertOrderedList" title="Daftar nomor" aria-label="Daftar nomor">1. ≡</button><select id="docFont" class="doc-select" title="Jenis huruf" aria-label="Jenis huruf"><option value="Arial">Arial (sans)</option><option value="Times New Roman">Times (serif)</option><option value="Courier New">Courier (mono)</option></select><span class="doc-spinbox"><button type="button" class="editor-btn" data-dsize="-1" title="Perkecil huruf" aria-label="Perkecil huruf">−</button><input id="docSizePx" class="doc-size-input" type="number" min="8" max="96" step="1" value="14" title="Ukuran huruf (piksel)" aria-label="Ukuran huruf (piksel)"><button type="button" class="editor-btn" data-dsize="1" title="Perbesar huruf" aria-label="Perbesar huruf">+</button></span><input id="docColor" type="color" value="#17243c" title="Warna teks" aria-label="Warna teks"><span class="doc-toolbar-sep"></span><button type="button" class="editor-btn" data-doc="image" title="Sisip gambar" aria-label="Sisip gambar">🖼</button><button type="button" class="editor-btn" data-doc="sheet" title="Sisip tabel" aria-label="Sisip tabel">▦</button><button type="button" class="editor-btn" data-doc="font" title="Unggah font sendiri (TTF/OTF)" aria-label="Unggah font sendiri">🔤</button><button type="button" class="editor-btn" data-doc="add-page" title="Tambah halaman" aria-label="Tambah halaman">+ Hal</button><button type="button" class="editor-btn" data-doc="remove-page" title="Hapus halaman terakhir" aria-label="Hapus halaman terakhir">− Hal</button><button type="button" class="editor-btn" data-doc="clear" title="Kosongkan semua" aria-label="Kosongkan semua">Kosongkan</button></div><div class="doc-pages" id="docPages"><div class="doc-page" contenteditable="true" spellcheck="false"></div></div><input id="docImageInput" type="file" accept="image/png,image/jpeg" hidden><input id="docFontFile" type="file" accept=".ttf,.otf,font/ttf,font/otf" hidden></div>
     <div class="modal-progress" id="docProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-hidden="true"><div class="modal-progress-fill" id="docProgressFill"></div></div><div class="modal-progress-label" id="docProgressLabel" aria-live="polite"></div><div class="modal-error" id="docError" role="alert"></div></div>
   </section>
+  <section class="sheet-page" id="sheetPage" aria-hidden="true">
+    <header class="sheet-topbar">
+      <button class="button-quiet sheet-back-btn" id="sheetBackBtn" aria-label="Kembali ke halaman utama">← Kembali</button>
+      <div class="sheet-title">
+        <span class="sheet-eyebrow">PDF SHEET</span>
+        <div class="sheet-title-row">
+          <input class="sheet-name" id="sheetName" value="Lembar 1" maxlength="48" aria-label="Nama sheet" autocomplete="off" spellcheck="false">
+          <span class="doc-write-status" id="sheetStatus" role="status" aria-live="polite"><span aria-hidden="true">✓</span> PDF sudah diunduh</span>
+        </div>
+      </div>
+      <div class="sheet-actions">
+        <span class="sheet-dirty" id="sheetDirty">Belum diekspor</span>
+        <button type="button" class="button-quiet" id="sheetVarsBtn" aria-expanded="false" aria-controls="sheetVars">ƒ Variabel</button>
+        <button type="button" class="button-primary" id="sheetExport"><span>Ekspor PDF</span><span>↓</span></button>
+      </div>
+    </header>
+    <div class="sheet-toolbar" role="toolbar" aria-label="Alat PDF Sheet">
+      <div class="sheet-formula-row">
+        <span class="sheet-cellref" id="sheetCellRef">A1</span>
+        <span class="sheet-fx" aria-hidden="true">fx</span>
+        <input class="sheet-formula" id="sheetFormula" type="text" autocomplete="off" spellcheck="false" aria-label="Nilai atau rumus sel" placeholder="Ketik nilai, =SUM(A1:A5), atau =harga*qty">
+        <button type="button" class="sheet-formula-apply" id="sheetFormulaApply" title="Terapkan ke sel" aria-label="Terapkan ke sel">↵</button>
+      </div>
+      <div class="sheet-tools" id="sheetTools">
+        <div class="sheet-tool-group">
+          <button type="button" class="sheet-tool" data-sact="undo" title="Urungkan (Ctrl+Z)" aria-label="Urungkan">↶</button>
+          <button type="button" class="sheet-tool" data-sact="redo" title="Ulangi (Ctrl+Y)" aria-label="Ulangi">↷</button>
+        </div>
+        <div class="sheet-tool-group">
+          <button type="button" class="sheet-tool sheet-strong" data-sact="bold" title="Tebal" aria-label="Tebal"><b>B</b></button>
+          <button type="button" class="sheet-tool sheet-em" data-sact="italic" title="Miring" aria-label="Miring"><i>I</i></button>
+          <button type="button" class="sheet-tool" data-sact="align-left" title="Rata kiri" aria-label="Rata kiri"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h8M2 12h10"/></svg></button>
+          <button type="button" class="sheet-tool" data-sact="align-center" title="Rata tengah" aria-label="Rata tengah"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M4 8h8M3 12h10"/></svg></button>
+          <button type="button" class="sheet-tool" data-sact="align-right" title="Rata kanan" aria-label="Rata kanan"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6 8h8M4 12h10"/></svg></button>
+        </div>
+        <div class="sheet-tool-group sheet-colors">
+          <label class="sheet-color" title="Warna teks"><span aria-hidden="true">A</span><input type="color" id="sheetTextColor" value="#3a3019" aria-label="Warna teks"></label>
+          <label class="sheet-color" title="Warna isi sel"><span aria-hidden="true">▨</span><input type="color" id="sheetFillColor" value="#fbf1d8" aria-label="Warna isi sel"></label>
+          <button type="button" class="sheet-tool" data-sact="fill-none" title="Hapus warna isi" aria-label="Hapus warna isi">◻</button>
+        </div>
+        <div class="sheet-tool-group">
+          <select id="sheetBorder" class="sheet-select" aria-label="Border sel">
+            <option value="all">Semua border</option>
+            <option value="outer">Border luar</option>
+            <option value="inner">Border dalam</option>
+            <option value="bottom">Garis bawah</option>
+            <option value="none">Tanpa border</option>
+          </select>
+          <select id="sheetFormat" class="sheet-select" aria-label="Format angka">
+            <option value="auto">Otomatis</option>
+            <option value="number">Angka</option>
+            <option value="currency">Rupiah</option>
+            <option value="percent">Persen</option>
+            <option value="text">Teks</option>
+          </select>
+        </div>
+        <div class="sheet-tool-group sheet-struct">
+          <button type="button" class="sheet-tool sheet-tool-wide" data-sact="row-add">+ Baris</button>
+          <button type="button" class="sheet-tool sheet-tool-wide" data-sact="col-add">+ Kolom</button>
+          <button type="button" class="sheet-tool sheet-tool-wide" data-sact="row-del">− Baris</button>
+          <button type="button" class="sheet-tool sheet-tool-wide" data-sact="col-del">− Kolom</button>
+          <button type="button" class="sheet-tool sheet-tool-wide" data-sact="clear">Bersihkan</button>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-main">
+      <div class="sheet-grid-wrap" id="sheetGridWrap">
+        <div class="sheet-grid" id="sheetGrid" role="region" aria-label="Grid spreadsheet PDF Sheet"></div>
+      </div>
+      <aside class="sheet-vars" id="sheetVars" aria-label="Variabel sheet">
+        <header class="sheet-vars-head"><div><strong>Variabel</strong><p>Definisikan nilai sekali, pakai di banyak rumus.</p></div><button type="button" class="sheet-vars-close" id="sheetVarsClose" aria-label="Tutup panel variabel">×</button></header>
+        <form class="sheet-var-form" id="sheetVarForm">
+          <div class="sheet-var-fields">
+            <input id="sheetVarName" type="text" placeholder="harga" maxlength="24" autocomplete="off" spellcheck="false" aria-label="Nama variabel">
+            <span aria-hidden="true">=</span>
+            <input id="sheetVarValue" type="text" placeholder="25000 atau =A1*2" autocomplete="off" spellcheck="false" aria-label="Nilai variabel">
+          </div>
+          <button type="submit" class="sheet-mini-btn">Tambah variabel</button>
+          <p class="sheet-var-error" id="sheetVarError" role="alert"></p>
+        </form>
+        <div class="sheet-var-list" id="sheetVarList"></div>
+        <p class="sheet-var-hint">Contoh: <code>=harga*qty</code> atau <code>=SUM(A2:A10)</code>. Variabel bisa berisi angka atau rumus.</p>
+      </aside>
+    </div>
+    <div class="sheet-progress-area">
+      <div class="modal-progress" id="sheetProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-hidden="true"><div class="modal-progress-fill" id="sheetProgressFill"></div></div>
+      <div class="modal-progress-label" id="sheetProgressLabel" aria-live="polite"></div>
+      <div class="modal-error" id="sheetError" role="alert"></div>
+    </div>
+    <div class="sheet-statusbar">
+      <span class="sheet-selinfo" id="sheetSelection">A1</span>
+      <span id="sheetMeta">16 kolom × 40 baris</span>
+      <span class="sheet-shortcut-hint">Enter simpan · Ctrl+S ekspor · Ctrl+Z urungkan · Ctrl+C salin</span>
+    </div>
+  </section>
+  <div class="doc-confirm-backdrop" id="sheetLeaveDialog" aria-hidden="true">
+    <section class="doc-confirm" role="alertdialog" aria-modal="true" aria-labelledby="sheetLeaveTitle" aria-describedby="sheetLeaveCopy">
+      <span class="doc-confirm-icon" aria-hidden="true">←</span>
+      <h2 id="sheetLeaveTitle">Tutup PDF Sheet?</h2>
+      <p id="sheetLeaveCopy">Sheet Anda tetap tersimpan selama tab ini terbuka. Ekspor PDF terlebih dahulu jika datanya masih diperlukan.</p>
+      <div class="doc-confirm-actions">
+        <button type="button" class="button-quiet" id="sheetLeaveCancel">Tetap di sini</button>
+        <button type="button" class="button-primary" id="sheetLeaveConfirm"><span>Ya, tutup</span><span>←</span></button>
+      </div>
+    </section>
+  </div>
   <div class="doc-confirm-backdrop" id="docLeaveDialog" aria-hidden="true">
     <section class="doc-confirm" role="alertdialog" aria-modal="true" aria-labelledby="docLeaveTitle" aria-describedby="docLeaveCopy">
       <span class="doc-confirm-icon" aria-hidden="true">←</span>
@@ -103,6 +209,6 @@
   <script src="vendor/pdf-lib-cantoo.min.js"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/fflate.js"></script>
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=24"></script>
 </body>
 </html>
