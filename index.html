@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="styles.css?v=22">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -108,6 +108,12 @@
         <span class="sheet-fx" aria-hidden="true">fx</span>
         <input class="sheet-formula" id="sheetFormula" type="text" autocomplete="off" spellcheck="false" aria-label="Nilai atau rumus sel" placeholder="Ketik nilai, =SUM(A1:A5), atau =harga*qty">
         <button type="button" class="sheet-formula-apply" id="sheetFormulaApply" title="Terapkan ke sel" aria-label="Terapkan ke sel">↵</button>
+        <button type="button" class="sheet-formula-help" id="sheetFormulaHelp" aria-haspopup="dialog" aria-expanded="false" aria-controls="sheetFormulaMenu" title="Lihat semua rumus yang tersedia">=</button>
+      </div>
+      <div class="sheet-formula-menu" id="sheetFormulaMenu" role="dialog" aria-label="Daftar rumus yang tersedia" aria-hidden="true">
+        <header class="sheet-formula-menu-head"><div><strong>Daftar rumus</strong><span>Klik rumus untuk memasukkan polanya ke bilah rumus.</span></div><button type="button" id="sheetFormulaMenuClose" aria-label="Tutup daftar rumus">×</button></header>
+        <div class="sheet-formula-list" id="sheetFormulaList"></div>
+        <p class="sheet-formula-note">Pisahkan argumen dengan <code>,</code> atau <code>;</code>. Contoh: <code>=SUM(A2:A10)</code>, <code>=IF(B2&gt;10;"Lunas";"Belum")</code>.</p>
       </div>
       <div class="sheet-tools" id="sheetTools">
         <div class="sheet-tool-group">
@@ -120,6 +126,28 @@
           <button type="button" class="sheet-tool" data-sact="align-left" title="Rata kiri" aria-label="Rata kiri"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h8M2 12h10"/></svg></button>
           <button type="button" class="sheet-tool" data-sact="align-center" title="Rata tengah" aria-label="Rata tengah"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M4 8h8M3 12h10"/></svg></button>
           <button type="button" class="sheet-tool" data-sact="align-right" title="Rata kanan" aria-label="Rata kanan"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M6 8h8M4 12h10"/></svg></button>
+        </div>
+        <div class="sheet-tool-group">
+          <select id="sheetFont" class="sheet-select sheet-select-font" aria-label="Jenis huruf sel" title="Jenis huruf">
+            <option value="sans">Sans</option>
+            <option value="serif">Serif</option>
+            <option value="mono">Mono</option>
+          </select>
+          <button type="button" class="sheet-tool" id="sheetFontUpload" title="Unggah font TTF/OTF" aria-label="Unggah font kustom">＋A</button>
+          <select id="sheetFontSize" class="sheet-select sheet-select-size" aria-label="Ukuran huruf sel" title="Ukuran huruf">
+            <option value="8">8</option>
+            <option value="9" selected>9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="14">14</option>
+            <option value="16">16</option>
+            <option value="18">18</option>
+            <option value="20">20</option>
+            <option value="24">24</option>
+          </select>
+          <button type="button" class="sheet-tool" data-sact="wrap" title="Bungkus teks dalam sel" aria-label="Bungkus teks"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h8a2.5 2.5 0 0 1 0 5H8m2.5 0L8 15.5 10.5 13"/></svg></button>
+          <button type="button" class="sheet-tool" data-sact="merge" title="Gabung &amp; tengahkan sel (tekan lagi untuk pisah)" aria-label="Gabung dan tengahkan sel"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M6 3v10M10 3v10"/></svg></button>
         </div>
         <div class="sheet-tool-group sheet-colors">
           <label class="sheet-color" title="Warna teks"><span aria-hidden="true">A</span><input type="color" id="sheetTextColor" value="#3a3019" aria-label="Warna teks"></label>
@@ -178,10 +206,59 @@
     <div class="sheet-statusbar">
       <span class="sheet-selinfo" id="sheetSelection">A1</span>
       <span id="sheetMeta">16 kolom × 40 baris</span>
-      <span class="sheet-shortcut-hint">Enter simpan · Ctrl+S ekspor · Ctrl+Z urungkan · Ctrl+C salin</span>
+      <span class="sheet-shortcut-hint">Enter simpan · Ctrl+S pratinjau · Ctrl+Z urungkan · Ctrl+C salin</span>
     </div>
+    <input type="file" id="sheetFontFile" accept=".ttf,.otf,font/ttf,font/otf" hidden>
   </section>
-  <div class="doc-confirm-backdrop" id="sheetLeaveDialog" aria-hidden="true">
+  <div class="sheet-preview-backdrop" id="sheetPreview" aria-hidden="true">
+    <section class="sheet-preview-panel" role="dialog" aria-modal="true" aria-labelledby="sheetPreviewTitle">
+      <header class="sheet-preview-head">
+        <div class="sheet-preview-heading"><span class="sheet-eyebrow">EKSPOR PDF</span><h2 id="sheetPreviewTitle">Pratinjau PDF Sheet</h2></div>
+        <button type="button" class="sheet-preview-close" id="sheetPreviewClose" aria-label="Tutup pratinjau">×</button>
+      </header>
+      <div class="sheet-preview-body">
+        <div class="sheet-preview-stage">
+          <div class="sheet-preview-canvas-wrap" id="sheetPreviewCanvasWrap">
+            <canvas id="sheetPreviewCanvas" hidden aria-label="Pratinjau halaman PDF"></canvas>
+            <div class="sheet-preview-loading" id="sheetPreviewLoading"><span class="button-spinner" aria-hidden="true"></span><span>Membuat pratinjau…</span></div>
+          </div>
+          <div class="sheet-preview-pager">
+            <button type="button" class="sheet-pager-btn" id="sheetPreviewPrev" aria-label="Halaman sebelumnya">←</button>
+            <span class="sheet-preview-page" id="sheetPreviewPage" aria-live="polite">Halaman 1 / 1</span>
+            <button type="button" class="sheet-pager-btn" id="sheetPreviewNext" aria-label="Halaman berikutnya">→</button>
+            <span class="sheet-preview-meta" id="sheetPreviewMeta">A4 · Lanskap</span>
+          </div>
+        </div>
+        <aside class="sheet-preview-controls" aria-label="Pengaturan tampilan PDF">
+          <div class="sheet-preview-section">
+            <h3>Kertas</h3>
+            <label class="sheet-preview-field" for="sheetPaper"><span>Ukuran</span><select id="sheetPaper"><option value="a4">A4</option><option value="a3">A3</option><option value="letter">Letter</option><option value="legal">Legal</option><option value="f4">F4 / Folio</option></select></label>
+            <label class="sheet-preview-field" for="sheetOrient"><span>Orientasi</span><select id="sheetOrient"><option value="auto">Otomatis</option><option value="landscape">Lanskap</option><option value="portrait">Potret</option></select></label>
+            <label class="sheet-preview-field" for="sheetMargin"><span>Margin</span><select id="sheetMargin"><option value="normal">Normal</option><option value="narrow">Sempit</option><option value="wide">Lebar</option></select></label>
+          </div>
+          <div class="sheet-preview-section">
+            <h3>Tabel</h3>
+            <label class="sheet-preview-field" for="sheetLayout"><span>Tata letak</span><select id="sheetLayout"><option value="fit">Penuhi lebar kertas</option><option value="actual">Ukuran asli</option></select></label>
+            <label class="sheet-preview-field" for="sheetBorderStyle"><span>Border</span><select id="sheetBorderStyle"><option value="all">Semua garis</option><option value="outer">Luar saja</option><option value="horizontal">Horizontal</option><option value="none">Tanpa border</option></select></label>
+            <label class="sheet-preview-field" for="sheetFontScale"><span>Skala huruf</span><select id="sheetFontScale"><option value="0.88">Kecil</option><option value="1" selected>Normal</option><option value="1.15">Besar</option></select></label>
+          </div>
+          <div class="sheet-preview-section">
+            <h3>Tampilkan</h3>
+            <label class="sheet-check"><input type="checkbox" id="sheetShowTitle" checked> Judul sheet</label>
+            <label class="sheet-check"><input type="checkbox" id="sheetShowHeader" checked> Kepala kolom</label>
+            <label class="sheet-check"><input type="checkbox" id="sheetShowRowNums" checked> Nomor baris</label>
+          </div>
+        </aside>
+      </div>
+      <footer class="sheet-preview-foot">
+        <p class="sheet-preview-note" id="sheetPreviewNote">Atur tampilan, lalu unduh PDF.</p>
+        <div class="sheet-preview-actions">
+          <button type="button" class="button-quiet" id="sheetPreviewCancel">Batal</button>
+          <button type="button" class="button-primary" id="sheetPreviewDownload"><span>Unduh PDF</span><span>↓</span></button>
+        </div>
+      </footer>
+    </section>
+  </div>  <div class="doc-confirm-backdrop" id="sheetLeaveDialog" aria-hidden="true">
     <section class="doc-confirm" role="alertdialog" aria-modal="true" aria-labelledby="sheetLeaveTitle" aria-describedby="sheetLeaveCopy">
       <span class="doc-confirm-icon" aria-hidden="true">←</span>
       <h2 id="sheetLeaveTitle">Tutup PDF Sheet?</h2>
@@ -209,6 +286,6 @@
   <script src="vendor/pdf-lib-cantoo.min.js"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/fflate.js"></script>
-  <script src="app.js?v=24"></script>
+  <script src="app.js?v=25"></script>
 </body>
 </html>
