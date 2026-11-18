@@ -378,7 +378,34 @@ const now=new Date(),dateLabel=document.getElementById('todayLabel');dateLabel.t
 
 /* ===== PDF Sheet: spreadsheet lokal dengan rumus, variabel, dan ekspor PDF ===== */
 const SHEET_MAX_COLS=26,SHEET_MAX_ROWS=120;
-const sheet={cols:16,rows:40,cells:{},vars:{},sel:{r:0,c:0},anchor:{r:0,c:0},editing:null,editOriginal:'',history:[],future:[],dragging:false,initialized:false,exported:false,exportToken:0,_cache:null,_varCache:null,_display:null};
+const SHEET_FONTS={sans:{css:"'DM Sans',Arial,sans-serif",label:'Sans'},serif:{css:"Georgia,'Times New Roman',serif",label:'Serif'},mono:{css:"'Courier New',monospace",label:'Mono'}};
+const SHEET_PAPERS={a4:{w:595.28,h:841.89,label:'A4'},a3:{w:841.89,h:1190.55,label:'A3'},letter:{w:612,h:792,label:'Letter'},legal:{w:612,h:1008,label:'Legal'},f4:{w:609.45,h:935.43,label:'F4 / Folio'}};
+const SHEET_STD_FONTS={sans:{r:StandardFonts.Helvetica,b:StandardFonts.HelveticaBold,i:StandardFonts.HelveticaOblique,bi:StandardFonts.HelveticaBoldOblique},serif:{r:StandardFonts.TimesRoman,b:StandardFonts.TimesRomanBold,i:StandardFonts.TimesRomanItalic,bi:StandardFonts.TimesRomanBoldItalic},mono:{r:StandardFonts.Courier,b:StandardFonts.CourierBold,i:StandardFonts.CourierOblique,bi:StandardFonts.CourierBoldOblique}};
+const SHEET_PDF_DEFAULTS={paper:'a4',orientation:'auto',layout:'fit',border:'all',fontScale:1,margins:'normal',title:true,header:true,rowNumbers:true};
+const SHEET_FORMULA_DOCS=[
+  {group:'Matematika',fn:'SUM',args:'A1:A9',desc:'Menjumlahkan angka atau rentang.'},
+  {group:'Matematika',fn:'AVERAGE',args:'A1:A9',desc:'Rata-rata nilai.'},
+  {group:'Matematika',fn:'MIN',args:'A1:A9',desc:'Nilai terkecil.'},
+  {group:'Matematika',fn:'MAX',args:'A1:A9',desc:'Nilai terbesar.'},
+  {group:'Matematika',fn:'ROUND',args:'2,567; 2',desc:'Membulatkan ke jumlah desimal.'},
+  {group:'Matematika',fn:'ABS',args:'A1',desc:'Nilai absolut.'},
+  {group:'Matematika',fn:'SQRT',args:'A1',desc:'Akar kuadrat.'},
+  {group:'Matematika',fn:'POWER',args:'A1; 2',desc:'Pangkat.'},
+  {group:'Matematika',fn:'MOD',args:'A1; 3',desc:'Sisa pembagian.'},
+  {group:'Statistik',fn:'COUNT',args:'A1:A9',desc:'Hitung sel berisi angka.'},
+  {group:'Statistik',fn:'COUNTA',args:'A1:A9',desc:'Hitung sel tidak kosong.'},
+  {group:'Statistik',fn:'PRODUCT',args:'A1; B1',desc:'Mengalikan semua nilai.'},
+  {group:'Logika',fn:'IF',args:'A1>10; "Lunas"; "Belum"',desc:'Pilih nilai sesuai kondisi.'},
+  {group:'Logika',fn:'AND',args:'A1>0; B1>0',desc:'Benar jika semua benar.'},
+  {group:'Logika',fn:'OR',args:'A1>0; B1>0',desc:'Benar jika salah satu benar.'},
+  {group:'Logika',fn:'NOT',args:'A1>0',desc:'Membalik nilai benar/salah.'},
+  {group:'Teks',fn:'CONCAT',args:'A1; " - "; B1',desc:'Gabungkan teks.'},
+  {group:'Teks',fn:'LEN',args:'A1',desc:'Panjang teks.'}
+];
+let sheetCustomFonts=[];
+const sheetPdfState={open:false,token:0,doc:null,pages:0,page:1,busy:false,bytes:null,options:null,returnFocus:null,landscape:false};
+let sheetPreviewTimer=null;
+const sheet={cols:16,rows:40,cells:{},vars:{},merges:[],sel:{r:0,c:0},anchor:{r:0,c:0},editing:null,editOriginal:'',history:[],future:[],dragging:false,initialized:false,exported:false,exportToken:0,_cache:null,_varCache:null,_display:null};
 let sheetLeaveReturnFocus=null,sheetPageReturnFocus=null;
 
 function sheetColName(c){let s='';c++;while(c>0){const m=(c-1)%26;s=String.fromCharCode(65+m)+s;c=Math.floor((c-1)/26)}return s}
@@ -412,9 +439,9 @@ function sheetEvalVar(name,stack){const key=Object.keys(sheet.vars).find(k=>k.to
 function sheetEvalCell(r,c,stack){if(r<0||c<0||r>=SHEET_MAX_ROWS||c>=SHEET_MAX_COLS)throw Error('#REF!');const key=sheetKey(r,c),cache=sheet._cache||(sheet._cache=new Map());if(cache.has(key))return cache.get(key);const cell=sheet.cells[key];if(!cell||cell.v===''||cell.v==null){cache.set(key,'');return ''}const raw=String(cell.v);if(raw[0]!=='='){const val=sheetCoerce(raw);cache.set(key,val);return val}const id='cell:'+r+':'+c;if(stack.has(id))throw Error('#CYCLE!');const next=new Set(stack);next.add(id);const val=sheetParseFormula(raw.slice(1),next);cache.set(key,val);return val}
 function sheetFormatValue(v,style){const fmt=style&&style.fmt||'auto';if(v===''||v==null)return {text:'',type:'empty',error:false};if(typeof v==='boolean')return {text:v?'TRUE':'FALSE',type:'text',error:false};if(typeof v==='number'){if(!Number.isFinite(v))return {text:'#NUM!',type:'error',error:true};let text;if(fmt==='currency')text='Rp '+v.toLocaleString('id-ID',{maximumFractionDigits:0});else if(fmt==='percent')text=(v*100).toLocaleString('id-ID',{maximumFractionDigits:1})+'%';else if(fmt==='number')text=v.toLocaleString('id-ID',{maximumFractionDigits:2});else if(fmt==='text')text=String(v);else text=Number.isInteger(v)?String(v):String(Math.round(v*1e6)/1e6);return {text,type:'number',error:false}}return {text:String(v),type:'text',error:false}}
 function sheetDisplay(r,c){const key=sheetKey(r,c),cache=sheet._display||(sheet._display=new Map());if(cache.has(key))return cache.get(key);const cell=sheet.cells[key],style=cell&&cell.s||{};let out={text:'',type:'empty',error:false};if(cell&&cell.v!==''&&cell.v!=null){try{out=sheetFormatValue(sheetEvalCell(r,c,new Set()),style)}catch(e){out={text:sheetErrText(e),type:'error',error:true}}}cache.set(key,out);return out}
-function sheetSnapshot(){return JSON.stringify({cells:sheet.cells,vars:sheet.vars,cols:sheet.cols,rows:sheet.rows})}
+function sheetSnapshot(){return JSON.stringify({cells:sheet.cells,vars:sheet.vars,cols:sheet.cols,rows:sheet.rows,merges:sheet.merges||[]})}
+function sheetRestore(snap){const data=JSON.parse(snap);sheet.cells=data.cells;sheet.vars=data.vars;sheet.cols=data.cols;sheet.rows=data.rows;sheet.merges=data.merges||[];sheet.sel={r:Math.min(sheet.sel.r,sheet.rows-1),c:Math.min(sheet.sel.c,sheet.cols-1)};sheet.anchor={...sheet.sel};sheet.editing=null;sheetMarkDirty();sheetRefresh();renderSheetVars()}
 function sheetPushHistory(){sheet.history.push(sheetSnapshot());if(sheet.history.length>80)sheet.history.shift();sheet.future=[]}
-function sheetRestore(snap){const data=JSON.parse(snap);sheet.cells=data.cells;sheet.vars=data.vars;sheet.cols=data.cols;sheet.rows=data.rows;sheet.sel={r:Math.min(sheet.sel.r,sheet.rows-1),c:Math.min(sheet.sel.c,sheet.cols-1)};sheet.anchor={...sheet.sel};sheet.editing=null;sheetMarkDirty();sheetRefresh();renderSheetVars()}
 function sheetUndo(){if(!sheet.history.length)return;sheet.future.push(sheetSnapshot());sheetRestore(sheet.history.pop())}
 function sheetRedo(){if(!sheet.future.length)return;sheet.history.push(sheetSnapshot());sheetRestore(sheet.future.pop())}
 function sheetMarkDirty(){sheet.exported=false;const dirty=document.getElementById('sheetDirty');if(dirty)dirty.hidden=false;const st=document.getElementById('sheetStatus');if(st)st.classList.remove('show');const err=document.getElementById('sheetError');if(err)err.classList.remove('show')}
@@ -423,12 +450,48 @@ function sheetNormRange(){return {r1:Math.min(sheet.anchor.r,sheet.sel.r),r2:Mat
 function sheetIsSelected(r,c){const g=sheetNormRange();return r>=g.r1&&r<=g.r2&&c>=g.c1&&c<=g.c2}
 function sheetCellNode(r,c){return document.querySelector(`#sheetGrid .sheet-cell[data-r="${r}"][data-c="${c}"]`)}
 function sheetBorderShadow(style){const b=style&&style.bd;if(!b)return'';const parts=[];if(b.t)parts.push('inset 0 1.5px 0 0 #8d7c51');if(b.r)parts.push('inset -1.5px 0 0 0 #8d7c51');if(b.b)parts.push('inset 0 -1.5px 0 0 #8d7c51');if(b.l)parts.push('inset 1.5px 0 0 0 #8d7c51');return parts.join(',')}
-function renderSheetGrid(){const host=document.getElementById('sheetGrid');if(!host)return;sheet._cache=new Map();sheet._varCache=new Map();sheet._display=new Map();let html='<table class="sheet-table" role="grid" aria-label="Spreadsheet PDF Sheet"><thead><tr role="row"><th class="sheet-corner" role="columnheader" aria-label="Pilih semua sel"></th>';for(let c=0;c<sheet.cols;c++)html+=`<th class="sheet-colhead" role="columnheader" data-col="${c}" scope="col" aria-label="Kolom ${sheetColName(c)}">${sheetColName(c)}</th>`;html+='</tr></thead><tbody>';for(let r=0;r<sheet.rows;r++){html+=`<tr role="row"><th class="sheet-rowhead" role="rowheader" data-row="${r}" scope="row" aria-label="Baris ${r+1}">${r+1}</th>`;for(let c=0;c<sheet.cols;c++){const key=sheetKey(r,c),cell=sheet.cells[key],style=cell&&cell.s||{},view=sheetDisplay(r,c),align=style.align||(view.type==='number'?'right':'left'),sel=sheetIsSelected(r,c),active=sheet.sel.r===r&&sheet.sel.c===c;let st=`text-align:${align};`;if(style.color)st+=`color:${style.color};`;if(style.bg)st+=`background:${style.bg};`;if(style.b)st+='font-weight:700;';if(style.i)st+='font-style:italic;';const shadow=sheetBorderShadow(style);if(shadow)st+=`box-shadow:${shadow};`;const text=escapeHTML(view.text).replace(/\n/g,'<br>');const label=escapeHTML(key)+(view.text?': '+escapeHTML(view.text):'');html+=`<td class="sheet-cell${sel?' sel':''}${active?' active':''}${view.error?' err':''}" role="gridcell" aria-selected="${sel?'true':'false'}" data-r="${r}" data-c="${c}" tabindex="${active?0:-1}" style="${st}" aria-label="${label}">${text}</td>`}html+='</tr>'}html+='</tbody></table>';host.innerHTML=html;sheetUpdateSelectionUI()}
+function renderSheetGrid(){
+  const host=document.getElementById('sheetGrid');if(!host)return;
+  sheet._cache=new Map();sheet._varCache=new Map();sheet._display=new Map();
+  const rows=sheet.rows,cols=sheet.cols;
+  const merges=(sheet.merges||[]).map(m=>({r1:Math.max(0,Math.min(m.r1,rows-1)),c1:Math.max(0,Math.min(m.c1,cols-1)),r2:Math.min(m.r2,rows-1),c2:Math.min(m.c2,cols-1)})).filter(m=>m.r2>=m.r1&&m.c2>=m.c1&&(m.r2>m.r1||m.c2>m.c1));
+  const anchorMap=new Map(),covered=new Set();
+  for(const m of merges){anchorMap.set(m.r1+':'+m.c1,m);for(let r=m.r1;r<=m.r2;r++)for(let c=m.c1;c<=m.c2;c++)if(r!==m.r1||c!==m.c1)covered.add(r+':'+c)}
+  let html='<table class="sheet-table" role="grid" aria-label="Spreadsheet PDF Sheet"><thead><tr role="row"><th class="sheet-corner" role="columnheader" aria-label="Pilih semua sel"></th>';
+  for(let c=0;c<cols;c++)html+=`<th class="sheet-colhead" role="columnheader" data-col="${c}" scope="col" aria-label="Kolom ${sheetColName(c)}">${sheetColName(c)}</th>`;
+  html+='</tr></thead><tbody>';
+  for(let r=0;r<rows;r++){
+    html+=`<tr role="row"><th class="sheet-rowhead" role="rowheader" data-row="${r}" scope="row" aria-label="Baris ${r+1}">${r+1}</th>`;
+    for(let c=0;c<cols;c++){
+      if(covered.has(r+':'+c))continue;
+      const key=sheetKey(r,c),cell=sheet.cells[key],style=cell&&cell.s||{},view=sheetDisplay(r,c),m=anchorMap.get(r+':'+c);
+      const align=style.align||(view.type==='number'?'right':'left'),sel=sheetIsSelected(r,c),active=sheet.sel.r===r&&sheet.sel.c===c;
+      const spanRows=m?m.r2-m.r1+1:1,spanCols=m?m.c2-m.c1+1:1;
+      let st=`text-align:${align};`;
+      if(style.color)st+=`color:${style.color};`;
+      if(style.bg)st+=`background:${style.bg};`;
+      if(style.b)st+='font-weight:700;';
+      if(style.i)st+='font-style:italic;';
+      if(style.fs)st+=`font-size:${Math.round(style.fs*1.35*10)/10}px;`;
+      if(style.f)st+=`font-family:${sheetFontCss(style.f)};`;
+      if(style.wrap)st+='white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;text-overflow:clip;';
+      if(m)st+='vertical-align:middle;';
+      const shadow=sheetBorderShadow(style);if(shadow)st+=`box-shadow:${shadow};`;
+      const text=escapeHTML(view.text).replace(/\n/g,'<br>');
+      const label=escapeHTML(key)+(view.text?': '+escapeHTML(view.text):'')+(m?' (gabungan)':'');
+      const spanAttr=(spanRows>1?` rowspan="${spanRows}"`:'')+(spanCols>1?` colspan="${spanCols}"`:'');
+      html+=`<td class="sheet-cell${sel?' sel':''}${active?' active':''}${view.error?' err':''}${m?' merged':''}" role="gridcell" aria-selected="${sel?'true':'false'}" data-r="${r}" data-c="${c}" tabindex="${active?0:-1}" style="${st}" aria-label="${label}"${spanAttr}>${text}</td>`;
+    }
+    html+='</tr>';
+  }
+  html+='</tbody></table>';host.innerHTML=html;sheetUpdateSelectionUI();
+}
 function sheetFocusActive(){const td=sheetCellNode(sheet.sel.r,sheet.sel.c);if(!td)return;document.querySelectorAll('#sheetGrid .sheet-cell[tabindex="0"]').forEach(el=>el.tabIndex=-1);td.tabIndex=0;td.focus({preventScroll:true});try{td.scrollIntoView({block:'nearest',inline:'nearest'})}catch{}}
 function sheetSyncFormula(force){const f=document.getElementById('sheetFormula');if(f&&(force||document.activeElement!==f))f.value=sheetRaw(sheet.sel.r,sheet.sel.c);sheetUpdateToolbarState()}
 function sheetUpdateSelectionUI(){const g=sheetNormRange();document.querySelectorAll('#sheetGrid .sheet-cell').forEach(td=>{const r=+td.dataset.r,c=+td.dataset.c,sel=r>=g.r1&&r<=g.r2&&c>=g.c1&&c<=g.c2,active=sheet.sel.r===r&&sheet.sel.c===c;td.classList.toggle('sel',sel);td.classList.toggle('active',active);td.setAttribute('aria-selected',sel?'true':'false');td.tabIndex=active?0:-1});const ref=document.getElementById('sheetCellRef'),info=document.getElementById('sheetSelection');const single=sheet.sel.r===sheet.anchor.r&&sheet.sel.c===sheet.anchor.c;const label=single?sheetKey(sheet.sel.r,sheet.sel.c):`${sheetKey(g.r1,g.c1)}:${sheetKey(g.r2,g.c2)}`;if(ref)ref.textContent=label;if(info)info.textContent=single?label:`${label} · ${(g.r2-g.r1+1)*(g.c2-g.c1+1)} sel`;sheetSyncFormula(false);sheetUpdateToolbarState()}
-function sheetUpdateToolbarState(){const style=sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)]&&sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)].s||{};const undoBtn=document.querySelector('#sheetTools [data-sact="undo"]'),redoBtn=document.querySelector('#sheetTools [data-sact="redo"]');if(undoBtn)undoBtn.disabled=!sheet.history.length;if(redoBtn)redoBtn.disabled=!sheet.future.length;document.querySelectorAll('#sheetTools [data-sact]').forEach(b=>{const a=b.dataset.sact;if(a==='bold')b.classList.toggle('active',!!style.b);else if(a==='italic')b.classList.toggle('active',!!style.i);else if(a==='align-left')b.classList.toggle('active',style.align==='left');else if(a==='align-center')b.classList.toggle('active',style.align==='center');else if(a==='align-right')b.classList.toggle('active',style.align==='right')});const tc=document.getElementById('sheetTextColor'),fc=document.getElementById('sheetFillColor');if(tc){tc.value=style.color||'#3a3019';tc.closest('.sheet-color').style.setProperty('--swatch',tc.value)}if(fc){fc.value=style.bg||'#fbf1d8';fc.closest('.sheet-color').style.setProperty('--swatch',fc.value)}}
-function sheetSelect(r,c,extend){r=Math.max(0,Math.min(sheet.rows-1,r));c=Math.max(0,Math.min(sheet.cols-1,c));if(!extend)sheet.anchor={r,c};sheet.sel={r,c};sheetUpdateSelectionUI()}
+function sheetUpdateToolbarState(){const activeCell=sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)],style=activeCell&&activeCell.s||{};const undoBtn=document.querySelector('#sheetTools [data-sact="undo"]'),redoBtn=document.querySelector('#sheetTools [data-sact="redo"]');if(undoBtn)undoBtn.disabled=!sheet.history.length;if(redoBtn)redoBtn.disabled=!sheet.future.length;const g=sheetNormRange(),merged=(sheet.merges||[]).some(m=>m.r1===g.r1&&m.c1===g.c1&&m.r2===g.r2&&m.c2===g.c2);document.querySelectorAll('#sheetTools [data-sact]').forEach(b=>{const a=b.dataset.sact;if(a==='bold')b.classList.toggle('active',!!style.b);else if(a==='italic')b.classList.toggle('active',!!style.i);else if(a==='align-left')b.classList.toggle('active',style.align==='left');else if(a==='align-center')b.classList.toggle('active',style.align==='center');else if(a==='align-right')b.classList.toggle('active',style.align==='right');else if(a==='wrap')b.classList.toggle('active',!!style.wrap);else if(a==='merge')b.classList.toggle('active',merged)});const tc=document.getElementById('sheetTextColor'),fc=document.getElementById('sheetFillColor');if(tc){tc.value=style.color||'#3a3019';tc.closest('.sheet-color').style.setProperty('--swatch',tc.value)}if(fc){fc.value=style.bg||'#fbf1d8';fc.closest('.sheet-color').style.setProperty('--swatch',fc.value)}const fontSel=document.getElementById('sheetFont');if(fontSel){const f=style.f||'sans';fontSel.value=[...fontSel.options].some(o=>o.value===f)?f:'sans'}const sizeSel=document.getElementById('sheetFontSize');if(sizeSel){const v=String(style.fs||9);sizeSel.value=[...sizeSel.options].some(o=>o.value===v)?v:'9'}}
+function sheetMergeAt(r,c){return (sheet.merges||[]).find(m=>r>=m.r1&&r<=m.r2&&c>=m.c1&&c<=m.c2)||null}
+function sheetSelect(r,c,extend){r=Math.max(0,Math.min(sheet.rows-1,r));c=Math.max(0,Math.min(sheet.cols-1,c));const m=sheetMergeAt(r,c);if(m&&!extend){r=m.r1;c=m.c1}if(!extend)sheet.anchor={r,c};sheet.sel={r,c};sheetUpdateSelectionUI()}
 function sheetMove(dr,dc,extend){sheetSelect(sheet.sel.r+dr,sheet.sel.c+dc,extend)}
 function sheetRefresh(){sheetMarkDirty();renderSheetGrid();sheetUpdateMeta()}
 function sheetUpdateMeta(){const meta=document.getElementById('sheetMeta');if(meta)meta.textContent=`${sheet.cols} kolom × ${sheet.rows} baris`}
@@ -442,10 +505,10 @@ function sheetToggleStyle(prop){if(sheet.editing)sheetCommitEdit();const style=s
 function sheetAlign(mode){if(sheet.editing)sheetCommitEdit();sheetApplyRangeStyle(s=>{if(mode==='left')delete s.align;else s.align=mode})}
 function sheetClearRange(){if(sheet.editing)sheetCommitEdit();const g=sheetNormRange();sheetPushHistory();for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++)delete sheet.cells[sheetKey(r,c)];sheetRefresh();sheetFocusActive()}
 function sheetShiftRefs(raw,kind,index,delta){if(!raw.startsWith('='))return raw;return raw.replace(/(?<![A-Za-z0-9_])(\$?)([A-Za-z]{1,3})(\$?)(\d+)(?![A-Za-z0-9_])/g,(full,dcol,col,drow,row)=>{if(kind==='row'){const rn=+row;if(delta<0&&rn===index)return '#REF!';return dcol+col+drow+(rn>=index?rn+delta:rn)}const cn=sheetColIndex(col)+1;if(delta<0&&cn===index)return '#REF!';return dcol+sheetColName(cn>=index?cn+delta-1:cn-1)+drow+row})}
-function sheetInsertRow(){if(sheet.editing)sheetCommitEdit();if(sheet.rows>=SHEET_MAX_ROWS){showToast(`Batas ${SHEET_MAX_ROWS} baris tercapai.`);return}sheetPushHistory();const at=sheet.sel.r+1,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p)continue;const nr=p.r>=at?p.r+1:p.r,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'row',at+1,1);next[sheetKey(nr,p.c)]=copy}sheet.cells=next;if(sheet.rows<SHEET_MAX_ROWS)sheet.rows++;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'row',at+1,1);sheet.sel={r:Math.min(at,sheet.rows-1),c:sheet.sel.c};sheet.anchor={...sheet.sel};sheetRefresh();sheetFocusActive()}
-function sheetInsertCol(){if(sheet.editing)sheetCommitEdit();if(sheet.cols>=SHEET_MAX_COLS){showToast(`Batas ${SHEET_MAX_COLS} kolom tercapai.`);return}sheetPushHistory();const at=sheet.sel.c+1,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p)continue;const nc=p.c>=at?p.c+1:p.c,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'col',at+1,1);next[sheetKey(p.r,nc)]=copy}sheet.cells=next;if(sheet.cols<SHEET_MAX_COLS)sheet.cols++;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'col',at+1,1);sheet.sel={r:sheet.sel.r,c:Math.min(at,sheet.cols-1)};sheet.anchor={...sheet.sel};sheetRefresh();sheetFocusActive()}
-function sheetDeleteRow(){if(sheet.editing)sheetCommitEdit();if(sheet.rows<=1)return;sheetPushHistory();const at=sheet.sel.r,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p||p.r===at)continue;const nr=p.r>at?p.r-1:p.r,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'row',at+1,-1);next[sheetKey(nr,p.c)]=copy}sheet.cells=next;sheet.rows--;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'row',at+1,-1);sheet.sel={r:Math.min(at,sheet.rows-1),c:sheet.sel.c};sheet.anchor={...sheet.sel};sheetRefresh();sheetFocusActive()}
-function sheetDeleteCol(){if(sheet.editing)sheetCommitEdit();if(sheet.cols<=1)return;sheetPushHistory();const at=sheet.sel.c,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p||p.c===at)continue;const nc=p.c>at?p.c-1:p.c,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'col',at+1,-1);next[sheetKey(p.r,nc)]=copy}sheet.cells=next;sheet.cols--;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'col',at+1,-1);sheet.sel={r:sheet.sel.r,c:Math.min(at,sheet.cols-1)};sheet.anchor={...sheet.sel};sheetRefresh();sheetFocusActive()}
+function sheetInsertRow(){if(sheet.editing)sheetCommitEdit();if(sheet.rows>=SHEET_MAX_ROWS){showToast(`Batas ${SHEET_MAX_ROWS} baris tercapai.`);return}sheetPushHistory();const at=sheet.sel.r+1,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p)continue;const nr=p.r>=at?p.r+1:p.r,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'row',at+1,1);next[sheetKey(nr,p.c)]=copy}sheet.cells=next;if(sheet.rows<SHEET_MAX_ROWS)sheet.rows++;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'row',at+1,1);sheet.sel={r:Math.min(at,sheet.rows-1),c:sheet.sel.c};sheet.anchor={...sheet.sel};sheetShiftMerges('row',at,1);sheetRefresh();sheetFocusActive()}
+function sheetInsertCol(){if(sheet.editing)sheetCommitEdit();if(sheet.cols>=SHEET_MAX_COLS){showToast(`Batas ${SHEET_MAX_COLS} kolom tercapai.`);return}sheetPushHistory();const at=sheet.sel.c+1,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p)continue;const nc=p.c>=at?p.c+1:p.c,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'col',at+1,1);next[sheetKey(p.r,nc)]=copy}sheet.cells=next;if(sheet.cols<SHEET_MAX_COLS)sheet.cols++;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'col',at+1,1);sheet.sel={r:sheet.sel.r,c:Math.min(at,sheet.cols-1)};sheet.anchor={...sheet.sel};sheetShiftMerges('col',at,1);sheetRefresh();sheetFocusActive()}
+function sheetDeleteRow(){if(sheet.editing)sheetCommitEdit();if(sheet.rows<=1)return;sheetPushHistory();const at=sheet.sel.r,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p||p.r===at)continue;const nr=p.r>at?p.r-1:p.r,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'row',at+1,-1);next[sheetKey(nr,p.c)]=copy}sheet.cells=next;sheet.rows--;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'row',at+1,-1);sheet.sel={r:Math.min(at,sheet.rows-1),c:sheet.sel.c};sheet.anchor={...sheet.sel};sheetShiftMerges('row',at,-1);sheetRefresh();sheetFocusActive()}
+function sheetDeleteCol(){if(sheet.editing)sheetCommitEdit();if(sheet.cols<=1)return;sheetPushHistory();const at=sheet.sel.c,next={};for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p||p.c===at)continue;const nc=p.c>at?p.c-1:p.c,copy=JSON.parse(JSON.stringify(cell));if(typeof copy.v==='string')copy.v=sheetShiftRefs(copy.v,'col',at+1,-1);next[sheetKey(p.r,nc)]=copy}sheet.cells=next;sheet.cols--;for(const name of Object.keys(sheet.vars))sheet.vars[name]=sheetShiftRefs(String(sheet.vars[name]),'col',at+1,-1);sheet.sel={r:sheet.sel.r,c:Math.min(at,sheet.cols-1)};sheet.anchor={...sheet.sel};sheetShiftMerges('col',at,-1);sheetRefresh();sheetFocusActive()}
 function sheetRangeTSV(){const g=sheetNormRange(),rows=[];for(let r=g.r1;r<=g.r2;r++){const cols=[];for(let c=g.c1;c<=g.c2;c++)cols.push(sheetDisplay(r,c).text.replace(/\t/g,' ').replace(/\n/g,' '));rows.push(cols.join('\t'))}return rows.join('\n')}
 function sheetPasteTSV(text){if(!text)return;sheetPushHistory();const lines=String(text).replace(/\r/g,'').split('\n');if(lines.length&&lines[lines.length-1]==='')lines.pop();const start=sheet.sel;const needRows=start.r+lines.length,needCols=start.c+Math.max(...lines.map(line=>line.split('\t').length));if(needRows>sheet.rows)sheet.rows=Math.min(SHEET_MAX_ROWS,needRows);if(needCols>sheet.cols)sheet.cols=Math.min(SHEET_MAX_COLS,needCols);lines.forEach((line,ri)=>line.split('\t').forEach((value,ci)=>{const r=start.r+ri,c=start.c+ci;if(r>=sheet.rows||c>=sheet.cols)return;const key=sheetKey(r,c);if(value===''){if(sheet.cells[key]&&(!sheet.cells[key].s||!Object.keys(sheet.cells[key].s).length))delete sheet.cells[key];else if(sheet.cells[key])sheet.cells[key].v=''}else{const cell=sheet.cells[key]||(sheet.cells[key]={v:'',s:{}});cell.v=value}}));sheetRefresh();sheetFocusActive()}
 function sheetShowVarError(msg){const el=document.getElementById('sheetVarError');if(!el)return;el.textContent=msg||'';el.classList.toggle('show',!!msg)}
@@ -459,9 +522,319 @@ function sheetPdfColor(hex,fallback){const m=/^#?([0-9a-f]{6})$/i.exec(String(he
 function sheetPdfFont(style,fonts){if(style&&style.b&&style.i)return fonts.bi;if(style&&style.b)return fonts.b;if(style&&style.i)return fonts.i;return fonts.r}
 function sheetPdfTruncate(text,font,size,maxWidth){if(font.widthOfTextAtSize(text,size)<=maxWidth)return text;let lo=0,hi=text.length;while(lo<hi){const mid=Math.ceil((lo+hi)/2);if(font.widthOfTextAtSize(text.slice(0,mid)+'...',size)<=maxWidth)lo=mid;else hi=mid-1}return text.slice(0,lo)+'...'}
 function sheetPdfWrap(text,font,size,maxWidth){const lines=[];for(const para of String(text).split(/\n/)){const words=para.split(/\s+/).filter(Boolean);if(!words.length){lines.push('');continue}let line='';for(const word of words){const test=line?line+' '+word:word;if(font.widthOfTextAtSize(test,size)<=maxWidth||!line)line=test;else{lines.push(sheetPdfTruncate(line,font,size,maxWidth));line=word}}lines.push(sheetPdfTruncate(line,font,size,maxWidth))}return lines.length?lines:['']}
-function sheetUsedBounds(){let maxR=-1,maxC=-1;for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p)continue;const has=(cell.v!==''&&cell.v!=null)||(cell.s&&Object.keys(cell.s).length);if(!has)continue;maxR=Math.max(maxR,p.r);maxC=Math.max(maxC,p.c)}return {rows:maxR+1,cols:maxC+1}}
-async function exportSheetToPdf(report){const bounds=sheetUsedBounds();if(!bounds.rows||!bounds.cols)throw Error('Sheet masih kosong. Isi minimal satu sel sebelum mengekspor PDF.');sheet._cache=new Map();sheet._varCache=new Map();sheet._display=new Map();const doc=await PDFDocument.create(),fonts={r:await doc.embedFont(StandardFonts.Helvetica),b:await doc.embedFont(StandardFonts.HelveticaBold),i:await doc.embedFont(StandardFonts.HelveticaOblique),bi:await doc.embedFont(StandardFonts.HelveticaBoldOblique)};const rows=bounds.rows,cols=bounds.cols,data=[];for(let r=0;r<rows;r++){const row=[];for(let c=0;c<cols;c++){const cell=sheet.cells[sheetKey(r,c)],style=cell&&cell.s||{},view=sheetDisplay(r,c);row.push({text:sanitizeWinAnsi(view.text),type:view.type,error:view.error,style})}data.push(row)}const widthBase=9,pad=10;let widths=[];for(let c=0;c<cols;c++){let w=44;for(let r=0;r<rows;r++){const cell=data[r][c];if(!cell.text)continue;const font=sheetPdfFont(cell.style,fonts);w=Math.max(w,Math.min(190,font.widthOfTextAtSize(cell.text,widthBase)+pad*2))}widths.push(w)}const pageW=842,pageH=595,margin=32,rowHead=24,usableW=pageW-margin*2-rowHead;let totalW=widths.reduce((a,b)=>a+b,0);if(totalW>usableW){widths=widths.map(w=>Math.max(30,Math.floor(w*usableW/totalW)));totalW=widths.reduce((a,b)=>a+b,0);if(totalW>usableW)widths=widths.map(w=>Math.max(24,Math.floor(w*usableW/totalW)))}else if(totalW<usableW){const extra=(usableW-totalW)/cols,cap=Math.max(220,usableW*.45);widths=widths.map(w=>Math.min(cap,w+extra));totalW=widths.reduce((a,b)=>a+b,0)}const cellLines=[];const rowHeights=[];for(let r=0;r<rows;r++){const lines=[];let h=20;for(let c=0;c<cols;c++){const cell=data[r][c],font=sheetPdfFont(cell.style,fonts),wrapped=cell.text?sheetPdfWrap(cell.text,font,widthBase,widths[c]-pad):[''];lines.push(wrapped);h=Math.max(h,wrapped.length*11.5+7)}cellLines.push(lines);rowHeights.push(Math.min(110,h))}const titleH=30,colHeadH=20,footerH=14,tableTop=pageH-margin-titleH,rowsTop=tableTop-colHeadH,avail=rowsTop-(margin+footerH);const pages=[];let current=[],used=0;for(let r=0;r<rows;r++){const h=Math.min(rowHeights[r],avail-2);if(used+h>avail&&current.length){pages.push(current);current=[];used=0}current.push({r,h});used+=h}if(current.length)pages.push(current);for(let pi=0;pi<pages.length;pi++){const page=doc.addPage([pageW,pageH]);page.drawText(sheetPdfTruncate(sanitizeWinAnsi(sheetNameValue()),fonts.b,13,pageW-margin*2-110),{x:margin,y:pageH-margin-10,size:13,font:fonts.b,color:rgb(.23,.19,.1)});page.drawText('Paperly PDF Sheet',{x:pageW-margin-92,y:pageH-margin-9,size:7.5,font:fonts.r,color:rgb(.55,.5,.4)});page.drawRectangle({x:margin,y:tableTop-1,width:Math.min(usableW+rowHead,totalW+rowHead),height:1,color:rgb(.85,.79,.67)});const bandW=totalW+rowHead;page.drawRectangle({x:margin,y:rowsTop,width:bandW,height:colHeadH,color:sheetPdfColor('#f6f0e2',[.96,.94,.89])});page.drawRectangle({x:margin,y:rowsTop,width:rowHead,height:colHeadH,color:sheetPdfColor('#f0e8d5',[.94,.91,.84])});page.drawText('#',{x:margin+rowHead/2-2.5,y:rowsTop+6,size:8,font:fonts.b,color:rgb(.52,.46,.34)});let x=margin+rowHead;for(let c=0;c<cols;c++){page.drawText(sheetColName(c),{x:x+widths[c]/2-3.5,y:rowsTop+6,size:8,font:fonts.b,color:rgb(.52,.46,.34)});x+=widths[c]}let y=rowsTop;for(const {r,h} of pages[pi]){y-=h;page.drawRectangle({x:margin,y,width:rowHead,height:h,color:sheetPdfColor('#faf6ec',[.98,.96,.92]),borderColor:sheetPdfColor('#e3dac7',[.89,.85,.78]),borderWidth:.5});page.drawText(String(r+1),{x:margin+rowHead/2-String(r+1).length*2.4,y:y+h/2-3,size:7.5,font:fonts.r,color:rgb(.58,.52,.4)});x=margin+rowHead;for(let c=0;c<cols;c++){const cell=data[r][c],style=cell.style,w=widths[c];if(style.bg)page.drawRectangle({x,y,width:w,height:h,color:sheetPdfColor(style.bg,[1,1,1])});if(cell.text){const font=sheetPdfFont(style,fonts),lines=cellLines[r][c],lineH=11.5,textH=lines.length*lineH,startY=y+(h-textH)/2+8.7,align=style.align||(cell.type==='number'?'right':'left');for(let li=0;li<lines.length;li++){const line=lines[li];if(!line)continue;const lw=font.widthOfTextAtSize(line,widthBase);let tx=align==='right'?x+w-pad/2-lw:align==='center'?x+(w-lw)/2:x+pad/2;page.drawText(line,{x:tx,y:startY-li*lineH,size:widthBase,font,color:sheetPdfColor(cell.error?'#c4616d':style.color||'#3a3019',[.23,.19,.1])})}}page.drawRectangle({x,y,width:w,height:h,borderColor:sheetPdfColor('#e7e0d0',[.91,.88,.82]),borderWidth:.4});const b=style.bd;if(b){const bc=sheetPdfColor('#8d7c51',[.55,.49,.32]),lw=1;if(b.t)page.drawLine({start:{x,y:y+h},end:{x:x+w,y:y+h},thickness:lw,color:bc});if(b.b)page.drawLine({start:{x,y},end:{x:x+w,y},thickness:lw,color:bc});if(b.l)page.drawLine({start:{x,y},end:{x,y:y+h},thickness:lw,color:bc});if(b.r)page.drawLine({start:{x:x+w,y},end:{x:x+w,y:y+h},thickness:lw,color:bc})}x+=w}}page.drawText(`Halaman ${pi+1} dari ${pages.length}`,{x:pageW/2-34,y:16,size:7.5,font:fonts.r,color:rgb(.56,.5,.4)});if(report)report((pi+1)/pages.length)}doc.setTitle(sheetNameValue());doc.setCreator('Paperly');doc.setProducer('Paperly');return doc.save({useObjectStreams:true})}
+function sheetUsedBounds(){let maxR=-1,maxC=-1;for(const [key,cell] of Object.entries(sheet.cells)){const p=sheetParseKey(key);if(!p)continue;const has=(cell.v!==''&&cell.v!=null)||(cell.s&&Object.keys(cell.s).length);if(!has)continue;maxR=Math.max(maxR,p.r);maxC=Math.max(maxC,p.c)}for(const m of (sheet.merges||[])){maxR=Math.max(maxR,m.r2);maxC=Math.max(maxC,m.c2)}return {rows:maxR+1,cols:maxC+1}}
+async function exportSheetToPdf(report,options){
+  const o={...SHEET_PDF_DEFAULTS,...(options||{})};
+  const bounds=sheetUsedBounds();
+  if(!bounds.rows||!bounds.cols)throw Error('Sheet masih kosong. Isi minimal satu sel sebelum mengekspor PDF.');
+  sheet._cache=new Map();sheet._varCache=new Map();sheet._display=new Map();
+  const doc=await PDFDocument.create();
+  const rows=bounds.rows,cols=bounds.cols;
+  const fams=new Set(['sans']);
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const st=sheet.cells[sheetKey(r,c)]&&sheet.cells[sheetKey(r,c)].s;if(st&&st.f)fams.add(st.f)}
+  const getFont=await sheetEmbedFonts(doc,[...fams]);
+  const margin={narrow:20,normal:32,wide:48}[o.margins]??32;
+  const rowHead=o.rowNumbers?24:0,colHeadH=o.header?20:0,titleH=o.title?30:0,footerH=14;
+  const paper=SHEET_PAPERS[o.paper]||SHEET_PAPERS.a4;
+  const merges=(sheet.merges||[]).map(m=>({r1:Math.max(0,Math.min(m.r1,rows-1)),c1:Math.max(0,Math.min(m.c1,cols-1)),r2:Math.min(m.r2,rows-1),c2:Math.min(m.c2,cols-1)})).filter(m=>m.r2>=m.r1&&m.c2>=m.c1&&(m.r2>m.r1||m.c2>m.c1));
+  const covered=new Set();
+  for(const m of merges)for(let r=m.r1;r<=m.r2;r++)for(let c=m.c1;c<=m.c2;c++)if(r!==m.r1||c!==m.c1)covered.add(r+':'+c);
+  const mergeFor=(r,c)=>merges.find(m=>r>=m.r1&&r<=m.r2&&c>=m.c1&&c<=m.c2)||null;
+  const sizeOf=st=>Math.max(4,(st&&st.fs?st.fs:9)*o.fontScale);
+  const prepCell=(r,c)=>{
+    const cell=sheet.cells[sheetKey(r,c)],style=cell&&cell.s||{},view=sheetDisplay(r,c),font=getFont(style),size=sizeOf(style),raw=String(view.text);
+    const safe=style.f&&String(style.f).startsWith('custom:')?stripInvisible(raw):sanitizeWinAnsi(raw);
+    return {raw,safe,type:view.type,error:view.error,style,font,size};
+  };
+  let widths=[];
+  for(let c=0;c<cols;c++){
+    let w=44;
+    for(let r=0;r<rows;r++){
+      if(covered.has(r+':'+c))continue;
+      const cell=prepCell(r,c);
+      if(!cell.safe)continue;
+      const capWidth=cell.style.wrap?180:190;
+      w=Math.max(w,Math.min(capWidth,cell.font.widthOfTextAtSize(cell.safe,cell.size)+20));
+    }
+    widths.push(w);
+  }
+  let totalW=widths.reduce((a,b)=>a+b,0);
+  const portraitUsableW=paper.w-margin*2-rowHead;
+  const landscape=o.orientation==='landscape'||(o.orientation==='auto'&&totalW+rowHead>portraitUsableW*.94);
+  const pageW=landscape?paper.h:paper.w,pageH=landscape?paper.w:paper.h;
+  const usableW=pageW-margin*2-rowHead;
+  if(totalW>usableW){widths=widths.map(w=>Math.max(24,Math.floor(w*usableW/totalW)));totalW=widths.reduce((a,b)=>a+b,0)}
+  else if(o.layout==='fit'&&totalW<usableW){const extra=(usableW-totalW)/cols,cap=Math.max(220,usableW*.45);widths=widths.map(w=>Math.min(cap,w+extra));totalW=widths.reduce((a,b)=>a+b,0)}
+  const layout=new Map();
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    if(covered.has(r+':'+c))continue;
+    const cell=prepCell(r,c),m=mergeFor(r,c);
+    const spanW=m?widths.slice(m.c1,m.c2+1).reduce((a,b)=>a+b,0):widths[c];
+    const availW=Math.max(12,spanW-10);
+    const lines=cell.safe?(cell.style.wrap?sheetPdfWrap(cell.safe,cell.font,cell.size,availW):[sheetPdfTruncate(cell.safe,cell.font,cell.size,availW)]):[];
+    layout.set(r+':'+c,{...cell,lines,availW,spanW});
+  }
+  const lineFactor=1.28;
+  const rowHeights=[];
+  for(let r=0;r<rows;r++)rowHeights.push(Math.max(20,9*o.fontScale*1.5+7));
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const cell=layout.get(r+':'+c);if(!cell||!cell.lines.length)continue;
+    const m=mergeFor(r,c);if(m&&m.r2>m.r1)continue;
+    rowHeights[r]=Math.max(rowHeights[r],cell.lines.length*cell.size*lineFactor+7);
+  }
+  for(const m of merges){
+    if(m.r2<=m.r1)continue;
+    const cell=layout.get(m.r1+':'+m.c1);if(!cell||!cell.lines.length)continue;
+    const need=cell.lines.length*cell.size*lineFactor+7;
+    const sum=rowHeights.slice(m.r1,m.r2+1).reduce((a,b)=>a+b,0);
+    if(sum<need)rowHeights[m.r2]+=need-sum;
+  }
+  const tableTop=pageH-margin-titleH,rowsTop=tableTop-colHeadH,avail=rowsTop-(margin+footerH);
+  const groupEnd=new Map();
+  for(const m of merges)if(m.r2>m.r1)groupEnd.set(m.r1,Math.max(groupEnd.get(m.r1)||m.r1,m.r2));
+  const pages=[];let current=[],used=0;
+  for(let r=0;r<rows;r++){
+    const end=groupEnd.get(r);
+    if(end!==undefined&&end>r){
+      let groupH=0;for(let rr=r;rr<=end;rr++)groupH+=rowHeights[rr];
+      if(groupH<=avail){
+        if(current.length&&used+groupH>avail){pages.push(current);current=[];used=0}
+        for(let rr=r;rr<=end;rr++){const h=Math.min(rowHeights[rr],avail-2);current.push({r:rr,h});used+=h}
+        r=end;continue;
+      }
+    }
+    const h=Math.min(rowHeights[r],avail-2);
+    if(current.length&&used+h>avail){pages.push(current);current=[];used=0}
+    current.push({r,h});used+=h;
+  }
+  if(current.length)pages.push(current);
+  const gridColor=sheetPdfColor('#e7e0d0',[.91,.88,.82]),ink=rgb(.23,.19,.1),muted=rgb(.55,.5,.4),lineColor=rgb(.85,.79,.67);
+  const borderAll=o.border==='all',borderRows=o.border==='all'||o.border==='horizontal';
+  for(let pi=0;pi<pages.length;pi++){
+    const page=doc.addPage([pageW,pageH]);
+    if(o.title){
+      page.drawText(sheetPdfTruncate(sanitizeWinAnsi(sheetNameValue()),getFont({b:1}),13,pageW-margin*2-110),{x:margin,y:pageH-margin-10,size:13,font:getFont({b:1}),color:ink});
+      page.drawText('Paperly PDF Sheet',{x:pageW-margin-92,y:pageH-margin-9,size:7.5,font:getFont({}),color:muted});
+    }
+    const bandW=totalW+rowHead,tableBottomInit=rowsTop;
+    if(o.header){
+      page.drawRectangle({x:margin,y:tableTop-1,width:bandW,height:1,color:lineColor});
+      page.drawRectangle({x:margin,y:rowsTop,width:bandW,height:colHeadH,color:sheetPdfColor('#f6f0e2',[.96,.94,.89])});
+      if(rowHead){
+        page.drawRectangle({x:margin,y:rowsTop,width:rowHead,height:colHeadH,color:sheetPdfColor('#f0e8d5',[.94,.91,.84])});
+        page.drawText('#',{x:margin+rowHead/2-2.5,y:rowsTop+6,size:8,font:getFont({b:1}),color:rgb(.52,.46,.34)});
+      }
+      let hx=margin+rowHead;
+      for(let c=0;c<cols;c++){
+        page.drawText(sheetColName(c),{x:hx+widths[c]/2-3.5,y:rowsTop+6,size:8,font:getFont({b:1}),color:rgb(.52,.46,.34)});
+        if(borderAll)page.drawLine({start:{x:hx,y:rowsTop},end:{x:hx,y:rowsTop+colHeadH},thickness:.4,color:gridColor});
+        hx+=widths[c];
+      }
+      page.drawLine({start:{x:margin,y:rowsTop},end:{x:margin+bandW,y:rowsTop},thickness:.6,color:lineColor});
+    }
+    let y=rowsTop;
+    for(const item of pages[pi]){
+      const r=item.r,h=item.h;
+      y-=h;
+      if(rowHead){
+        page.drawRectangle({x:margin,y,width:rowHead,height:h,color:sheetPdfColor('#faf6ec',[.98,.96,.92]),borderColor:gridColor,borderWidth:.5});
+        page.drawText(String(r+1),{x:margin+rowHead/2-String(r+1).length*2.4,y:y+h/2-3,size:7.5,font:getFont({}),color:rgb(.58,.52,.4)});
+      }
+      let x=margin+rowHead;
+      for(let c=0;c<cols;c++){
+        const w=widths[c];
+        if(covered.has(r+':'+c)){x+=w;continue}
+        const cell=layout.get(r+':'+c),style=cell.style,m=mergeFor(r,c);
+        const spanW=m?widths.slice(m.c1,m.c2+1).reduce((a,b)=>a+b,0):w;
+        const spanH=m?rowHeights.slice(m.r1,m.r2+1).reduce((a,b)=>a+b,0):h;
+        const boxY=y+h-spanH;
+        if(style.bg)page.drawRectangle({x,y:boxY,width:spanW,height:spanH,color:sheetPdfColor(style.bg,[1,1,1])});
+        if(cell.lines.length){
+          const lines=cell.lines,lineH=cell.size*lineFactor,textH=lines.length*lineH;
+          const align=style.align||(cell.type==='number'?'right':'left');
+          const startY=boxY+(spanH-textH)/2+cell.size*.78;
+          for(let li=0;li<lines.length;li++){
+            const line=lines[li];if(!line)continue;
+            const lw=cell.font.widthOfTextAtSize(line,cell.size);
+            const tx=align==='right'?x+spanW-5-lw:align==='center'?x+(spanW-lw)/2:x+5;
+            page.drawText(line,{x:tx,y:startY-li*lineH,size:cell.size,font:cell.font,color:sheetPdfColor(cell.error?'#c4616d':style.color||'#3a3019',[.23,.19,.1])});
+          }
+        }
+        if(borderAll)page.drawRectangle({x,y:boxY,width:spanW,height:spanH,borderColor:gridColor,borderWidth:.4});
+        const b=style.bd;
+        if(b){
+          const bc=sheetPdfColor('#8d7c51',[.55,.49,.32]);
+          if(b.t)page.drawLine({start:{x,y:boxY+spanH},end:{x:x+spanW,y:boxY+spanH},thickness:1,color:bc});
+          if(b.b)page.drawLine({start:{x,y:boxY},end:{x:x+spanW,y:boxY},thickness:1,color:bc});
+          if(b.l)page.drawLine({start:{x,y:boxY},end:{x,y:boxY+spanH},thickness:1,color:bc});
+          if(b.r)page.drawLine({start:{x:x+spanW,y:boxY},end:{x:x+spanW,y:boxY+spanH},thickness:1,color:bc});
+        }
+        x+=w;
+      }
+      const last=pages[pi][pages[pi].length-1];
+      if(borderRows&&last&&r!==last.r)page.drawLine({start:{x:margin,y},end:{x:margin+bandW,y},thickness:.4,color:gridColor});
+    }
+    if(o.border==='outer'||o.border==='horizontal'){
+      page.drawRectangle({x:margin,y:Math.min(y,margin+footerH),width:bandW,height:tableTop-Math.min(y,margin+footerH),borderColor:lineColor,borderWidth:.8});
+    }
+    page.drawText(`Halaman ${pi+1} dari ${pages.length}`,{x:pageW/2-34,y:16,size:7.5,font:getFont({}),color:muted});
+    if(report)report((pi+1)/pages.length);
+  }
+  doc.setTitle(sheetNameValue());doc.setCreator('Paperly');doc.setProducer('Paperly');
+  return doc.save({useObjectStreams:true});
+}
 
+function sheetFontCss(key){if(key&&String(key).startsWith('custom:')){const f=sheetCustomFonts.find(x=>x.id===key);return f?`'${f.family}',sans-serif`:'inherit'}return (SHEET_FONTS[key]||SHEET_FONTS.sans).css}
+async function loadSheetFont(file){
+  if(!/\.(ttf|otf)$/i.test(file.name)){showToast('Gunakan file font TTF atau OTF.');return}
+  let bytes;try{bytes=new Uint8Array(await file.arrayBuffer())}catch{showToast('File font tidak bisa dibaca.');return}
+  const family='paperly-sheet-'+Date.now().toString(36);
+  try{const face=new FontFace(family,bytes.slice().buffer);await face.load();document.fonts.add(face)}catch{showToast('Font tidak bisa dimuat. Pastikan file TTF/OTF valid.');return}
+  const label=file.name.replace(/\.(ttf|otf)$/i,''),id='custom:'+family;
+  sheetCustomFonts.push({label,family,id,bytes});
+  const sel=document.getElementById('sheetFont');
+  if(sel){const opt=document.createElement('option');opt.value=id;opt.textContent=label.length>18?label.slice(0,17)+'…':label;sel.appendChild(opt);sel.value=id}
+  if(sheet.editing)sheetCommitEdit();
+  sheetApplyRangeStyle(s=>{s.f=id});
+  showToast(`Font "${label}" diterapkan ke sel terpilih.`);
+}
+function sheetApplyFont(value){if(sheet.editing)sheetCommitEdit();sheetApplyRangeStyle(s=>{if(value==='sans')delete s.f;else s.f=value})}
+function sheetApplyFontSize(value){const n=Number(value);if(!n)return;if(sheet.editing)sheetCommitEdit();sheetApplyRangeStyle(s=>{if(n===9)delete s.fs;else s.fs=n})}
+function sheetToggleWrap(){if(sheet.editing)sheetCommitEdit();const cell=sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)],on=!!(cell&&cell.s&&cell.s.wrap);sheetApplyRangeStyle(s=>{if(on)delete s.wrap;else s.wrap=1})}
+function sheetShiftMerges(kind,index,delta){const out=[];for(const m of (sheet.merges||[])){const a={...m};if(kind==='row'){if(delta>0){if(a.r1>=index)a.r1++;if(a.r2>=index)a.r2++}else{if(a.r1>index)a.r1--;if(a.r2>=index)a.r2--;if(a.r2<a.r1)continue}}else{if(delta>0){if(a.c1>=index)a.c1++;if(a.c2>=index)a.c2++}else{if(a.c1>index)a.c1--;if(a.c2>=index)a.c2--;if(a.c2<a.c1)continue}}out.push(a)}sheet.merges=out}
+function sheetMergeSelection(){
+  if(sheet.editing)sheetCommitEdit();
+  const g=sheetNormRange(),merges=sheet.merges||[];
+  const exact=merges.find(m=>m.r1===g.r1&&m.c1===g.c1&&m.r2===g.r2&&m.c2===g.c2);
+  if(exact){sheetPushHistory();sheet.merges=merges.filter(m=>m!==exact);sheetRefresh();sheetFocusActive();showToast('Sel gabungan dipisah.');return}
+  if(merges.some(m=>!(m.r2<g.r1||m.r1>g.r2||m.c2<g.c1||m.c1>g.c2))){showToast('Rentang memuat sel gabungan. Pilih tepat sel gabungan itu untuk memisahkannya.');return}
+  if(g.r1===g.r2&&g.c1===g.c2){showToast('Pilih minimal dua sel untuk digabung.');return}
+  sheetPushHistory();
+  let value='';outer:for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++){const cell=sheet.cells[sheetKey(r,c)];if(cell&&cell.v!==''&&cell.v!=null){value=String(cell.v);break outer}}
+  for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++){if(r===g.r1&&c===g.c1)continue;delete sheet.cells[sheetKey(r,c)]}
+  const key=sheetKey(g.r1,g.c1),cell=sheet.cells[key]||(sheet.cells[key]={v:'',s:{}});
+  cell.v=value;cell.s=cell.s||{};cell.s.align='center';
+  sheet.merges=[...merges,{r1:g.r1,c1:g.c1,r2:g.r2,c2:g.c2}];
+  sheet.sel={r:g.r1,c:g.c1};sheet.anchor={...sheet.sel};
+  sheetRefresh();sheetFocusActive();showToast('Sel digabung dan teks ditengahkan.');
+}
+function renderSheetFormulaMenu(){const host=document.getElementById('sheetFormulaList');if(!host)return;const groups={};for(const d of SHEET_FORMULA_DOCS){(groups[d.group]=groups[d.group]||[]).push(d)}host.innerHTML=Object.entries(groups).map(([g,items])=>`<div class="sheet-formula-group"><h4>${g}</h4>${items.map(d=>`<button type="button" class="sheet-formula-item" data-fn="${d.fn}"><code>=${d.fn}(${d.args})</code><span>${d.desc}</span></button>`).join('')}</div>`).join('')}
+function toggleSheetFormulaMenu(open){const menu=document.getElementById('sheetFormulaMenu'),btn=document.getElementById('sheetFormulaHelp');if(!menu)return;menu.classList.toggle('open',!!open);menu.setAttribute('aria-hidden',String(!open));if(btn)btn.setAttribute('aria-expanded',String(!!open));if(open){const first=menu.querySelector('[data-fn]');if(first)setTimeout(()=>first.focus(),40)}}
+function insertSheetFormula(fn){const f=document.getElementById('sheetFormula');if(!f)return;const raw=f.value,start=f.selectionStart==null?raw.length:f.selectionStart,end=f.selectionEnd==null?start:f.selectionEnd;let prefix=raw.slice(0,start);const suffix=raw.slice(end);if(!raw.startsWith('=')&&!prefix.startsWith('='))prefix='='+prefix;f.value=prefix+fn+'('+suffix;f.focus();const pos=(prefix+fn+'(').length;try{f.setSelectionRange(pos,pos)}catch{}}
+async function sheetEmbedFonts(doc,fams){const std=new Set(),custom=new Set();for(const f of fams){if(f&&String(f).startsWith('custom:'))custom.add(f);else std.add(SHEET_STD_FONTS[f]?f:'sans')}if(custom.size)doc.registerFontkit(await ensureFontkit());const cache=new Map();for(const fam of std){const set=SHEET_STD_FONTS[fam];for(const k of ['r','b','i','bi'])cache.set(fam+k,await doc.embedFont(set[k]))}for(const fam of custom){const rec=sheetCustomFonts.find(x=>x.id===fam)||sheetCustomFonts[0];if(!rec)continue;const font=await doc.embedFont(rec.bytes,{subset:true});for(const k of ['r','b','i','bi'])cache.set(fam+k,font)}return style=>{const f=style&&style.f,fam=f&&String(f).startsWith('custom:')?f:(SHEET_STD_FONTS[f]?f:'sans');return cache.get(fam+((style&&style.b)?'b':'')+((style&&style.i)?'i':''))||cache.get('sansr')}}
+function sheetPdfReadOptions(){const val=(id,fb)=>{const el=document.getElementById(id);return el?el.value:fb};const checked=(id,fb)=>{const el=document.getElementById(id);return el?el.checked:fb};return {paper:val('sheetPaper','a4'),orientation:val('sheetOrient','auto'),layout:val('sheetLayout','fit'),border:val('sheetBorderStyle','all'),fontScale:Number(val('sheetFontScale','1'))||1,margins:val('sheetMargin','normal'),title:checked('sheetShowTitle',true),header:checked('sheetShowHeader',true),rowNumbers:checked('sheetShowRowNums',true)}}
+function sheetPdfFillOptions(o){const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=String(v)};set('sheetPaper',o.paper);set('sheetOrient',o.orientation);set('sheetLayout',o.layout);set('sheetBorderStyle',o.border);set('sheetFontScale',o.fontScale);set('sheetMargin',o.margins);const chk=(id,v)=>{const el=document.getElementById(id);if(el)el.checked=!!v};chk('sheetShowTitle',o.title);chk('sheetShowHeader',o.header);chk('sheetShowRowNums',o.rowNumbers)}
+function updateSheetPreviewChrome(){const s=sheetPdfState;const label=document.getElementById('sheetPreviewPage'),prev=document.getElementById('sheetPreviewPrev'),next=document.getElementById('sheetPreviewNext'),meta=document.getElementById('sheetPreviewMeta');if(label)label.textContent=`Halaman ${s.page||1} / ${s.pages||1}`;if(prev)prev.disabled=!s.doc||s.page<=1;if(next)next.disabled=!s.doc||s.page>=s.pages;if(meta&&s.options){const p=SHEET_PAPERS[s.options.paper]||SHEET_PAPERS.a4;meta.textContent=`${p.label} · ${s.landscape?'Lanskap':'Potret'}${s.pages?` · ${s.pages} halaman`:''}`}}
+function showSheetPreviewLoading(show){const el=document.getElementById('sheetPreviewLoading');if(el)el.hidden=!show;const canvas=document.getElementById('sheetPreviewCanvas');if(canvas&&show)canvas.hidden=true}
+async function renderSheetPreviewPage(){const s=sheetPdfState;if(!s.doc)return;let page;try{page=await s.doc.getPage(s.page)}catch{return}if(!page)return;const base=page.getViewport({scale:1});s.landscape=base.width>base.height;const wrap=document.getElementById('sheetPreviewCanvasWrap'),canvas=document.getElementById('sheetPreviewCanvas');if(!wrap||!canvas)return;const availW=Math.max(220,wrap.clientWidth-12),availH=Math.max(180,wrap.clientHeight-12);const scale=Math.min(availW/base.width,availH/base.height,1.8);const vp=page.getViewport({scale});const dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.round(vp.width*dpr);canvas.height=Math.round(vp.height*dpr);canvas.style.width=Math.round(vp.width)+'px';canvas.style.height=Math.round(vp.height)+'px';const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);await page.render({canvasContext:ctx,viewport:vp,background:'#fff'}).promise;canvas.hidden=false;showSheetPreviewLoading(false);updateSheetPreviewChrome()}
+async function refreshSheetPreview(){
+  const s=sheetPdfState;if(!s.open)return;
+  const token=++s.token;s.busy=true;
+  const note=document.getElementById('sheetPreviewNote'),dl=document.getElementById('sheetPreviewDownload');
+  showSheetPreviewLoading(true);if(dl)dl.disabled=true;
+  if(note){note.textContent='Menyiapkan pratinjau…';note.classList.remove('error')}
+  if(s.doc){try{s.doc.destroy()}catch{}s.doc=null}
+  try{
+    const opts=sheetPdfReadOptions();s.options=opts;
+    const bytes=await exportSheetToPdf(null,opts);
+    if(token!==s.token)return;
+    const doc=await pdfjsLib.getDocument({data:bytes}).promise;
+    if(token!==s.token){try{doc.destroy()}catch{}return}
+    s.doc=doc;s.pages=doc.numPages;s.page=Math.max(1,Math.min(s.page||1,doc.numPages));s.bytes=bytes;
+    updateSheetPreviewChrome();await renderSheetPreviewPage();
+    if(token!==s.token)return;
+    if(note)note.textContent=opts.layout==='fit'?'Tabel mengisi lebar kertas. Pratinjau mengikuti pengaturan di samping.':'Tabel memakai ukuran asli; diperkecil otomatis bila melebihi kertas.';
+  }catch(e){
+    if(token!==s.token)return;
+    s.pages=0;s.bytes=null;showSheetPreviewLoading(false);
+    if(note){note.textContent=e.message||'Pratinjau gagal dibuat.';note.classList.add('error')}
+    updateSheetPreviewChrome();
+  }finally{
+    if(token===s.token){s.busy=false;if(dl)dl.disabled=!s.bytes}
+  }
+}
+function scheduleSheetPreview(delay=280){clearTimeout(sheetPreviewTimer);sheetPreviewTimer=setTimeout(()=>{if(sheetPdfState.open)refreshSheetPreview()},delay)}
+function openSheetPreview(){
+  if(!sheetUsedBounds().rows){const err=document.getElementById('sheetError');if(err){err.textContent='Sheet masih kosong. Isi minimal satu sel sebelum mengekspor PDF.';err.classList.add('show')}showToast('Isi minimal satu sel sebelum mengekspor PDF.');return}
+  if(sheet.editing)sheetCommitEdit();
+  const dlg=document.getElementById('sheetPreview');if(!dlg)return;
+  if(!sheetPdfState.options)sheetPdfState.options={...SHEET_PDF_DEFAULTS};
+  sheetPdfFillOptions(sheetPdfState.options);
+  sheetPdfState.open=true;sheetPdfState.page=1;sheetPdfState.returnFocus=document.activeElement;
+  dlg.classList.add('open');dlg.setAttribute('aria-hidden','false');document.body.classList.add('sheet-previewing');
+  setTimeout(()=>{const c=document.getElementById('sheetPreviewClose');if(c)c.focus({preventScroll:true})},40);
+  refreshSheetPreview();
+}
+function closeSheetPreview(){
+  const s=sheetPdfState,dlg=document.getElementById('sheetPreview');if(!dlg)return;
+  s.open=false;s.token++;clearTimeout(sheetPreviewTimer);
+  if(s.doc){try{s.doc.destroy()}catch{}s.doc=null}
+  s.bytes=null;s.pages=0;
+  dlg.classList.remove('open');dlg.setAttribute('aria-hidden','true');document.body.classList.remove('sheet-previewing');
+  const canvas=document.getElementById('sheetPreviewCanvas');if(canvas){canvas.hidden=true;canvas.width=1;canvas.height=1}
+  showSheetPreviewLoading(true);
+  const target=s.returnFocus;s.returnFocus=null;
+  if(target&&document.contains(target)){try{target.focus({preventScroll:true})}catch{}}
+}
+async function downloadSheetPdf(){
+  const s=sheetPdfState,b=document.getElementById('sheetPreviewDownload'),note=document.getElementById('sheetPreviewNote');
+  if(!s.open||s.busy)return;
+  const opts=sheetPdfReadOptions();s.options=opts;
+  b.disabled=true;b.classList.add('loading');b.innerHTML='<span class="button-spinner" aria-hidden="true"></span><span>Menyiapkan…</span>';
+  if(note){note.textContent='Menyusun PDF final…';note.classList.remove('error')}
+  try{
+    const bytes=await exportSheetToPdf(null,opts);
+    download(bytes,`${filenameBase(sheetNameValue())}.pdf`);
+    sheet.exported=true;sheetUpdateDirty();
+    const status=document.getElementById('sheetStatus');
+    if(status){status.innerHTML='<span aria-hidden="true">✓</span> PDF sudah diunduh';status.classList.add('show')}
+    closeSheetPreview();
+    showToast('PDF Sheet selesai dibuat dan diunduh. Halaman tetap terbuka.');
+  }catch(e){
+    if(note){note.textContent=e.message||'Gagal membuat PDF.';note.classList.add('error')}
+  }finally{
+    b.disabled=false;b.classList.remove('loading');b.innerHTML='<span>Unduh PDF</span><span>↓</span>';
+  }
+}
+function initSheetExtras(){
+  const fontSel=document.getElementById('sheetFont'),sizeSel=document.getElementById('sheetFontSize'),fontFile=document.getElementById('sheetFontFile');
+  if(fontSel)fontSel.addEventListener('change',()=>sheetApplyFont(fontSel.value));
+  if(sizeSel)sizeSel.addEventListener('change',()=>sheetApplyFontSize(sizeSel.value));
+  const upload=document.getElementById('sheetFontUpload');
+  if(upload&&fontFile){upload.addEventListener('click',()=>fontFile.click());fontFile.addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(f)await loadSheetFont(f)})}
+  renderSheetFormulaMenu();
+  const help=document.getElementById('sheetFormulaHelp'),menu=document.getElementById('sheetFormulaMenu');
+  if(help&&menu){
+    help.addEventListener('click',()=>toggleSheetFormulaMenu(!menu.classList.contains('open')));
+    const closeBtn=document.getElementById('sheetFormulaMenuClose');
+    if(closeBtn)closeBtn.addEventListener('click',()=>{toggleSheetFormulaMenu(false);help.focus()});
+    menu.addEventListener('click',e=>{const item=e.target.closest('[data-fn]');if(!item)return;insertSheetFormula(item.dataset.fn);toggleSheetFormulaMenu(false);help.focus()});
+    document.addEventListener('pointerdown',e=>{if(!menu.classList.contains('open'))return;if(menu.contains(e.target)||help.contains(e.target))return;toggleSheetFormulaMenu(false)});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('open')){e.preventDefault();toggleSheetFormulaMenu(false);help.focus()}});
+  }
+  ['sheetPaper','sheetOrient','sheetLayout','sheetBorderStyle','sheetFontScale','sheetMargin','sheetShowTitle','sheetShowHeader','sheetShowRowNums'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',()=>{sheetPdfState.page=1;scheduleSheetPreview()})});
+  const dlg=document.getElementById('sheetPreview');
+  if(dlg){
+    const close=()=>closeSheetPreview();
+    ['sheetPreviewClose','sheetPreviewCancel'].forEach(id=>{const btn=document.getElementById(id);if(btn)btn.addEventListener('click',close)});
+    dlg.addEventListener('click',e=>{if(e.target===e.currentTarget)close()});
+    dlg.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){e.preventDefault();close();return}
+      if(e.key!=='Tab')return;
+      const focusable=[...dlg.querySelectorAll('button:not(:disabled),select:not(:disabled),input:not(:disabled)')].filter(el=>el.offsetParent!==null);
+      if(!focusable.length)return;
+      const first=focusable[0],last=focusable[focusable.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+    });
+    const prev=document.getElementById('sheetPreviewPrev'),next=document.getElementById('sheetPreviewNext');
+    if(prev)prev.addEventListener('click',()=>{if(sheetPdfState.page>1){sheetPdfState.page--;renderSheetPreviewPage()}});
+    if(next)next.addEventListener('click',()=>{if(sheetPdfState.page<sheetPdfState.pages){sheetPdfState.page++;renderSheetPreviewPage()}});
+    const dl=document.getElementById('sheetPreviewDownload');if(dl)dl.addEventListener('click',downloadSheetPdf);
+    const wrap=document.getElementById('sheetPreviewCanvasWrap');
+    if(wrap&&window.ResizeObserver){const ro=new ResizeObserver(()=>{if(sheetPdfState.open&&sheetPdfState.doc&&!sheetPdfState.busy)renderSheetPreviewPage()});ro.observe(wrap)}
+  }
+}
 function setSheetProgress(p,label){const bar=document.getElementById('sheetProgress'),fill=document.getElementById('sheetProgressFill'),lbl=document.getElementById('sheetProgressLabel');if(!bar)return;bar.classList.add('show');bar.setAttribute('aria-hidden','false');if(lbl){lbl.textContent=label||'';lbl.classList.toggle('show',!!label)}if(p==null||isNaN(p)){fill.classList.add('indeterminate');fill.style.width='100%';bar.removeAttribute('aria-valuenow')}else{fill.classList.remove('indeterminate');const v=Math.max(2,Math.min(100,p));fill.style.width=v+'%';bar.setAttribute('aria-valuenow',String(Math.round(v)))}}
 function hideSheetProgress(){const bar=document.getElementById('sheetProgress');if(!bar)return;bar.classList.remove('show');bar.setAttribute('aria-hidden','true');document.getElementById('sheetProgressFill').classList.remove('indeterminate');const lbl=document.getElementById('sheetProgressLabel');if(lbl){lbl.textContent='';lbl.classList.remove('show')}}
 function openSheetPage(){initSheetPage();if(!document.getElementById('sheetPage').classList.contains('open')){const active=document.activeElement;sheetPageReturnFocus=active&&active!==document.body?active:null}const pg=document.getElementById('sheetPage');pg.classList.add('open');pg.setAttribute('aria-hidden','false');document.body.classList.add('sheet-writing');document.getElementById('sheetError').classList.remove('show');document.getElementById('sheetStatus').classList.remove('show');hideSheetProgress();sheetUpdateDirty();renderSheetGrid();renderSheetVars();sheetUpdateMeta();const vars=document.getElementById('sheetVars'),btn=document.getElementById('sheetVarsBtn'),wide=window.innerWidth>=1100;if(vars)vars.classList.toggle('open',wide);if(btn)btn.setAttribute('aria-expanded',String(wide));setTimeout(()=>sheetFocusActive(),60)}
@@ -478,7 +851,7 @@ page.addEventListener('keydown',e=>{if(sheet.editing){if(e.key==='Enter'){e.prev
 page.addEventListener('copy',e=>{if(sheet.editing||(e.target&&e.target.matches&&e.target.matches('input,textarea')))return;const text=sheetRangeTSV();if(!text)return;e.clipboardData.setData('text/plain',text);e.preventDefault()});
 page.addEventListener('cut',e=>{if(sheet.editing||(e.target&&e.target.matches&&e.target.matches('input,textarea')))return;const text=sheetRangeTSV();if(!text)return;e.clipboardData.setData('text/plain',text);e.preventDefault();sheetClearRange()});
 page.addEventListener('paste',e=>{const text=(e.clipboardData||window.clipboardData).getData('text/plain');if(!text)return;if(sheet.editing){e.preventDefault();document.execCommand('insertText',false,text);return}if(e.target&&e.target.matches&&e.target.matches('input,textarea'))return;e.preventDefault();sheetPasteTSV(text)});
-tools.addEventListener('click',e=>{const b=e.target.closest('[data-sact]');if(!b)return;if(sheet.editing)sheetCommitEdit();const act=b.dataset.sact;if(act==='undo')sheetUndo();else if(act==='redo')sheetRedo();else if(act==='bold')sheetToggleStyle('b');else if(act==='italic')sheetToggleStyle('i');else if(act==='align-left')sheetAlign('left');else if(act==='align-center')sheetAlign('center');else if(act==='align-right')sheetAlign('right');else if(act==='fill-none')sheetApplyRangeStyle(s=>{delete s.bg});else if(act==='row-add')sheetInsertRow();else if(act==='col-add')sheetInsertCol();else if(act==='row-del')sheetDeleteRow();else if(act==='col-del')sheetDeleteCol();else if(act==='clear')sheetClearRange()});
+tools.addEventListener('click',e=>{const b=e.target.closest('[data-sact]');if(!b)return;if(sheet.editing)sheetCommitEdit();const act=b.dataset.sact;if(act==='undo')sheetUndo();else if(act==='redo')sheetRedo();else if(act==='bold')sheetToggleStyle('b');else if(act==='italic')sheetToggleStyle('i');else if(act==='align-left')sheetAlign('left');else if(act==='align-center')sheetAlign('center');else if(act==='align-right')sheetAlign('right');else if(act==='fill-none')sheetApplyRangeStyle(s=>{delete s.bg});else if(act==='row-add')sheetInsertRow();else if(act==='col-add')sheetInsertCol();else if(act==='row-del')sheetDeleteRow();else if(act==='col-del')sheetDeleteCol();else if(act==='clear')sheetClearRange();else if(act==='wrap')sheetToggleWrap();else if(act==='merge')sheetMergeSelection()});
 document.getElementById('sheetBorder').addEventListener('change',e=>{if(sheet.editing)sheetCommitEdit();const mode=e.target.value;sheetApplyRangeStyle((s,pos)=>{if(mode==='none'){delete s.bd;return}s.bd=s.bd||{};const b=s.bd;if(mode==='all'){b.t=b.r=b.b=b.l=1}else if(mode==='outer'){if(pos.r===pos.r1)b.t=1;if(pos.r===pos.r2)b.b=1;if(pos.c===pos.c1)b.l=1;if(pos.c===pos.c2)b.r=1}else if(mode==='inner'){if(pos.r>pos.r1)b.t=1;if(pos.r<pos.r2)b.b=1;if(pos.c>pos.c1)b.l=1;if(pos.c<pos.c2)b.r=1}else if(mode==='bottom'){b.b=1}if(!b.t&&!b.r&&!b.b&&!b.l)delete s.bd})});
 document.getElementById('sheetFormat').addEventListener('change',e=>{if(sheet.editing)sheetCommitEdit();const fmt=e.target.value;sheetApplyRangeStyle(s=>{if(fmt==='auto')delete s.fmt;else s.fmt=fmt})});
 const textColor=document.getElementById('sheetTextColor'),fillColor=document.getElementById('sheetFillColor');textColor.addEventListener('input',()=>textColor.closest('.sheet-color').style.setProperty('--swatch',textColor.value));fillColor.addEventListener('input',()=>fillColor.closest('.sheet-color').style.setProperty('--swatch',fillColor.value));textColor.addEventListener('change',()=>{if(sheet.editing)sheetCommitEdit();sheetApplyRangeStyle(s=>{s.color=textColor.value})});fillColor.addEventListener('change',()=>{if(sheet.editing)sheetCommitEdit();const bg=fillColor.value,n=parseInt(bg.slice(1),16),lum=((n>>16&255)*.299+(n>>8&255)*.587+(n&255)*.114)/255;sheetApplyRangeStyle(s=>{s.bg=bg;if(!s.color)s.color=lum>.55?'#3a3019':'#fffaf0'})});
@@ -496,5 +869,5 @@ document.getElementById('sheetLeaveCancel').addEventListener('click',()=>closeSh
 document.getElementById('sheetLeaveConfirm').addEventListener('click',()=>{closeSheetPage();showToast('PDF Sheet ditutup. Data tetap tersimpan di tab ini.')});
 document.getElementById('sheetLeaveDialog').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSheetLeaveDialog()});
 document.getElementById('sheetLeaveDialog').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const f=[...e.currentTarget.querySelectorAll('button:not(:disabled)')];if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}});
-document.getElementById('sheetExport').addEventListener('click',async()=>{const b=document.getElementById('sheetExport'),status=document.getElementById('sheetStatus'),error=document.getElementById('sheetError');if(b.disabled)return;if(sheet.editing)sheetCommitEdit();const token=++sheet.exportToken;b.disabled=true;b.classList.add('loading');b.innerHTML='<span class="button-spinner" aria-hidden="true"></span><span>Menyusun…</span>';error.classList.remove('show');status.classList.remove('show');setSheetProgress(null,'Menyiapkan sheet…');try{const bytes=await exportSheetToPdf(f=>setSheetProgress(10+f*.82,'Merender halaman PDF…'));setSheetProgress(94,'Menyimpan PDF…');download(bytes,`${filenameBase(sheetNameValue()+'.pdf')}.pdf`);setSheetProgress(100,'PDF berhasil diunduh');status.innerHTML='<span aria-hidden="true">✓</span> PDF sudah diunduh';status.classList.add('show');sheet.exported=true;sheetUpdateDirty();showToast('PDF Sheet selesai dibuat dan diunduh. Halaman tetap terbuka.');setTimeout(()=>{if(token===sheet.exportToken)hideSheetProgress()},1700)}catch(e){hideSheetProgress();error.textContent=e.message||'Terjadi kesalahan saat membuat PDF Sheet.';error.classList.add('show')}finally{b.disabled=false;b.classList.remove('loading');b.innerHTML='<span>Ekspor PDF</span><span>↓</span>'}});
-renderSheetGrid();renderSheetVars();sheetUpdateMeta()}
+document.getElementById('sheetExport').addEventListener('click',()=>openSheetPreview());
+renderSheetGrid();renderSheetVars();sheetUpdateMeta();initSheetExtras()}
