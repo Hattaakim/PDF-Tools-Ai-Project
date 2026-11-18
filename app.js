@@ -125,6 +125,8 @@ function addFiles(files){
  });
  if(activeTool.input==='office'&&valid.length>1){showError('Pilih satu file Office untuk dikonversi.');return}
  if(!valid.length&&incoming.length){showError(activeTool.input==='images'?'Pilih file gambar PNG, JPG, atau WEBP.':activeTool.input==='office'?'Pilih file DOCX, PPTX, atau XLSX dengan tipe MIME yang sesuai.':'Pilih file PDF yang valid.');return}
+ hideProgress();
+ hideDocProgress();
  if(['merge','extract','rotate'].includes(activeTool.id))resetProcessedPreview();
  if(activeTool.id==='officeToPdf'&&valid.length){resetOfficeConversion();selectedFiles=valid}
  else{const batch=activeTool.input==='pdf-multiple'||activeTool.input==='images'||BATCH_TOOLS.includes(activeTool.id);if(!batch)selectedFiles=[];const accepted=batch?valid:valid.slice(0,1);selectedFiles.push(...accepted.filter(file=>!selectedFiles.some(old=>old.name===file.name&&old.size===file.size)))}
