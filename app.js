@@ -379,7 +379,7 @@ const now=new Date(),dateLabel=document.getElementById('todayLabel');dateLabel.t
 /* ===== PDF Sheet: spreadsheet lokal dengan rumus, variabel, dan ekspor PDF ===== */
 const SHEET_MAX_COLS=26,SHEET_MAX_ROWS=120;
 const SHEET_FONTS={sans:{css:"'DM Sans',Arial,sans-serif",label:'Sans'},serif:{css:"Georgia,'Times New Roman',serif",label:'Serif'},mono:{css:"'Courier New',monospace",label:'Mono'}};
-const SHEET_PAPERS={a4:{w:595.28,h:841.89,label:'A4'},a3:{w:841.89,h:1190.55,label:'A3'},letter:{w:612,h:792,label:'Letter'},legal:{w:612,h:1008,label:'Legal'},f4:{w:609.45,h:935.43,label:'F4 / Folio'}};
+const SHEET_PAPERS={a4:{w:595.28,h:841.89,label:'A4'},a3:{w:841.89,h:1190.55,label:'A3'},a5:{w:419.53,h:595.28,label:'A5'},b5:{w:498.9,h:708.66,label:'B5'},letter:{w:612,h:792,label:'Letter'},legal:{w:612,h:1008,label:'Legal'},f4:{w:609.45,h:935.43,label:'F4 / Folio'}};
 const SHEET_STD_FONTS={sans:{r:StandardFonts.Helvetica,b:StandardFonts.HelveticaBold,i:StandardFonts.HelveticaOblique,bi:StandardFonts.HelveticaBoldOblique},serif:{r:StandardFonts.TimesRoman,b:StandardFonts.TimesRomanBold,i:StandardFonts.TimesRomanItalic,bi:StandardFonts.TimesRomanBoldItalic},mono:{r:StandardFonts.Courier,b:StandardFonts.CourierBold,i:StandardFonts.CourierOblique,bi:StandardFonts.CourierBoldOblique}};
 const SHEET_PDF_DEFAULTS={paper:'a4',orientation:'auto',layout:'fit',border:'all',fontScale:1,margins:'normal',title:true,header:true,rowNumbers:true};
 const SHEET_FORMULA_DOCS=[
@@ -403,6 +403,7 @@ const SHEET_FORMULA_DOCS=[
   {group:'Teks',fn:'LEN',args:'A1',desc:'Panjang teks.'}
 ];
 let sheetCustomFonts=[];
+let sheetFormulaPrev='',sheetFormulaInserting=false,sheetFormulaCaret=null;
 const sheetPdfState={open:false,token:0,doc:null,pages:0,page:1,busy:false,bytes:null,options:null,returnFocus:null,landscape:false};
 let sheetPreviewTimer=null;
 const sheet={cols:16,rows:40,cells:{},vars:{},merges:[],sel:{r:0,c:0},anchor:{r:0,c:0},editing:null,editOriginal:'',history:[],future:[],dragging:false,initialized:false,exported:false,exportToken:0,_cache:null,_varCache:null,_display:null};
@@ -487,9 +488,9 @@ function renderSheetGrid(){
   html+='</tbody></table>';host.innerHTML=html;sheetUpdateSelectionUI();
 }
 function sheetFocusActive(){const td=sheetCellNode(sheet.sel.r,sheet.sel.c);if(!td)return;document.querySelectorAll('#sheetGrid .sheet-cell[tabindex="0"]').forEach(el=>el.tabIndex=-1);td.tabIndex=0;td.focus({preventScroll:true});try{td.scrollIntoView({block:'nearest',inline:'nearest'})}catch{}}
-function sheetSyncFormula(force){const f=document.getElementById('sheetFormula');if(f&&(force||document.activeElement!==f))f.value=sheetRaw(sheet.sel.r,sheet.sel.c);sheetUpdateToolbarState()}
+function sheetSyncFormula(force){const f=document.getElementById('sheetFormula');if(f&&(force||document.activeElement!==f)){f.value=sheetRaw(sheet.sel.r,sheet.sel.c);sheetFormulaCaret=null}sheetUpdateToolbarState()}
 function sheetUpdateSelectionUI(){const g=sheetNormRange();document.querySelectorAll('#sheetGrid .sheet-cell').forEach(td=>{const r=+td.dataset.r,c=+td.dataset.c,sel=r>=g.r1&&r<=g.r2&&c>=g.c1&&c<=g.c2,active=sheet.sel.r===r&&sheet.sel.c===c;td.classList.toggle('sel',sel);td.classList.toggle('active',active);td.setAttribute('aria-selected',sel?'true':'false');td.tabIndex=active?0:-1});const ref=document.getElementById('sheetCellRef'),info=document.getElementById('sheetSelection');const single=sheet.sel.r===sheet.anchor.r&&sheet.sel.c===sheet.anchor.c;const label=single?sheetKey(sheet.sel.r,sheet.sel.c):`${sheetKey(g.r1,g.c1)}:${sheetKey(g.r2,g.c2)}`;if(ref)ref.textContent=label;if(info)info.textContent=single?label:`${label} · ${(g.r2-g.r1+1)*(g.c2-g.c1+1)} sel`;sheetSyncFormula(false);sheetUpdateToolbarState()}
-function sheetUpdateToolbarState(){const activeCell=sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)],style=activeCell&&activeCell.s||{};const undoBtn=document.querySelector('#sheetTools [data-sact="undo"]'),redoBtn=document.querySelector('#sheetTools [data-sact="redo"]');if(undoBtn)undoBtn.disabled=!sheet.history.length;if(redoBtn)redoBtn.disabled=!sheet.future.length;const g=sheetNormRange(),merged=(sheet.merges||[]).some(m=>m.r1===g.r1&&m.c1===g.c1&&m.r2===g.r2&&m.c2===g.c2);document.querySelectorAll('#sheetTools [data-sact]').forEach(b=>{const a=b.dataset.sact;if(a==='bold')b.classList.toggle('active',!!style.b);else if(a==='italic')b.classList.toggle('active',!!style.i);else if(a==='align-left')b.classList.toggle('active',style.align==='left');else if(a==='align-center')b.classList.toggle('active',style.align==='center');else if(a==='align-right')b.classList.toggle('active',style.align==='right');else if(a==='wrap')b.classList.toggle('active',!!style.wrap);else if(a==='merge')b.classList.toggle('active',merged)});const tc=document.getElementById('sheetTextColor'),fc=document.getElementById('sheetFillColor');if(tc){tc.value=style.color||'#3a3019';tc.closest('.sheet-color').style.setProperty('--swatch',tc.value)}if(fc){fc.value=style.bg||'#fbf1d8';fc.closest('.sheet-color').style.setProperty('--swatch',fc.value)}const fontSel=document.getElementById('sheetFont');if(fontSel){const f=style.f||'sans';fontSel.value=[...fontSel.options].some(o=>o.value===f)?f:'sans'}const sizeSel=document.getElementById('sheetFontSize');if(sizeSel){const v=String(style.fs||9);sizeSel.value=[...sizeSel.options].some(o=>o.value===v)?v:'9'}}
+function sheetUpdateToolbarState(){const activeCell=sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)],style=activeCell&&activeCell.s||{};const undoBtn=document.querySelector('#sheetTools [data-sact="undo"]'),redoBtn=document.querySelector('#sheetTools [data-sact="redo"]');if(undoBtn)undoBtn.disabled=!sheet.history.length;if(redoBtn)redoBtn.disabled=!sheet.future.length;const g=sheetNormRange(),merged=!!sheetMergeAt(sheet.sel.r,sheet.sel.c)||(sheet.merges||[]).some(m=>!(m.r2<g.r1||m.r1>g.r2||m.c2<g.c1||m.c1>g.c2));document.querySelectorAll('#sheetTools [data-sact]').forEach(b=>{const a=b.dataset.sact;let pressed=false;if(a==='bold'){pressed=!!style.b;b.classList.toggle('active',pressed)}else if(a==='italic'){pressed=!!style.i;b.classList.toggle('active',pressed)}else if(a==='align-left')b.classList.toggle('active',style.align==='left');else if(a==='align-center')b.classList.toggle('active',style.align==='center');else if(a==='align-right')b.classList.toggle('active',style.align==='right');else if(a==='wrap'){pressed=!!style.wrap;b.classList.toggle('active',pressed)}else if(a==='merge'){pressed=merged;b.classList.toggle('active',merged);b.title=merged?'Pisahkan sel gabungan':'Gabung & tengahkan sel';b.setAttribute('aria-label',merged?'Pisahkan sel gabungan':'Gabung dan tengahkan sel')}if(['bold','italic','wrap','merge'].includes(a))b.setAttribute('aria-pressed',String(pressed))});const tc=document.getElementById('sheetTextColor'),fc=document.getElementById('sheetFillColor');if(tc){tc.value=style.color||'#3a3019';tc.closest('.sheet-color').style.setProperty('--swatch',tc.value)}if(fc){fc.value=style.bg||'#fbf1d8';fc.closest('.sheet-color').style.setProperty('--swatch',fc.value)}const fontSel=document.getElementById('sheetFont');if(fontSel){const f=style.f||'sans';fontSel.value=[...fontSel.options].some(o=>o.value===f)?f:'sans'}const sizeSel=document.getElementById('sheetFontSize');if(sizeSel){const v=String(style.fs||9);sizeSel.value=[...sizeSel.options].some(o=>o.value===v)?v:'9'}}
 function sheetMergeAt(r,c){return (sheet.merges||[]).find(m=>r>=m.r1&&r<=m.r2&&c>=m.c1&&c<=m.c2)||null}
 function sheetSelect(r,c,extend){r=Math.max(0,Math.min(sheet.rows-1,r));c=Math.max(0,Math.min(sheet.cols-1,c));const m=sheetMergeAt(r,c);if(m&&!extend){r=m.r1;c=m.c1}if(!extend)sheet.anchor={r,c};sheet.sel={r,c};sheetUpdateSelectionUI()}
 function sheetMove(dr,dc,extend){sheetSelect(sheet.sel.r+dr,sheet.sel.c+dc,extend)}
@@ -499,7 +500,7 @@ function sheetSetValue(r,c,value,history=true){const key=sheetKey(r,c),existing=
 function sheetBeginEdit(r,c,initial){if(sheet.editing)sheetCommitEdit();const td=sheetCellNode(r,c);if(!td)return;const cell=sheet.cells[sheetKey(r,c)];sheet.editing={r,c};sheet.editOriginal=cell?String(cell.v??''):'';td.classList.add('editing');td.setAttribute('contenteditable','true');td.textContent=initial!==undefined?initial:sheet.editOriginal;td.focus({preventScroll:true});try{const range=document.createRange();range.selectNodeContents(td);range.collapse(false);const s=window.getSelection();s.removeAllRanges();s.addRange(range)}catch{}sheetSyncFormula(true)}
 function sheetCommitEdit(move,restoreFocus=true){if(!sheet.editing)return;const {r,c}=sheet.editing,td=sheetCellNode(r,c);const value=td?td.innerText.replace(/\u00a0/g,' ').replace(/\n$/,''):'';const original=sheet.editOriginal;sheet.editing=null;sheet.editOriginal='';if(td){td.removeAttribute('contenteditable');td.classList.remove('editing')}if(value!==original)sheetSetValue(r,c,value,true);else{sheetRefresh()}if(move==='down')sheetMove(1,0,false);else if(move==='up')sheetMove(-1,0,false);else if(move==='right')sheetMove(0,1,false);else if(move==='left')sheetMove(0,-1,false);if(restoreFocus)sheetFocusActive()}
 function sheetCancelEdit(){if(!sheet.editing)return;sheet.editing=null;sheet.editOriginal='';sheetRefresh();sheetFocusActive()}
-function sheetApplyFormula(){if(sheet.editing)sheetCommitEdit();const f=document.getElementById('sheetFormula');if(!f)return;sheetSetValue(sheet.sel.r,sheet.sel.c,f.value,true);sheetFocusActive()}
+function sheetApplyFormula(){if(sheet.editing)sheetCommitEdit();const f=document.getElementById('sheetFormula');if(!f)return;sheetSetValue(sheet.sel.r,sheet.sel.c,f.value,true);toggleSheetFormulaMenu(false);sheetFocusActive()}
 function sheetApplyRangeStyle(mutator){const g=sheetNormRange();sheetPushHistory();for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++){const key=sheetKey(r,c);let cell=sheet.cells[key];if(!cell){cell={v:'',s:{}}}cell.s=cell.s||{};mutator(cell.s,{r,c,r1:g.r1,r2:g.r2,c1:g.c1,c2:g.c2});if((cell.v===''||cell.v==null)&&!Object.keys(cell.s).length)delete sheet.cells[key];else sheet.cells[key]=cell}sheetRefresh()}
 function sheetToggleStyle(prop){if(sheet.editing)sheetCommitEdit();const style=sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)]&&sheet.cells[sheetKey(sheet.sel.r,sheet.sel.c)].s||{};const next=!style[prop];sheetApplyRangeStyle(s=>{if(next)s[prop]=1;else delete s[prop]})}
 function sheetAlign(mode){if(sheet.editing)sheetCommitEdit();sheetApplyRangeStyle(s=>{if(mode==='left')delete s.align;else s.align=mode})}
@@ -543,7 +544,7 @@ async function exportSheetToPdf(report,options){
   const sizeOf=st=>Math.max(4,(st&&st.fs?st.fs:9)*o.fontScale);
   const prepCell=(r,c)=>{
     const cell=sheet.cells[sheetKey(r,c)],style=cell&&cell.s||{},view=sheetDisplay(r,c),font=getFont(style),size=sizeOf(style),raw=String(view.text);
-    const safe=style.f&&String(style.f).startsWith('custom:')?stripInvisible(raw):sanitizeWinAnsi(raw);
+    const safe=style.f&&String(style.f).startsWith('custom:')&&sheetCustomFonts.some(f=>f.id===style.f)?stripInvisible(raw):sanitizeWinAnsi(raw);
     return {raw,safe,type:view.type,error:view.error,style,font,size};
   };
   let widths=[];
@@ -616,9 +617,9 @@ async function exportSheetToPdf(report,options){
       page.drawText(sheetPdfTruncate(sanitizeWinAnsi(sheetNameValue()),getFont({b:1}),13,pageW-margin*2-110),{x:margin,y:pageH-margin-10,size:13,font:getFont({b:1}),color:ink});
       page.drawText('Paperly PDF Sheet',{x:pageW-margin-92,y:pageH-margin-9,size:7.5,font:getFont({}),color:muted});
     }
-    const bandW=totalW+rowHead,tableBottomInit=rowsTop;
+    const bandW=totalW+rowHead,borderVisible=o.border!=='none';
     if(o.header){
-      page.drawRectangle({x:margin,y:tableTop-1,width:bandW,height:1,color:lineColor});
+      if(borderVisible)page.drawRectangle({x:margin,y:tableTop-1,width:bandW,height:1,color:lineColor});
       page.drawRectangle({x:margin,y:rowsTop,width:bandW,height:colHeadH,color:sheetPdfColor('#f6f0e2',[.96,.94,.89])});
       if(rowHead){
         page.drawRectangle({x:margin,y:rowsTop,width:rowHead,height:colHeadH,color:sheetPdfColor('#f0e8d5',[.94,.91,.84])});
@@ -630,14 +631,14 @@ async function exportSheetToPdf(report,options){
         if(borderAll)page.drawLine({start:{x:hx,y:rowsTop},end:{x:hx,y:rowsTop+colHeadH},thickness:.4,color:gridColor});
         hx+=widths[c];
       }
-      page.drawLine({start:{x:margin,y:rowsTop},end:{x:margin+bandW,y:rowsTop},thickness:.6,color:lineColor});
+      if(borderVisible)page.drawLine({start:{x:margin,y:rowsTop},end:{x:margin+bandW,y:rowsTop},thickness:.6,color:lineColor});
     }
     let y=rowsTop;
     for(const item of pages[pi]){
       const r=item.r,h=item.h;
       y-=h;
       if(rowHead){
-        page.drawRectangle({x:margin,y,width:rowHead,height:h,color:sheetPdfColor('#faf6ec',[.98,.96,.92]),borderColor:gridColor,borderWidth:.5});
+        page.drawRectangle({x:margin,y,width:rowHead,height:h,color:sheetPdfColor('#faf6ec',[.98,.96,.92]),borderColor:borderAll?gridColor:undefined,borderWidth:borderAll?.5:0});
         page.drawText(String(r+1),{x:margin+rowHead/2-String(r+1).length*2.4,y:y+h/2-3,size:7.5,font:getFont({}),color:rgb(.58,.52,.4)});
       }
       let x=margin+rowHead;
@@ -675,7 +676,7 @@ async function exportSheetToPdf(report,options){
       if(borderRows&&last&&r!==last.r)page.drawLine({start:{x:margin,y},end:{x:margin+bandW,y},thickness:.4,color:gridColor});
     }
     if(o.border==='outer'||o.border==='horizontal'){
-      page.drawRectangle({x:margin,y:Math.min(y,margin+footerH),width:bandW,height:tableTop-Math.min(y,margin+footerH),borderColor:lineColor,borderWidth:.8});
+      page.drawRectangle({x:margin,y,width:bandW,height:Math.max(1,tableTop-y),borderColor:lineColor,borderWidth:.8});
     }
     page.drawText(`Halaman ${pi+1} dari ${pages.length}`,{x:pageW/2-34,y:16,size:7.5,font:getFont({}),color:muted});
     if(report)report((pi+1)/pages.length);
@@ -705,23 +706,37 @@ function sheetShiftMerges(kind,index,delta){const out=[];for(const m of (sheet.m
 function sheetMergeSelection(){
   if(sheet.editing)sheetCommitEdit();
   const g=sheetNormRange(),merges=sheet.merges||[];
+  const containsSelection=merges.find(m=>!(m.r2<g.r1||m.r1>g.r2||m.c2<g.c1||m.c1>g.c2));
   const exact=merges.find(m=>m.r1===g.r1&&m.c1===g.c1&&m.r2===g.r2&&m.c2===g.c2);
-  if(exact){sheetPushHistory();sheet.merges=merges.filter(m=>m!==exact);sheetRefresh();sheetFocusActive();showToast('Sel gabungan dipisah.');return}
-  if(merges.some(m=>!(m.r2<g.r1||m.r1>g.r2||m.c2<g.c1||m.c1>g.c2))){showToast('Rentang memuat sel gabungan. Pilih tepat sel gabungan itu untuk memisahkannya.');return}
+  const activeMerge=sheetMergeAt(sheet.sel.r,sheet.sel.c);
+  const target=exact||containsSelection||activeMerge;
+  if(target){
+    sheetPushHistory();
+    sheet.merges=merges.filter(m=>m!==target);
+    const cell=sheet.cells[sheetKey(target.r1,target.c1)];
+    if(cell&&cell.s){
+      if(target.prevAlign)cell.s.align=target.prevAlign;else delete cell.s.align;
+      if(!Object.keys(cell.s).length&&(!cell.v||cell.v===''))delete sheet.cells[sheetKey(target.r1,target.c1)];
+    }
+    sheet.sel={r:target.r1,c:target.c1};sheet.anchor={...sheet.sel};
+    sheetRefresh();sheetFocusActive();showToast('Sel gabungan dipisah.');return
+  }
   if(g.r1===g.r2&&g.c1===g.c2){showToast('Pilih minimal dua sel untuk digabung.');return}
   sheetPushHistory();
   let value='';outer:for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++){const cell=sheet.cells[sheetKey(r,c)];if(cell&&cell.v!==''&&cell.v!=null){value=String(cell.v);break outer}}
   for(let r=g.r1;r<=g.r2;r++)for(let c=g.c1;c<=g.c2;c++){if(r===g.r1&&c===g.c1)continue;delete sheet.cells[sheetKey(r,c)]}
   const key=sheetKey(g.r1,g.c1),cell=sheet.cells[key]||(sheet.cells[key]={v:'',s:{}});
-  cell.v=value;cell.s=cell.s||{};cell.s.align='center';
-  sheet.merges=[...merges,{r1:g.r1,c1:g.c1,r2:g.r2,c2:g.c2}];
+  cell.v=value;cell.s=cell.s||{};
+  const prevAlign=cell.s.align;
+  cell.s.align='center';
+  sheet.merges=[...merges,{r1:g.r1,c1:g.c1,r2:g.r2,c2:g.c2,prevAlign}];
   sheet.sel={r:g.r1,c:g.c1};sheet.anchor={...sheet.sel};
   sheetRefresh();sheetFocusActive();showToast('Sel digabung dan teks ditengahkan.');
 }
 function renderSheetFormulaMenu(){const host=document.getElementById('sheetFormulaList');if(!host)return;const groups={};for(const d of SHEET_FORMULA_DOCS){(groups[d.group]=groups[d.group]||[]).push(d)}host.innerHTML=Object.entries(groups).map(([g,items])=>`<div class="sheet-formula-group"><h4>${g}</h4>${items.map(d=>`<button type="button" class="sheet-formula-item" data-fn="${d.fn}"><code>=${d.fn}(${d.args})</code><span>${d.desc}</span></button>`).join('')}</div>`).join('')}
-function toggleSheetFormulaMenu(open){const menu=document.getElementById('sheetFormulaMenu'),btn=document.getElementById('sheetFormulaHelp');if(!menu)return;menu.classList.toggle('open',!!open);menu.setAttribute('aria-hidden',String(!open));if(btn)btn.setAttribute('aria-expanded',String(!!open));if(open){const first=menu.querySelector('[data-fn]');if(first)setTimeout(()=>first.focus(),40)}}
-function insertSheetFormula(fn){const f=document.getElementById('sheetFormula');if(!f)return;const raw=f.value,start=f.selectionStart==null?raw.length:f.selectionStart,end=f.selectionEnd==null?start:f.selectionEnd;let prefix=raw.slice(0,start);const suffix=raw.slice(end);if(!raw.startsWith('=')&&!prefix.startsWith('='))prefix='='+prefix;f.value=prefix+fn+'('+suffix;f.focus();const pos=(prefix+fn+'(').length;try{f.setSelectionRange(pos,pos)}catch{}}
-async function sheetEmbedFonts(doc,fams){const std=new Set(),custom=new Set();for(const f of fams){if(f&&String(f).startsWith('custom:'))custom.add(f);else std.add(SHEET_STD_FONTS[f]?f:'sans')}if(custom.size)doc.registerFontkit(await ensureFontkit());const cache=new Map();for(const fam of std){const set=SHEET_STD_FONTS[fam];for(const k of ['r','b','i','bi'])cache.set(fam+k,await doc.embedFont(set[k]))}for(const fam of custom){const rec=sheetCustomFonts.find(x=>x.id===fam)||sheetCustomFonts[0];if(!rec)continue;const font=await doc.embedFont(rec.bytes,{subset:true});for(const k of ['r','b','i','bi'])cache.set(fam+k,font)}return style=>{const f=style&&style.f,fam=f&&String(f).startsWith('custom:')?f:(SHEET_STD_FONTS[f]?f:'sans');return cache.get(fam+((style&&style.b)?'b':'')+((style&&style.i)?'i':''))||cache.get('sansr')}}
+function toggleSheetFormulaMenu(open,focusFirst=true){const menu=document.getElementById('sheetFormulaMenu'),btn=document.getElementById('sheetFormulaHelp');if(!menu)return;menu.classList.toggle('open',!!open);menu.setAttribute('aria-hidden',String(!open));if(btn)btn.setAttribute('aria-expanded',String(!!open));if(open&&focusFirst){const first=menu.querySelector('[data-fn]');if(first)setTimeout(()=>first.focus(),40)}}
+function insertSheetFormula(fn){const f=document.getElementById('sheetFormula');if(!f)return;const raw=f.value,isFormula=raw.startsWith('='),sel=isFormula?sheetFormulaCaret:null;let prefix=sel?raw.slice(0,sel.start):'',suffix=sel?raw.slice(sel.end):'';if(!prefix.startsWith('='))prefix='='+prefix;prefix=prefix.replace(/([A-Za-z_][A-Za-z_]*)$/,'');const addParen=!suffix.startsWith('('),insert=fn+(addParen?'(':'');f.value=prefix+insert+suffix;sheetFormulaInserting=true;try{f.focus()}finally{sheetFormulaInserting=false}const pos=addParen?(prefix+insert).length:(prefix+fn).length+1;sheetFormulaPrev=f.value;sheetFormulaCaret={start:pos,end:pos};try{f.setSelectionRange(pos,pos)}catch{}}
+async function sheetEmbedFonts(doc,fams){const std=new Set(),custom=new Set();for(const f of fams){if(f&&String(f).startsWith('custom:'))custom.add(f);else std.add(SHEET_STD_FONTS[f]?f:'sans')}if(custom.size)doc.registerFontkit(await ensureFontkit());const cache=new Map();for(const fam of std){const set=SHEET_STD_FONTS[fam];for(const k of ['r','b','i','bi'])cache.set(fam+k,await doc.embedFont(set[k]))}for(const fam of custom){const rec=sheetCustomFonts.find(x=>x.id===fam);if(!rec)continue;try{const font=await doc.embedFont(rec.bytes,{subset:true});for(const k of ['r','b','i','bi'])cache.set(fam+k,font)}catch(e){console.warn('Font kustom gagal disematkan:',rec.label,e)}}return style=>{const f=style&&style.f,fam=f&&String(f).startsWith('custom:')?f:(SHEET_STD_FONTS[f]?f:'sans'),k=style&&style.b?(style.i?'bi':'b'):(style&&style.i?'i':'r');return cache.get(fam+k)||cache.get('sansr')}}
 function sheetPdfReadOptions(){const val=(id,fb)=>{const el=document.getElementById(id);return el?el.value:fb};const checked=(id,fb)=>{const el=document.getElementById(id);return el?el.checked:fb};return {paper:val('sheetPaper','a4'),orientation:val('sheetOrient','auto'),layout:val('sheetLayout','fit'),border:val('sheetBorderStyle','all'),fontScale:Number(val('sheetFontScale','1'))||1,margins:val('sheetMargin','normal'),title:checked('sheetShowTitle',true),header:checked('sheetShowHeader',true),rowNumbers:checked('sheetShowRowNums',true)}}
 function sheetPdfFillOptions(o){const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=String(v)};set('sheetPaper',o.paper);set('sheetOrient',o.orientation);set('sheetLayout',o.layout);set('sheetBorderStyle',o.border);set('sheetFontScale',o.fontScale);set('sheetMargin',o.margins);const chk=(id,v)=>{const el=document.getElementById(id);if(el)el.checked=!!v};chk('sheetShowTitle',o.title);chk('sheetShowHeader',o.header);chk('sheetShowRowNums',o.rowNumbers)}
 function updateSheetPreviewChrome(){const s=sheetPdfState;const label=document.getElementById('sheetPreviewPage'),prev=document.getElementById('sheetPreviewPrev'),next=document.getElementById('sheetPreviewNext'),meta=document.getElementById('sheetPreviewMeta');if(label)label.textContent=`Halaman ${s.page||1} / ${s.pages||1}`;if(prev)prev.disabled=!s.doc||s.page<=1;if(next)next.disabled=!s.doc||s.page>=s.pages;if(meta&&s.options){const p=SHEET_PAPERS[s.options.paper]||SHEET_PAPERS.a4;meta.textContent=`${p.label} · ${s.landscape?'Lanskap':'Potret'}${s.pages?` · ${s.pages} halaman`:''}`}}
@@ -738,7 +753,7 @@ async function refreshSheetPreview(){
     const opts=sheetPdfReadOptions();s.options=opts;
     const bytes=await exportSheetToPdf(null,opts);
     if(token!==s.token)return;
-    const doc=await pdfjsLib.getDocument({data:bytes}).promise;
+    const doc=await pdfjsLib.getDocument({data:bytes.slice()}).promise;
     if(token!==s.token){try{doc.destroy()}catch{}return}
     s.doc=doc;s.pages=doc.numPages;s.page=Math.max(1,Math.min(s.page||1,doc.numPages));s.bytes=bytes;
     updateSheetPreviewChrome();await renderSheetPreviewPage();
@@ -808,9 +823,9 @@ function initSheetExtras(){
     help.addEventListener('click',()=>toggleSheetFormulaMenu(!menu.classList.contains('open')));
     const closeBtn=document.getElementById('sheetFormulaMenuClose');
     if(closeBtn)closeBtn.addEventListener('click',()=>{toggleSheetFormulaMenu(false);help.focus()});
-    menu.addEventListener('click',e=>{const item=e.target.closest('[data-fn]');if(!item)return;insertSheetFormula(item.dataset.fn);toggleSheetFormulaMenu(false);help.focus()});
+    menu.addEventListener('click',e=>{const item=e.target.closest('[data-fn]');if(!item)return;insertSheetFormula(item.dataset.fn);toggleSheetFormulaMenu(false);const f=document.getElementById('sheetFormula');if(f)f.focus()});
     document.addEventListener('pointerdown',e=>{if(!menu.classList.contains('open'))return;if(menu.contains(e.target)||help.contains(e.target))return;toggleSheetFormulaMenu(false)});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('open')){e.preventDefault();toggleSheetFormulaMenu(false);help.focus()}});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu.classList.contains('open')){e.preventDefault();const inMenu=menu.contains(document.activeElement);toggleSheetFormulaMenu(false);if(inMenu)help.focus()}});
   }
   ['sheetPaper','sheetOrient','sheetLayout','sheetBorderStyle','sheetFontScale','sheetMargin','sheetShowTitle','sheetShowHeader','sheetShowRowNums'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',()=>{sheetPdfState.page=1;scheduleSheetPreview()})});
   const dlg=document.getElementById('sheetPreview');
@@ -847,7 +862,7 @@ grid.addEventListener('pointerover',e=>{if(!sheet.dragging)return;const td=e.tar
 window.addEventListener('pointerup',()=>{sheet.dragging=false});
 grid.addEventListener('dblclick',e=>{const td=e.target.closest('.sheet-cell');if(!td)return;sheetBeginEdit(+td.dataset.r,+td.dataset.c)});
 page.addEventListener('focusin',e=>{if(!sheet.editing)return;const td=sheetCellNode(sheet.editing.r,sheet.editing.c);if(td&&(e.target===td||td.contains(e.target)))return;sheetCommitEdit(null,false)});
-page.addEventListener('keydown',e=>{if(sheet.editing){if(e.key==='Enter'){e.preventDefault();e.stopPropagation();sheetCommitEdit(e.shiftKey?'up':'down');return}if(e.key==='Tab'){e.preventDefault();e.stopPropagation();sheetCommitEdit(e.shiftKey?'left':'right');return}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();sheetCancelEdit();return}if(e.key==='Delete')return;return}const target=e.target;if(target&&target.matches&&target.matches('input,select,textarea')){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();if(target.id==='sheetFormula')sheetSyncFormula(true);target.blur()}return}if(e.ctrlKey||e.metaKey){const k=e.key.toLowerCase();if(k==='z'){e.preventDefault();if(e.shiftKey)sheetRedo();else sheetUndo();return}if(k==='y'){e.preventDefault();sheetRedo();return}if(k==='s'){e.preventDefault();document.getElementById('sheetExport').click();return}return}if(e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const dr=e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0,dc=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;sheetMove(dr,dc,e.shiftKey);sheetFocusActive();return}if(e.key==='Enter'){e.preventDefault();sheetMove(e.shiftKey?-1:1,0,false);sheetFocusActive();return}if(e.key==='Tab'){e.preventDefault();sheetMove(0,e.shiftKey?-1:1,false);sheetFocusActive();return}if(e.key==='Home'){e.preventDefault();sheetSelect(sheet.sel.r,0,e.shiftKey);sheetFocusActive();return}if(e.key==='End'){e.preventDefault();sheetSelect(sheet.sel.r,sheet.cols-1,e.shiftKey);sheetFocusActive();return}if(e.key==='PageDown'){e.preventDefault();sheetMove(12,0,e.shiftKey);sheetFocusActive();return}if(e.key==='PageUp'){e.preventDefault();sheetMove(-12,0,e.shiftKey);sheetFocusActive();return}if(e.key==='F2'){e.preventDefault();sheetBeginEdit(sheet.sel.r,sheet.sel.c);return}if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();sheetClearRange();return}if(e.key.length===1&&!e.altKey){e.preventDefault();sheetBeginEdit(sheet.sel.r,sheet.sel.c,e.key)}});
+page.addEventListener('keydown',e=>{if(sheet.editing){if(e.key==='Enter'){e.preventDefault();e.stopPropagation();sheetCommitEdit(e.shiftKey?'up':'down');return}if(e.key==='Tab'){e.preventDefault();e.stopPropagation();sheetCommitEdit(e.shiftKey?'left':'right');return}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();sheetCancelEdit();return}if(e.key==='Delete')return;return}const target=e.target;if(target&&target.closest&&target.closest('#sheetFormulaMenu'))return;if(target&&target.matches&&target.matches('input,select,textarea')){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();if(target.id==='sheetFormula')sheetSyncFormula(true);target.blur()}return}if(e.ctrlKey||e.metaKey){const k=e.key.toLowerCase();if(k==='z'){e.preventDefault();if(e.shiftKey)sheetRedo();else sheetUndo();return}if(k==='y'){e.preventDefault();sheetRedo();return}if(k==='s'){e.preventDefault();document.getElementById('sheetExport').click();return}return}if(e.key==='ArrowUp'||e.key==='ArrowDown'||e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const dr=e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0,dc=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;sheetMove(dr,dc,e.shiftKey);sheetFocusActive();return}if(e.key==='Enter'){e.preventDefault();sheetMove(e.shiftKey?-1:1,0,false);sheetFocusActive();return}if(e.key==='Tab'){e.preventDefault();sheetMove(0,e.shiftKey?-1:1,false);sheetFocusActive();return}if(e.key==='Home'){e.preventDefault();sheetSelect(sheet.sel.r,0,e.shiftKey);sheetFocusActive();return}if(e.key==='End'){e.preventDefault();sheetSelect(sheet.sel.r,sheet.cols-1,e.shiftKey);sheetFocusActive();return}if(e.key==='PageDown'){e.preventDefault();sheetMove(12,0,e.shiftKey);sheetFocusActive();return}if(e.key==='PageUp'){e.preventDefault();sheetMove(-12,0,e.shiftKey);sheetFocusActive();return}if(e.key==='F2'){e.preventDefault();sheetBeginEdit(sheet.sel.r,sheet.sel.c);return}if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();sheetClearRange();return}if(e.key.length===1&&!e.altKey){e.preventDefault();sheetBeginEdit(sheet.sel.r,sheet.sel.c,e.key)}});
 page.addEventListener('copy',e=>{if(sheet.editing||(e.target&&e.target.matches&&e.target.matches('input,textarea')))return;const text=sheetRangeTSV();if(!text)return;e.clipboardData.setData('text/plain',text);e.preventDefault()});
 page.addEventListener('cut',e=>{if(sheet.editing||(e.target&&e.target.matches&&e.target.matches('input,textarea')))return;const text=sheetRangeTSV();if(!text)return;e.clipboardData.setData('text/plain',text);e.preventDefault();sheetClearRange()});
 page.addEventListener('paste',e=>{const text=(e.clipboardData||window.clipboardData).getData('text/plain');if(!text)return;if(sheet.editing){e.preventDefault();document.execCommand('insertText',false,text);return}if(e.target&&e.target.matches&&e.target.matches('input,textarea'))return;e.preventDefault();sheetPasteTSV(text)});
@@ -856,8 +871,12 @@ document.getElementById('sheetBorder').addEventListener('change',e=>{if(sheet.ed
 document.getElementById('sheetFormat').addEventListener('change',e=>{if(sheet.editing)sheetCommitEdit();const fmt=e.target.value;sheetApplyRangeStyle(s=>{if(fmt==='auto')delete s.fmt;else s.fmt=fmt})});
 const textColor=document.getElementById('sheetTextColor'),fillColor=document.getElementById('sheetFillColor');textColor.addEventListener('input',()=>textColor.closest('.sheet-color').style.setProperty('--swatch',textColor.value));fillColor.addEventListener('input',()=>fillColor.closest('.sheet-color').style.setProperty('--swatch',fillColor.value));textColor.addEventListener('change',()=>{if(sheet.editing)sheetCommitEdit();sheetApplyRangeStyle(s=>{s.color=textColor.value})});fillColor.addEventListener('change',()=>{if(sheet.editing)sheetCommitEdit();const bg=fillColor.value,n=parseInt(bg.slice(1),16),lum=((n>>16&255)*.299+(n>>8&255)*.587+(n&255)*.114)/255;sheetApplyRangeStyle(s=>{s.bg=bg;if(!s.color)s.color=lum>.55?'#3a3019':'#fffaf0'})});
 document.getElementById('sheetFormulaApply').addEventListener('click',sheetApplyFormula);
-formula.addEventListener('focus',()=>{if(sheet.editing)sheetCommitEdit(null,false);sheetSyncFormula(true)});
-formula.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();sheetApplyFormula()}else if(e.key==='Escape'){e.preventDefault();e.stopPropagation();sheetSyncFormula(true);formula.blur()}});
+formula.addEventListener('focus',()=>{if(sheet.editing)sheetCommitEdit(null,false);if(!sheetFormulaInserting)sheetSyncFormula(true);sheetFormulaPrev=formula.value;sheetFormulaCaret={start:formula.selectionStart??formula.value.length,end:formula.selectionEnd??formula.value.length}});
+formula.addEventListener('blur',()=>{sheetFormulaCaret={start:formula.selectionStart??formula.value.length,end:formula.selectionEnd??formula.value.length}});
+const rememberFormulaCaret=()=>{if(document.activeElement===formula)sheetFormulaCaret={start:formula.selectionStart??formula.value.length,end:formula.selectionEnd??formula.value.length}};
+['keyup','click','select'].forEach(ev=>formula.addEventListener(ev,rememberFormulaCaret));
+formula.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();sheetApplyFormula()}else if(e.key==='Escape'){e.preventDefault();e.stopPropagation();toggleSheetFormulaMenu(false);sheetSyncFormula(true);formula.blur()}else if(e.key==='ArrowDown'&&document.getElementById('sheetFormulaMenu').classList.contains('open')){e.preventDefault();const first=document.querySelector('#sheetFormulaList [data-fn]');if(first)first.focus()}});
+formula.addEventListener('input',()=>{const v=formula.value;if(v.startsWith('=')&&!sheetFormulaPrev.startsWith('='))toggleSheetFormulaMenu(true,false);else if(!v.startsWith('='))toggleSheetFormulaMenu(false);sheetFormulaPrev=v;rememberFormulaCaret()});
 document.getElementById('sheetName').addEventListener('input',()=>sheetMarkDirty());
 document.getElementById('sheetVarsBtn').addEventListener('click',()=>{const open=vars.classList.toggle('open');document.getElementById('sheetVarsBtn').setAttribute('aria-expanded',String(open));if(open){const first=document.getElementById('sheetVarName');if(first)first.focus()}});
 document.getElementById('sheetVarsClose').addEventListener('click',()=>{vars.classList.remove('open');document.getElementById('sheetVarsBtn').setAttribute('aria-expanded','false');sheetFocusActive()});
