@@ -459,6 +459,8 @@ function setSidebarOpen(open,options={}){sidebarOpen=!!open&&mobileQuery.matches
 mobileMenu.addEventListener('click',()=>setSidebarOpen(!sidebarOpen));sidebarScrim.addEventListener('click',()=>setSidebarOpen(false));document.querySelector('.brand').addEventListener('click',()=>setSidebarOpen(false));mobileQuery.addEventListener?.('change',()=>setSidebarOpen(false));setSidebarOpen(false);
 function showPage(page){
   const target=['home','tools','about'].includes(page)?page:'home';
+  const context=document.getElementById('topbarContext');
+  if(context)context.textContent={home:'Beranda',tools:'Alat PDF',about:'Tentang'}[target];
   document.querySelectorAll('.page-section').forEach(section=>section.classList.toggle('active',section.dataset.page===target));
   document.querySelectorAll('.nav-link').forEach(link=>{const active=link.dataset.nav===target;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')});
   setSidebarOpen(false);
@@ -1020,3 +1022,58 @@ document.getElementById('sheetLeaveDialog').addEventListener('click',e=>{if(e.ta
 document.getElementById('sheetLeaveDialog').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const f=[...e.currentTarget.querySelectorAll('button:not(:disabled)')];if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}});
 document.getElementById('sheetExport').addEventListener('click',()=>openSheetPreview());
 renderSheetGrid();renderSheetVars();sheetUpdateMeta();initSheetExtras()}
+
+/* ===== Liquid glass: interaksi kursor + governer performa tampilan ===== */
+(() => {
+  const root=document.documentElement;
+  const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const finePointer=window.matchMedia('(hover: hover) and (pointer: fine)');
+  const connection=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  const lowMemory=(navigator.deviceMemory||8)<=4;
+  const lowCores=(navigator.hardwareConcurrency||8)<=2;
+  const syncPerfProfile=()=>{
+    const lite=!!(connection&&connection.saveData)||lowMemory||lowCores;
+    root.dataset.perf=lite?'lite':'full';
+  };
+  syncPerfProfile();
+  connection?.addEventListener?.('change',syncPerfProfile);
+
+  /* Hentikan animasi ambient saat tab tidak terlihat. */
+  const syncVisibility=()=>root.classList.toggle('is-paused',document.hidden);
+  document.addEventListener('visibilitychange',syncVisibility);
+  syncVisibility();
+
+  /* Hero yang keluar layar tidak perlu terus beranimasi. */
+  const hero=document.querySelector('.hero-card');
+  if(hero&&'IntersectionObserver'in window){
+    new IntersectionObserver(entries=>{
+      for(const entry of entries)hero.classList.toggle('is-offscreen',!entry.isIntersecting);
+    },{rootMargin:'140px'}).observe(hero);
+  }
+
+  /* Satu listener kursor untuk semua permukaan kaca (rAF-throttled). */
+  const targets='.tool-card,.guide-card,.hero-card,.about-card,.bottom-banner,.quick-link';
+  let frame=0,pending=null;
+  const paintGlow=()=>{
+    frame=0;
+    if(!pending)return;
+    const {el,x,y}=pending;pending=null;
+    const rect=el.getBoundingClientRect();
+    el.style.setProperty('--mx',Math.round(x-rect.left)+'px');
+    el.style.setProperty('--my',Math.round(y-rect.top)+'px');
+  };
+  const canGlow=()=>finePointer.matches&&!motion.matches&&root.dataset.perf!=='lite';
+  document.addEventListener('pointermove',event=>{
+    if(!canGlow())return;
+    const el=event.target instanceof Element?event.target.closest(targets):null;
+    if(!el)return;
+    pending={el,x:event.clientX,y:event.clientY};
+    if(!frame)frame=requestAnimationFrame(paintGlow);
+  },{passive:true});
+  document.addEventListener('pointerout',event=>{
+    const el=event.target instanceof Element?event.target.closest(targets):null;
+    if(!el||(event.relatedTarget instanceof Node&&el.contains(event.relatedTarget)))return;
+    el.style.removeProperty('--mx');
+    el.style.removeProperty('--my');
+  },{passive:true});
+})();
