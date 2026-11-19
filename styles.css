@@ -692,15 +692,15 @@ body[data-theme="dark"] .tool-group .tool-card{background:rgba(97,84,56,.72)}
 .modal-progress.show{display:block}
 body[data-theme="dark"] .modal-progress{background:#605439}
 .modal-progress-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#c48e1b,#e0cb9e,#e2b445,#c48e1b);background-size:300% 100%;animation:progress-flow 2.2s linear infinite;transition:width .25s ease}
-.modal-progress-fill.indeterminate{width:100%!important;transform-origin:left center;animation:progress-flow 2.2s linear infinite,progress-indeterminate 1.35s ease-in-out infinite}
+.modal-progress-fill.indeterminate{width:35%!important;animation:progress-flow 2.2s linear infinite,progress-indeterminate 1.35s ease-in-out infinite}
 @keyframes progress-flow{0%{background-position:0 0}100%{background-position:300% 0}}
-@keyframes progress-indeterminate{0%{transform:translateX(-105%) scaleX(.5)}55%{transform:translateX(40%) scaleX(.65)}100%{transform:translateX(110%) scaleX(.5)}}
+@keyframes progress-indeterminate{0%{transform:translateX(-105%)}55%{transform:translateX(90%)}100%{transform:translateX(300%)}}
 .modal-progress-label{display:none;margin-top:6px;font:500 10px 'DM Sans',sans-serif;color:var(--muted);text-align:center}
 .modal-progress-label.show{display:block}
 .button-spinner{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:button-spin .8s linear infinite}
 @keyframes button-spin{to{transform:rotate(360deg)}}
 .button-primary.loading{pointer-events:none}
-@media(prefers-reduced-motion:reduce){.modal-progress-fill,.button-spinner{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+@media(prefers-reduced-motion:reduce){.modal-progress-fill,.button-spinner{animation:none!important}}
 /* ===== Navigasi halaman hash ===== */
 .page-section{display:none}.page-section.active{display:block;animation:page-in .22s ease-out}@keyframes page-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 /* ===== Panduan singkat ===== */
