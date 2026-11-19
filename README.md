@@ -18,45 +18,14 @@
 - 🧬 [Explore the remix source](https://github.com/Hattaakim/PDF-Tools-Ai-Project).
 <!-- omgithub:readme:end -->
 
-## Office documents to PDF
+## Pembuat PDF
 
-DOCX, PPTX, and XLSX conversion is handled by the separate Node.js service in `office-converter/`. Office files are uploaded to the conversion API you configure; other PDF tools continue to run in the browser. The preview and download use the exact same PDF returned by that service.
+**Pembuat PDF** menulis dokumen baru langsung di browser lalu mengekspornya menjadi PDF. Selain format teks dasar, editor menyediakan pengaturan tata letak:
 
-### Requirements
+- Ukuran kertas (A4, A5, B5, Letter, Legal, F4/Folio, A3) dan margin atas, kanan, bawah, kiri.
+- Orientasi halaman portrait atau landscape.
+- Jumlah kolom yang berlaku khusus pada teks yang dipilih/diblok, bukan seluruh dokumen.
+- Inden kiri, inden baris pertama, spasi baris, dan spasi paragraf.
+- Perataan teks rata kiri, tengah, kanan, dan rata kiri-kanan (justify).
 
-- Node.js 18 or newer
-- LibreOffice (including `soffice`/`libreoffice`) installed on the machine running the service
-
-Install LibreOffice with your platform's package manager or from [libreoffice.org](https://www.libreoffice.org/download/download/). On Debian/Ubuntu, for example:
-
-```sh
-sudo apt-get update
-sudo apt-get install -y libreoffice
-```
-
-### Start the conversion API
-
-```sh
-cd office-converter
-npm install
-npm start
-```
-
-The API listens on `http://localhost:3001` by default. In Paperly, open **Office ke PDF** and set **URL dasar API konversi** to the API's base URL. The service accepts `POST /convert` as `multipart/form-data` with one `file` field and returns `application/pdf`; `GET /health` is available for a basic health check. Uploads are limited to 50 MB and must have a matching DOCX, PPTX, or XLSX extension and MIME type. Temporary input, output, and LibreOffice profile files are removed after each conversion.
-
-### Configuration
-
-| Environment variable | Default | Purpose |
-| --- | --- | --- |
-| `PORT` | `3001` | HTTP port for the API |
-| `CORS_ORIGIN` | `*` | Comma-separated allowed browser origins, or `*` |
-| `LIBREOFFICE_PATH` | `libreoffice` | LibreOffice executable path (use `soffice` if that is its name on your system) |
-| `CONVERSION_TIMEOUT_MS` | `120000` | Per-document conversion timeout in milliseconds |
-
-For example, to serve the frontend from `https://paperly.example.com`:
-
-```sh
-CORS_ORIGIN=https://paperly.example.com PORT=3001 npm start
-```
-
-For deployments, put the API behind HTTPS and restrict CORS to the frontend's origin. Do not expose an unauthenticated conversion service to untrusted networks without suitable access controls and resource limits.
+Semua proses dokumen berjalan lokal di perangkat; tidak ada file yang diunggah ke server.
