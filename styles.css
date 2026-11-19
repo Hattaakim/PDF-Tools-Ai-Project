@@ -370,6 +370,21 @@ body[data-theme="dark"] .doc-page:empty::before{color:#625843}
 .doc-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:8px;border:1px solid #f1eee7;border-radius:10px;background:#fdfcfb}
 .doc-toolbar .editor-btn{padding:6px 9px;font-size:11px;min-width:30px}
 .doc-toolbar-sep{width:1px;height:22px;background:#efebe3;margin:0 2px}
+.doc-layout-toggle.active{background:#fbf1d8;border-color:#f0e2bd;color:#a9790c}
+.doc-layout-panel{padding:10px 12px;border:1px solid #f1eee7;border-radius:10px;background:#fdfcfb}
+.doc-layout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px 10px}
+.doc-layout-field{display:flex;flex-direction:column;gap:4px;font:600 10px 'DM Sans',sans-serif;color:#7b715e}
+.doc-layout-input{height:30px;padding:0 8px;border:1px solid #f0ede5;border-radius:7px;background:#fff;color:#5d533c;font:11px 'DM Sans',sans-serif;outline:none}
+.doc-layout-input:focus{border-color:#d8c69e}
+.doc-layout-hint{margin:9px 0 0;font:500 10px/1.5 'DM Sans',sans-serif;color:#8a7f69}
+.doc-columns{column-gap:1.5em;column-fill:balance;margin:0 0 8px}
+.doc-columns>:first-child{margin-top:0}
+.doc-columns p,.doc-columns h1,.doc-columns h2,.doc-columns h3,.doc-columns h4,.doc-columns li{break-inside:avoid-column}
+body[data-theme="dark"] .doc-layout-panel{background:#3f3725;border-color:#5c523d}
+body[data-theme="dark"] .doc-layout-field{color:#c2b8a1}
+body[data-theme="dark"] .doc-layout-input{background:#605439;border-color:#5c523d;color:#f6f1e6}
+body[data-theme="dark"] .doc-layout-hint{color:#a99b7d}
+body[data-theme="dark"] .doc-layout-toggle.active{background:#55492f;border-color:#665738;color:#e7c878}
 .doc-select{height:30px;padding:0 8px;border:1px solid #f0ede5;border-radius:7px;background:#fff;color:#5d533c;font:11px 'DM Sans',sans-serif;outline:none;cursor:pointer}
 #docColor{width:30px;height:30px;padding:2px;border:1px solid #f0ede5;border-radius:7px;background:#fff;cursor:pointer}
 .doc-pages{max-height:52vh;overflow-y:auto;padding:14px;border:1px solid #f4f1e9;border-radius:12px;background:linear-gradient(140deg,#fcfbf7,#fdf8ec)}
@@ -400,10 +415,10 @@ body.doc-writing{overflow:hidden}
 .doc-write-body .doc-builder{width:100%;max-width:860px;display:flex;flex-direction:column;gap:12px}
 .doc-write-body .doc-toolbar{align-self:stretch;position:sticky;top:10px;z-index:1;box-shadow:0 6px 18px rgba(102,86,51,.06)}
 .doc-write-body .doc-pages{width:100%;max-height:none;overflow:visible;flex:1}
-.doc-write-body .doc-page{min-height:520px;max-width:760px;margin:0 auto;width:100%;padding:56px 64px;font-size:15px}
+.doc-write-body .doc-page{min-height:520px;max-width:760px;margin:0 auto;width:100%;--doc-pad-scale:1;padding:calc(var(--doc-pad-top,56px)*var(--doc-pad-scale)) calc(var(--doc-pad-right,64px)*var(--doc-pad-scale)) calc(var(--doc-pad-bottom,64px)*var(--doc-pad-scale)) calc(var(--doc-pad-left,64px)*var(--doc-pad-scale));font-size:15px;aspect-ratio:var(--doc-aspect,210/297)}
 .doc-write-body .modal-progress{width:100%;max-width:860px;margin:0}
 .doc-write-body .modal-progress-label,.doc-write-body .modal-error{width:100%;max-width:860px;margin:0 auto}
-@media(max-width:640px){.doc-write-topbar{flex-wrap:wrap;padding:10px 16px;gap:10px}.doc-write-title{order:2;width:100%}.doc-write-actions{margin-left:auto;width:100%;justify-content:space-between}.doc-write-body{padding:14px 12px 30px}.doc-write-body .doc-page{padding:30px 22px;min-height:420px}}
+@media(max-width:640px){.doc-write-topbar{flex-wrap:wrap;padding:10px 16px;gap:10px}.doc-write-title{order:2;width:100%}.doc-write-actions{margin-left:auto;width:100%;justify-content:space-between}.doc-write-body{padding:14px 12px 30px}.doc-write-body .doc-page{--doc-pad-scale:.55;min-height:0}}
 .doc-write-status{display:none;align-items:center;gap:5px;margin-top:5px;font-size:9px;font-weight:600;color:#a9790c;background:#fbf1d8;border:1px solid #f0e2bd;border-radius:999px;padding:3px 8px;width:max-content;max-width:100%}
 .doc-write-status.show{display:inline-flex;animation:docStatusIn .24s ease-out}
 .doc-write-status span[aria-hidden]{font-size:10px;line-height:1}
