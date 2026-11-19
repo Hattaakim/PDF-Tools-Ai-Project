@@ -29,3 +29,12 @@
 - Perataan teks rata kiri, tengah, kanan, dan rata kiri-kanan (justify).
 
 Semua proses dokumen berjalan lokal di perangkat; tidak ada file yang diunggah ke server.
+
+## Perbaikan progress bar
+
+Progress bar pada alat PDF tidak lagi terlihat penuh (100%) saat file diganti atau saat proses baru dimulai:
+
+- Indikator "sedang menyiapkan" tidak lagi bergantung pada animasi transform. Jika animasi dinonaktifkan (misalnya karena pengaturan *reduced motion*), indikator tampil sebagai pita 35%, bukan bar penuh.
+- Setiap proses kini punya penanda sesi. Mengganti/menambah file, menutup dialog, atau membuka alat lain otomatis membatalkan proses lama sehingga hasil dan progresnya tidak lagi menimpa file yang baru dipilih.
+- Saat progress bar disembunyikan, lebar isi dan nilai `aria-valuenow` direset ke nol, jadi proses berikutnya selalu mulai dari keadaan bersih.
+- Tombol aksi kembali aktif setelah file diganti, sehingga file baru bisa langsung diproses tanpa menunggu proses lama selesai.
