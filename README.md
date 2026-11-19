@@ -38,3 +38,19 @@ Progress bar pada alat PDF tidak lagi terlihat penuh (100%) saat file diganti at
 - Setiap proses kini punya penanda sesi. Mengganti/menambah file, menutup dialog, atau membuka alat lain otomatis membatalkan proses lama sehingga hasil dan progresnya tidak lagi menimpa file yang baru dipilih.
 - Saat progress bar disembunyikan, lebar isi dan nilai `aria-valuenow` direset ke nol, jadi proses berikutnya selalu mulai dari keadaan bersih.
 - Tombol aksi kembali aktif setelah file diganti, sehingga file baru bisa langsung diproses tanpa menunggu proses lama selesai.
+
+## Antarmuka liquid glass yang ringan
+
+Tampilan Paperly diperbarui menjadi lebih modern dan minimalis tanpa meninggalkan nuansa kaca:
+
+- Sidebar dan topbar kini berupa panel kaca mengambang dengan sudut membulat, sehingga ruang kerja terasa lebih lega di layar besar.
+- Kartu alat, panduan, dan hero memakai gradien lembut serta sorotan kursor (liquid glass) yang halus. Sorotan hanya aktif pada perangkat dengan pointer presisi.
+- Tata letak menyesuaikan diri dari layar 320 px hingga desktop lebar: grid alat otomatis menjadi 1, 2, 3, atau 4 kolom, dan topbar berubah menjadi kapsul ringkas di ponsel.
+- Judul halaman aktif ditampilkan di topbar, sedangkan navigasi utama tetap berada di sidebar.
+
+Agar tetap ringan di perangkat kecil, efek mahal dibatasi:
+
+- `backdrop-filter` hanya dipakai pada sidebar, topbar, modal, dan lapisan overlay. Kartu alat tidak memakai blur per kartu.
+- Animasi memakai `transform`/`opacity` agar diproses compositor. Animasi hero dan ambient berhenti saat tab tidak terlihat atau hero keluar dari layar.
+- Profil `lite` otomatis aktif saat perangkat memiliki RAM/CPU rendah atau mode hemat data, dan mematikan blur serta animasi non-esensial.
+- Preferensi `prefers-reduced-motion` dan `prefers-reduced-transparency` dihormati, termasuk indikator progres yang tetap terbaca tanpa animasi.
