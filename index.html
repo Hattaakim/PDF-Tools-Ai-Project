@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -206,7 +206,7 @@
     <div class="sheet-statusbar">
       <span class="sheet-selinfo" id="sheetSelection">A1</span>
       <span id="sheetMeta">16 kolom × 40 baris</span>
-      <span class="sheet-shortcut-hint">Enter simpan · Ctrl+S pratinjau · Ctrl+Z urungkan · Ctrl+C salin</span>
+      <span class="sheet-shortcut-hint">Enter simpan · Ctrl+S pratinjau · Ctrl+Z urungkan · Tarik titik sudut sel untuk isi otomatis</span>
     </div>
     <input type="file" id="sheetFontFile" accept=".ttf,.otf,font/ttf,font/otf" hidden>
   </section>
@@ -247,6 +247,8 @@
             <label class="sheet-check"><input type="checkbox" id="sheetShowTitle" checked> Judul sheet</label>
             <label class="sheet-check"><input type="checkbox" id="sheetShowHeader" checked> Kepala kolom</label>
             <label class="sheet-check"><input type="checkbox" id="sheetShowRowNums" checked> Nomor baris</label>
+            <label class="sheet-check"><input type="checkbox" id="sheetShowPageNum" checked> Nomor halaman</label>
+            <label class="sheet-preview-field" for="sheetPageNumPos"><span>Posisi nomor</span><select id="sheetPageNumPos"><option value="center">Bawah tengah</option><option value="left">Bawah kiri</option><option value="right">Bawah kanan</option></select></label>
           </div>
         </aside>
       </div>
@@ -286,6 +288,6 @@
   <script src="vendor/pdf-lib-cantoo.min.js"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/fflate.js"></script>
-  <script src="app.js?v=32"></script>
+  <script src="app.js?v=33"></script>
 </body>
 </html>
