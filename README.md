@@ -54,3 +54,13 @@ Agar tetap ringan di perangkat kecil, efek mahal dibatasi:
 - Animasi memakai `transform`/`opacity` agar diproses compositor. Animasi hero dan ambient berhenti saat tab tidak terlihat atau hero keluar dari layar.
 - Profil `lite` otomatis aktif saat perangkat memiliki RAM/CPU rendah atau mode hemat data, dan mematikan blur serta animasi non-esensial.
 - Preferensi `prefers-reduced-motion` dan `prefers-reduced-transparency` dihormati, termasuk indikator progres yang tetap terbaca tanpa animasi.
+
+## Konsistensi tema terang dan gelap
+
+Warna kaca kini memakai satu set token untuk kedua tema, sehingga tidak ada lagi permukaan yang saling bertabrakan:
+
+- Mode terang memakai latar krem hangat dengan kaca susu yang lebih tenang. Intensitas putih dikurangi, tepi panel dipertegas, dan teks sekunder dibuat lebih gelap agar layar tidak terasa menyilaukan.
+- Mode gelap memakai palet espresso hangat yang seragam untuk sidebar, topbar, kartu, modal, dan editor. Ikon alat, avatar, serta penanda kecil tidak lagi berupa kotak krem terang.
+- Ilustrasi hero, kartu panduan, banner privasi, dan halaman Tentang mengikuti tema yang sama; gradien emas tetap dipakai sebagai aksen, bukan sebagai latar yang membanjiri layar.
+- Warna `theme-color` dan scrollbar browser ikut berubah saat tema diganti, termasuk scrollbar akar halaman.
+- Kontras teks sekunder pada modal, tabel rentang halaman, dan catatan pratinjau dinaikkan agar tetap terbaca di latar gelap.
