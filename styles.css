@@ -797,10 +797,7 @@ body[data-theme="dark"] .date-chip,body[data-theme="dark"] .search-box{box-shado
 
 /* --- 3. Kartu alat: keramik berkilau + sapuan cahaya + ikon bercincin --- */
 @keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
-.tool-card{background:linear-gradient(150deg,rgba(255,255,255,.82),rgba(255,255,255,.58));backdrop-filter:blur(18px) saturate(155%);-webkit-backdrop-filter:blur(18px) saturate(155%);box-shadow:0 4px 14px rgba(102,86,51,.05),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(255,255,255,.25);animation:cardIn .5s cubic-bezier(.22,1,.36,1) backwards}
-.tool-group-grid .tool-card:nth-child(2){animation-delay:.04s}
-.tool-group-grid .tool-card:nth-child(3){animation-delay:.08s}
-.tool-group-grid .tool-card:nth-child(4){animation-delay:.12s}
+.tool-card{background:linear-gradient(150deg,rgba(255,255,255,.82),rgba(255,255,255,.58));backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 4px 14px rgba(102,86,51,.05),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(255,255,255,.25);animation:cardIn .5s cubic-bezier(.22,1,.36,1) backwards}
 .tool-card::after{content:'';position:absolute;inset:-40% -30%;background:linear-gradient(62deg,transparent 44%,rgba(255,255,255,.55) 50%,transparent 56%);transform:translateX(-85%) rotate(.001deg);transition:transform .9s ease;pointer-events:none}
 .tool-card:hover{transform:translateY(-4px) scale(1.012);border-color:rgba(226,206,164,.55);box-shadow:0 18px 34px -12px rgba(104,87,49,.22),0 4px 12px rgba(104,87,49,.07),inset 0 1px 0 rgba(255,255,255,.95)}
 .tool-card:hover::after{transform:translateX(85%)}
@@ -1499,6 +1496,7 @@ html[data-perf="lite"] .tool-modal{
   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
   background:rgba(252,250,245,.98)!important;
 }
+html[data-perf="lite"] .modal-backdrop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 html[data-perf="lite"] body[data-theme="dark"] .sidebar,
 html[data-perf="lite"] body[data-theme="dark"] .topbar,
 html[data-perf="lite"] body[data-theme="dark"] .tool-modal{background:#2b2416!important}
@@ -1510,6 +1508,7 @@ html.is-paused .hero-card::before{animation-play-state:paused}
 }
 @media(prefers-reduced-transparency:reduce){
   .sidebar,.topbar,.tool-modal{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(252,250,245,.98)!important}
+  .modal-backdrop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   body[data-theme="dark"] .sidebar,body[data-theme="dark"] .topbar,body[data-theme="dark"] .tool-modal{background:#2b2416!important}
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
@@ -2021,3 +2020,63 @@ body[data-theme="dark"] .doc-write-eyebrow{color:#b09f7e}
 /* Scrollbar akar: pseudo-element melekat pada <html>, bukan keturunannya. */
 html[data-theme="dark"]::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#4b3f2b,#3d3323);background-clip:padding-box;border:2.5px solid transparent}
 html[data-theme="dark"]::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#5a4c33,#4a3e29);background-clip:padding-box;border:2.5px solid transparent}
+
+/* ============================================================
+   MOTION LAYER · animasi UX bertujuan (halus, ringan, bisa mati)
+   Semua efek di bawah hanya memakai transform/opacity, tidak
+   menambah blur baru, dan dimatikan oleh reduced-motion / lite.
+   ============================================================ */
+
+/* --- 1. Transisi halaman: konten berganti, topbar & sidebar tetap --- */
+.page-wrap{view-transition-name:paperly-page}
+html.vt-active .page-section.active{animation:none!important}
+::view-transition-old(root),
+::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-old(paperly-page){animation:vt-page-out .16s cubic-bezier(.4,0,1,1) both}
+::view-transition-new(paperly-page){animation:vt-page-in .3s cubic-bezier(.22,1,.36,1) both}
+@keyframes vt-page-out{to{opacity:0;transform:translateY(-6px)}}
+@keyframes vt-page-in{from{opacity:0;transform:translateY(10px)}}
+
+/* --- 2. Kartu alat muncul seperti riak, bukan serentak --- */
+.tool-group-grid .tool-card{animation-duration:.46s;animation-delay:calc(var(--i,0) * 26ms)}
+
+/* --- 3. Navigasi: penanda aktif tumbuh dan ikon memberi umpan balik --- */
+.nav-link.active::before{transform-origin:center;animation:nav-mark .32s cubic-bezier(.22,1,.36,1) both}
+@keyframes nav-mark{from{transform:scaleY(.2);opacity:0}to{transform:scaleY(1);opacity:1}}
+.nav-link.active .nav-icon{animation:nav-icon .4s cubic-bezier(.22,1,.36,1)}
+@keyframes nav-icon{0%{transform:scale(1)}42%{transform:scale(1.18) rotate(-4deg)}100%{transform:scale(1)}}
+.nav-link:active,.quick-link:active{transform:scale(.985)}
+
+/* --- 4. Pencarian: fokus terasa, hasil filter tidak berkedip --- */
+.search-box{transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
+.search-box:focus-within{border-color:rgba(205,174,104,.78);box-shadow:inset 0 1px 0 rgba(255,255,255,.85),0 0 0 3px rgba(196,142,27,.10)}
+body[data-theme="dark"] .search-box:focus-within{border-color:rgba(226,189,104,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 0 3px rgba(226,189,104,.10)}
+
+/* --- 5. Toast & modal: masuk-keluar dengan pegas lembut --- */
+.toast{transition:opacity .2s ease,transform .34s cubic-bezier(.22,1.2,.36,1),box-shadow .2s ease}
+.modal-backdrop{display:grid;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .24s ease,visibility 0s linear .24s}
+.modal-backdrop.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .24s ease,visibility 0s}
+.modal-backdrop.open .tool-modal{animation:modalIn .4s cubic-bezier(.16,1,.3,1) both}
+
+/* --- 6. Baris file masuk berurutan saat dipilih --- */
+.file-row{animation:file-row-in .34s cubic-bezier(.22,1,.36,1) backwards;animation-delay:calc(var(--i,0) * 38ms)}
+@keyframes file-row-in{from{opacity:0;transform:translateY(6px) scale(.99)}to{opacity:1;transform:none}}
+
+/* --- 7. Topbar terangkat saat konten digulir --- */
+.topbar{transition:box-shadow .3s ease,border-color .3s ease}
+.topbar.is-scrolled{box-shadow:0 16px 38px -34px rgba(70,53,19,.75),inset 0 1px 0 rgba(255,255,255,.9)}
+body[data-theme="dark"] .topbar.is-scrolled{box-shadow:0 16px 38px -34px #000,inset 0 1px 0 rgba(255,255,255,.07)}
+
+/* --- 8. Hormati preferensi gerak & profil hemat perangkat --- */
+@media(prefers-reduced-motion:reduce){
+  .page-wrap{view-transition-name:none}
+  .tool-group-grid .tool-card,.file-row,.nav-link.active::before,.nav-link.active .nav-icon{animation:none!important}
+  .modal-backdrop,.modal-backdrop.open .tool-modal,.toast,.search-box,.topbar{transition-duration:.01ms!important;animation:none!important}
+  ::view-transition-old(paperly-page),::view-transition-new(paperly-page){animation:none!important}
+}
+html[data-perf="lite"] .page-wrap{view-transition-name:none}
+html[data-perf="lite"] .tool-group-grid .tool-card,
+html[data-perf="lite"] .file-row,
+html[data-perf="lite"] .nav-link.active::before,
+html[data-perf="lite"] .nav-link.active .nav-icon{animation:none!important}
+html[data-perf="lite"] .topbar{transition:none}
