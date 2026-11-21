@@ -1496,7 +1496,8 @@ html[data-perf="lite"] .tool-modal{
   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
   background:rgba(252,250,245,.98)!important;
 }
-html[data-perf="lite"] .modal-backdrop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html[data-perf="lite"] .modal-backdrop,
+html[data-perf="lite"] .save-dialog-backdrop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 html[data-perf="lite"] body[data-theme="dark"] .sidebar,
 html[data-perf="lite"] body[data-theme="dark"] .topbar,
 html[data-perf="lite"] body[data-theme="dark"] .tool-modal{background:#2b2416!important}
@@ -1508,7 +1509,7 @@ html.is-paused .hero-card::before{animation-play-state:paused}
 }
 @media(prefers-reduced-transparency:reduce){
   .sidebar,.topbar,.tool-modal{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(252,250,245,.98)!important}
-  .modal-backdrop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .modal-backdrop,.save-dialog-backdrop{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   body[data-theme="dark"] .sidebar,body[data-theme="dark"] .topbar,body[data-theme="dark"] .tool-modal{background:#2b2416!important}
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
@@ -2080,3 +2081,80 @@ html[data-perf="lite"] .file-row,
 html[data-perf="lite"] .nav-link.active::before,
 html[data-perf="lite"] .nav-link.active .nav-icon{animation:none!important}
 html[data-perf="lite"] .topbar{transition:none}
+
+/* --- 9. Dialog "Simpan sebagai" --- */
+body.save-dialog-open{overflow:hidden}
+.save-dialog-backdrop{z-index:70;backdrop-filter:blur(10px) saturate(125%);-webkit-backdrop-filter:blur(10px) saturate(125%)}
+.save-dialog{width:min(100%,460px)}
+.save-name-row{display:flex;align-items:stretch;gap:8px}
+.save-name-row .text-field{flex:1;min-width:0;height:40px}
+.save-ext{display:flex;align-items:center;padding:0 12px;border:1px solid #efe9dd;border-radius:8px;background:#faf7f0;color:#8a7a5a;font:700 11px 'DM Sans',sans-serif;letter-spacing:.2px}
+.save-preset-label{margin:13px 0 7px;font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:#8a7e64}
+.save-preset-row{display:flex;flex-wrap:wrap;gap:6px}
+.save-preset{border:1px solid #f1eee7;background:#fdfcfb;color:#746b57;border-radius:999px;padding:7px 11px;font:600 9.5px 'DM Sans',sans-serif;cursor:pointer;transition:border .16s,background .16s,color .16s,transform .16s}
+.save-preset:hover{border-color:#e6d8b9;background:#fbf8f1;color:#8d7334;transform:translateY(-1px)}
+.save-preset.active{border-color:#e5d3ac;background:#fbf9f4;color:#9f7f3a;font-weight:700}
+.save-preset:focus-visible{outline:3px solid #e4d2ab;outline-offset:2px}
+.save-dialog .field-hint{min-height:14px}
+.save-dialog .doc-confirm-actions{margin-top:18px}
+body[data-theme="dark"] .save-ext{background:#403725;border-color:#5c523d;color:#c9bb9c}
+body[data-theme="dark"] .save-preset-label{color:#9a8a68}
+body[data-theme="dark"] .save-preset{background:#3d3422;border-color:#5c523d;color:#c9bb9c}
+body[data-theme="dark"] .save-preset:hover{background:#4a4029;border-color:#746546;color:#eadfc7}
+body[data-theme="dark"] .save-preset.active{background:#645535;border-color:#ca992f;color:#f6edd9}
+
+/* --- 10. Putar halaman per halaman --- */
+.rotate-mode{display:flex;gap:7px;margin:4px 0 2px}
+.rotate-mode .option-chip{display:flex;align-items:center;justify-content:center;gap:5px}
+.rotate-all-options[hidden],.rotate-pages-wrap[hidden]{display:none}
+.rotate-pages-wrap{margin-top:12px;padding:10px;border:1px solid #f1ece1;border-radius:13px;background:rgba(253,252,249,.82);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.rotate-pages-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 2px 8px}
+.rotate-pages-head strong{font-size:11px;color:#605439}
+.rotate-pages-head span{font-size:9px;line-height:1.4;color:#82775f;text-align:right}
+.rotate-pages-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.rotate-pages-toolbar .mini-button:hover{border-color:#e2d3b2;color:#8d7334}
+.rotate-pages-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;max-height:320px;overflow:auto;padding:2px 3px 6px;scrollbar-width:thin;scrollbar-color:#e5ddcb transparent}
+.rotate-pages-grid::-webkit-scrollbar{width:6px}
+.rotate-pages-grid::-webkit-scrollbar-thumb{background:#e5ddcb;border-radius:6px}
+.rotate-pages-loading{grid-column:1/-1;padding:24px 12px;text-align:center;color:#7c725c;font-size:10px;line-height:1.5}
+.rotate-page-card{display:grid;gap:5px;min-width:0;padding:7px;border:1px solid #f2eee6;border-radius:11px;background:rgba(255,255,255,.74);box-shadow:0 3px 10px rgba(106,87,47,.04);transition:border .2s,box-shadow .2s,background .2s}
+.rotate-page-card.rotated{border-color:#e6d4ac;background:#fffdf8;box-shadow:0 0 0 3px #f8f3e8,0 4px 12px rgba(106,87,47,.06)}
+.rotate-page-thumb{position:relative;display:grid;place-items:center;aspect-ratio:1/1.16;overflow:hidden;border:1px solid #f5f2ed;border-radius:7px;background:linear-gradient(145deg,#fbf9f5,#f4f1e9)}
+.rotate-page-rotor{display:grid;place-items:center;width:100%;height:100%;transform:rotate(var(--rot,0deg)) scale(var(--rot-scale,1));transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.rotate-page-rotor canvas{display:block;width:auto;height:auto;max-width:100%;max-height:100%;background:#fff;border-radius:2px;box-shadow:0 3px 9px rgba(102,86,51,.16)}
+.rotate-page-card:not(.rendered) .rotate-page-rotor{opacity:.25}
+.rotate-page-badge{position:absolute;z-index:2;top:5px;right:5px;padding:2px 6px;border-radius:999px;background:#b88c2d;color:#fff;font:700 8px 'DM Sans',sans-serif;box-shadow:0 2px 5px rgba(108,88,45,.28)}
+.rotate-page-badge[hidden]{display:none}
+.rotate-page-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 2px;font-size:8.5px;color:#7b715b}
+.rotate-page-meta em{font-style:normal;font-weight:700;color:#9d8964}
+.rotate-page-card.rotated .rotate-page-meta em{color:#b08220}
+.rotate-page-controls{display:flex;gap:4px}
+.rotate-page-btn{flex:1;height:26px;border:1px solid #f0ede5;border-radius:7px;background:#fff;color:#8a6f34;font:700 13px 'DM Sans',sans-serif;cursor:pointer;transition:border .16s,background .16s,transform .16s}
+.rotate-page-btn:hover{border-color:#e2d3b2;background:#fbf8f1;transform:translateY(-1px)}
+.rotate-page-btn:active{transform:translateY(0) scale(.96)}
+.rotate-page-btn:focus-visible{outline:2px solid #e4d2ab;outline-offset:1px}
+.rotate-page-btn.ghost{color:#9a8f78;font-size:12px}
+body[data-theme="dark"] .rotate-pages-wrap{background:#322b1b;border-color:#5c523d;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+body[data-theme="dark"] .rotate-pages-head strong{color:#f2ebdc}
+body[data-theme="dark"] .rotate-pages-head span{color:#8f8060}
+body[data-theme="dark"] .rotate-pages-grid{scrollbar-color:#5d523c transparent}
+body[data-theme="dark"] .rotate-pages-grid::-webkit-scrollbar-thumb{background:#5d523c}
+body[data-theme="dark"] .rotate-page-card{background:#3d3524;border-color:#5c523d}
+body[data-theme="dark"] .rotate-page-card.rotated{background:#463c26;border-color:#ca992f;box-shadow:0 0 0 3px rgba(185,141,44,.2)}
+body[data-theme="dark"] .rotate-page-thumb{background:#30291b;border-color:#5c523d}
+body[data-theme="dark"] .rotate-page-meta{color:#91815f}
+body[data-theme="dark"] .rotate-page-meta em{color:#b6a680}
+body[data-theme="dark"] .rotate-page-btn{background:#403725;border-color:#5c523d;color:#e3cf9d}
+body[data-theme="dark"] .rotate-page-btn:hover{background:#4a4029;border-color:#746546}
+body[data-theme="dark"] .rotate-page-btn.ghost{color:#a99a77}
+@media(max-width:540px){
+  .rotate-pages-grid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:7px;max-height:280px}
+  .rotate-page-card{padding:6px}
+  .rotate-pages-head{flex-direction:column;gap:3px}
+  .rotate-pages-head span{text-align:left}
+}
+@media(prefers-reduced-motion:reduce){
+  .rotate-page-rotor,.save-preset{transition:none!important}
+}
+html[data-perf="lite"] .rotate-page-rotor,
+html[data-perf="lite"] .save-preset{transition:none!important}
