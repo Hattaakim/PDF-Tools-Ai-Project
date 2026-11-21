@@ -2208,7 +2208,7 @@ body.db-writing{overflow:hidden}
 .db-choice-icon svg{width:20px;height:20px}
 .db-choice h3{font:700 16px Manrope,sans-serif;letter-spacing:-.3px;color:#5d4e33;margin:0 0 7px}
 .db-choice p{font-size:10.5px;line-height:1.65;color:#827863;margin:0 0 15px}
-.db-choice .button-primary{height:36px;margin-top:0}
+.db-choice .button-primary{height:36px;margin-top:0;margin-bottom:10px}
 .db-drop{width:100%;margin-top:10px;padding:9px;border:1px dashed #e5d9bd;border-radius:10px;text-align:center;font-size:9.5px;color:#968a70;transition:border-color .18s,background .18s,color .18s}
 .db-drop strong{color:#a77f29}
 .db-drop.dragover{border-color:#c99a2c;background:#fdf5e1;color:#7d652e}
@@ -2509,6 +2509,30 @@ body[data-theme="dark"] .db-stepper li.done b{background:#435231;color:#bcd395}
   .wz-col-row .wz-icon-btn{grid-area:del;align-self:center;width:30px;height:30px}
   .wz-summary{grid-template-columns:1fr 1fr}
 }
+/* Layar pendek lanskap: rapikan chrome agar badan wizard tetap lega */
+@media(max-height:480px) and (orientation:landscape){
+  .db-topbar{flex-wrap:nowrap;gap:6px;padding:5px 10px}
+  .db-title{order:0;flex-basis:auto}
+  .db-title .db-eyebrow{display:none}
+  .db-name{font-size:13px;max-width:min(170px,34vw)}
+  .db-back-btn{height:26px;padding:0 8px;font-size:9px}
+  .db-actions .button-quiet,.db-actions .button-primary{height:26px;font-size:8px;padding:0 7px}
+  .db-wizard-head{flex-wrap:nowrap;gap:6px;padding:6px 10px 5px}
+  .db-wizard-head>div:first-child{min-width:0;max-width:34vw}
+  .db-wizard-head h2{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .db-stepper{width:auto;gap:3px}
+  .db-stepper li{padding:3px 6px;font-size:7px}
+  .db-stepper li b{width:14px;height:14px}
+  .db-wizard-body{padding:9px 10px 12px}
+  .db-wizard-foot{padding:5px 10px 7px}
+  .db-wizard-error{margin-bottom:5px!important;padding:5px 8px}
+  .db-wizard-actions{gap:5px}
+  .db-wizard-actions button{height:28px;min-height:0;font-size:8px;padding:0 8px}
+  .db-wizard-actions #dbWizardNext{order:0;flex:0 1 auto}
+  .db-wizard-actions #dbWizardBack,
+  .db-wizard-actions #dbWizardCancel{flex:0 1 auto}
+  .db-wizard-actions #dbWizardCancel.full-width{flex-basis:auto}
+}
 
 /* Aksesibilitas: animasi dan transparansi dikurangi */
 @media(prefers-reduced-motion:reduce){
@@ -2543,3 +2567,51 @@ html[data-perf="lite"] body[data-theme="dark"] .db-wizard-head,
 html[data-perf="lite"] body[data-theme="dark"] .db-wizard-foot,
 html[data-perf="lite"] body[data-theme="dark"] .db-toolbar,
 html[data-perf="lite"] body[data-theme="dark"] .db-tables{background:#30291b!important}
+
+/* ===== Transisi jendela: ringan, hanya opacity/transform ===== */
+@keyframes paperly-window-head{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes paperly-window-body{from{opacity:0}to{opacity:1}}
+@keyframes paperly-pane-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes paperly-backdrop-in{from{opacity:0}to{opacity:1}}
+
+.doc-write.open>.doc-write-topbar,
+.sheet-page.open>.sheet-topbar,
+.db-page.open>.db-topbar{animation:paperly-window-head .26s cubic-bezier(.22,1,.36,1) both}
+.doc-write.open>.doc-write-body,
+.sheet-page.open>.sheet-main,
+.db-page.open>.db-body{animation:paperly-window-body .22s ease-out both}
+
+.doc-confirm-backdrop.open,
+.sheet-preview-backdrop.open{animation:paperly-backdrop-in .18s ease-out both}
+.sheet-preview-backdrop.open .sheet-preview-panel{animation:modalIn .28s cubic-bezier(.16,1,.3,1) both}
+
+.db-body>.db-start>.db-start-inner,
+.db-body>.db-workspace,
+.wz-panel{animation:paperly-pane-in .24s cubic-bezier(.22,1,.36,1) both}
+
+@media(prefers-reduced-motion:reduce){
+  .doc-write.open>.doc-write-topbar,
+  .sheet-page.open>.sheet-topbar,
+  .db-page.open>.db-topbar,
+  .doc-write.open>.doc-write-body,
+  .sheet-page.open>.sheet-main,
+  .db-page.open>.db-body,
+  .doc-confirm-backdrop.open,
+  .sheet-preview-backdrop.open,
+  .sheet-preview-backdrop.open .sheet-preview-panel,
+  .db-body>.db-start>.db-start-inner,
+  .db-body>.db-workspace,
+  .wz-panel{animation:none!important}
+}
+html[data-perf="lite"] .doc-write.open>.doc-write-topbar,
+html[data-perf="lite"] .sheet-page.open>.sheet-topbar,
+html[data-perf="lite"] .db-page.open>.db-topbar,
+html[data-perf="lite"] .doc-write.open>.doc-write-body,
+html[data-perf="lite"] .sheet-page.open>.sheet-main,
+html[data-perf="lite"] .db-page.open>.db-body,
+html[data-perf="lite"] .doc-confirm-backdrop.open,
+html[data-perf="lite"] .sheet-preview-backdrop.open,
+html[data-perf="lite"] .sheet-preview-backdrop.open .sheet-preview-panel,
+html[data-perf="lite"] .db-body>.db-start>.db-start-inner,
+html[data-perf="lite"] .db-body>.db-workspace,
+html[data-perf="lite"] .wz-panel{animation:none!important}
