@@ -30,6 +30,18 @@
 
 Semua proses dokumen berjalan lokal di perangkat; tidak ada file yang diunggah ke server.
 
+## Database File (SQLite)
+
+**Database File** membuka file `.db`, `.sqlite`, atau `.sqlite3` dan menampilkannya sebagai spreadsheet yang bisa disunting langsung di browser:
+
+- Pilih atau seret file SQLite untuk melihat daftar tabel, kolom, dan baris.
+- Ubah nilai sel, tambah baris, dan hapus baris; perubahan ditandai "Belum disimpan" sampai diekspor.
+- Simpan kembali hasil edit sebagai file `.db` yang valid, atau ekspor satu tabel/seluruh database ke PDF.
+- Wizard empat langkah membantu pengguna awam membuat database baru: nama file, struktur tabel dan kolom (Teks, Angka, Angka desimal, Tanggal, Tanggal & waktu, Ya/Tidak), data awal, lalu unduh.
+- Tabel dengan kunci utama tetap bisa disunting, termasuk tabel `WITHOUT ROWID`.
+
+Mesin SQLite memakai [sql.js](https://sql.js.org/) yang disimpan lokal di `vendor/`. Lisensinya ada di `vendor/SQLJS-LICENSE.txt`. File database tidak pernah dikirim ke server dan hanya disimpan di tab sampai pengguna mengunduhnya.
+
 ## Perbaikan progress bar
 
 Progress bar pada alat PDF tidak lagi terlihat penuh (100%) saat file diganti atau saat proses baru dimulai:

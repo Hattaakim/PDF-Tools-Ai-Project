@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=39">
+  <link rel="stylesheet" href="styles.css?v=41">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -282,6 +282,112 @@
       </div>
     </section>
   </div>
+  <section class="db-page" id="dbPage" aria-hidden="true">
+    <header class="db-topbar">
+      <button class="button-quiet db-back-btn" id="dbBackBtn" aria-label="Kembali ke halaman utama">← Kembali</button>
+      <div class="db-title">
+        <span class="db-eyebrow">DATABASE FILE · SQLITE</span>
+        <div class="db-title-row">
+          <span class="db-name-wrap"><input class="db-name" id="dbName" value="database" maxlength="64" aria-label="Nama file database" autocomplete="off" spellcheck="false"><span class="db-name-ext">.db</span></span>
+          <span class="doc-write-status" id="dbStatus" role="status" aria-live="polite"><span aria-hidden="true">✓</span> Database siap</span>
+          <span class="db-dirty" id="dbDirty" hidden>Belum disimpan</span>
+        </div>
+      </div>
+      <div class="db-actions">
+        <button type="button" class="button-quiet" id="dbPdfBtn" disabled><span>Ekspor PDF</span><span>↓</span></button>
+        <button type="button" class="button-primary" id="dbSaveBtn" disabled><span>Simpan .db</span><span>↓</span></button>
+      </div>
+    </header>
+    <div class="db-body">
+      <section class="db-start" id="dbStart">
+        <div class="db-start-inner">
+          <span class="db-start-badge"><span data-icon="database"></span></span>
+          <div class="db-eyebrow">DATABASE LOKAL</div>
+          <h1>Kelola data SQLite <span>tanpa menulis SQL.</span></h1>
+          <p>Buka file <strong>.db</strong> yang sudah ada untuk disunting seperti spreadsheet, atau buat database baru lewat panduan empat langkah. Semua data diproses di perangkat Anda.</p>
+          <div class="db-start-grid">
+            <article class="db-choice">
+              <span class="db-choice-icon" data-icon="upload"></span>
+              <h3>Unggah file .db</h3>
+              <p>Lihat tabel, ubah isi sel, lalu simpan kembali sebagai file SQLite atau ekspor ke PDF.</p>
+              <button type="button" class="button-primary" id="dbPickFile" data-db-autofocus><span>Pilih file .db</span><span>↗</span></button>
+              <div class="db-drop" id="dbDropzone">atau seret dan lepas file <strong>.db</strong> di sini</div>
+              <p class="db-choice-note">SQLite • Maksimal 80 MB</p>
+            </article>
+            <article class="db-choice db-choice-wizard">
+              <span class="db-choice-icon" data-icon="wand"></span>
+              <h3>Buat database baru</h3>
+              <p>Wizard ramah pemula: tentukan nama, susun tabel dan kolom, isi data awal, lalu unduh file .db.</p>
+              <button type="button" class="button-primary" id="dbStartWizard"><span>Mulai wizard</span><span>↗</span></button>
+              <ul class="db-choice-steps"><li>Nama &amp; pengaturan dasar</li><li>Struktur tabel &amp; kolom</li><li>Isi data awal (opsional)</li><li>Selesai &amp; unduh</li></ul>
+            </article>
+          </div>
+          <p class="db-start-note"><span data-icon="shield"></span> Tidak ada unggahan ke server. File database tetap di browser Anda.</p>
+          <p class="db-start-error" id="dbStartError" role="alert" hidden></p>
+        </div>
+      </section>
+      <section class="db-workspace" id="dbWorkspace" hidden>
+        <aside class="db-tables" aria-label="Daftar tabel">
+          <div class="db-tables-head"><strong>Tabel</strong><span id="dbTableCount">0</span></div>
+          <div class="db-table-list" id="dbTableList"></div>
+          <div class="db-tables-empty" id="dbTablesEmpty" hidden>Belum ada tabel di database ini.</div>
+        </aside>
+        <div class="db-main">
+          <div class="db-toolbar">
+            <div class="db-table-title"><strong id="dbActiveTable">—</strong><span id="dbActiveMeta">Pilih tabel untuk mulai.</span></div>
+            <div class="db-toolbar-actions">
+              <button type="button" class="mini-button" id="dbAddRow" disabled>+ Baris</button>
+              <button type="button" class="mini-button" id="dbPdfTable" disabled>PDF tabel ini</button>
+            </div>
+          </div>
+          <div class="db-grid-wrap" id="dbGridWrap">
+            <div class="db-grid-scroll" id="dbGridScroll"></div>
+          </div>
+          <div class="db-statusbar">
+            <span id="dbRowInfo">0 baris</span>
+            <span class="db-hint">Klik sel untuk mengubah · Kosongkan sel untuk NULL · Ctrl+S simpan .db</span>
+            <div class="db-pager"><button type="button" class="db-pager-btn" id="dbPrevPage" disabled aria-label="Halaman sebelumnya">←</button><span id="dbPageInfo">1 / 1</span><button type="button" class="db-pager-btn" id="dbNextPage" disabled aria-label="Halaman berikutnya">→</button></div>
+          </div>
+        </div>
+      </section>
+      <section class="db-wizard" id="dbWizard" hidden>
+        <div class="db-wizard-head">
+          <div><span class="db-eyebrow">WIZARD DATABASE BARU</span><h2 id="dbWizardTitle">Nama &amp; pengaturan dasar</h2></div>
+          <ol class="db-stepper" id="dbStepper">
+            <li class="active" data-wz-step="1"><b>1</b><span>Nama</span></li>
+            <li data-wz-step="2"><b>2</b><span>Struktur</span></li>
+            <li data-wz-step="3"><b>3</b><span>Data awal</span></li>
+            <li data-wz-step="4"><b>4</b><span>Selesai</span></li>
+          </ol>
+        </div>
+        <div class="db-wizard-body" id="dbWizardBody"></div>
+        <div class="db-wizard-foot">
+          <p class="db-wizard-error" id="dbWizardError" role="alert" hidden></p>
+          <div class="db-wizard-actions">
+            <button type="button" class="button-quiet" id="dbWizardCancel">Batal</button>
+            <button type="button" class="button-quiet" id="dbWizardBack" hidden>← Sebelumnya</button>
+            <button type="button" class="button-primary" id="dbWizardNext"><span>Lanjut</span><span>→</span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="db-progress-area">
+      <div class="modal-progress" id="dbProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-hidden="true"><div class="modal-progress-fill" id="dbProgressFill"></div></div>
+      <div class="modal-progress-label" id="dbProgressLabel" aria-live="polite"></div>
+    </div>
+    <input type="file" id="dbFileInput" accept=".db,.sqlite,.sqlite3,application/x-sqlite3,application/vnd.sqlite3" hidden>
+  </section>
+  <div class="doc-confirm-backdrop" id="dbConfirm" aria-hidden="true">
+    <section class="doc-confirm" role="alertdialog" aria-modal="true" aria-labelledby="dbConfirmTitle" aria-describedby="dbConfirmCopy">
+      <span class="doc-confirm-icon" aria-hidden="true">!</span>
+      <h2 id="dbConfirmTitle">Hapus data?</h2>
+      <p id="dbConfirmCopy">Tindakan ini tidak bisa dibatalkan.</p>
+      <div class="doc-confirm-actions">
+        <button type="button" class="button-quiet" id="dbConfirmCancel">Batal</button>
+        <button type="button" class="button-primary" id="dbConfirmOk"><span>Hapus</span><span>!</span></button>
+      </div>
+    </section>
+  </div>
   <div class="doc-confirm-backdrop save-dialog-backdrop" id="saveDialog" aria-hidden="true">
     <section class="doc-confirm save-dialog" role="dialog" aria-modal="true" aria-labelledby="saveDialogTitle" aria-describedby="saveDialogCopy">
       <span class="doc-confirm-icon" aria-hidden="true">↓</span>
@@ -311,6 +417,7 @@
   <script src="vendor/pdf-lib-cantoo.min.js"></script>
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/fflate.js"></script>
-  <script src="app.js?v=40"></script>
+  <script src="vendor/sql-wasm.js"></script>
+  <script src="app.js?v=42"></script>
 </body>
 </html>

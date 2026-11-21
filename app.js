@@ -2,7 +2,7 @@
 const { PDFDocument, rgb, degrees, StandardFonts, PDFName, PDFDict, PDFArray, PDFNumber, PDFString, PDFRawStream } = PDFLib;
 const { PDFDocument: CantooPDFDocument } = globalThis.PDFLibCantoo;
 pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js';
-const icons={grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',wand:'<path d="m15 4 5 5M4 20 17 7M7 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2ZM18 15l1.5 3.5L23 20l-3.5 1.5L18 25l-1.5-3.5L13 20l3.5-1.5L18 15Z"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.1 8.1 12 12M14.8 9.2 20 4M8 16l4-4"/>',compress:'<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3M8 8l3 3m5-3-3 3m0 2-3 3m8-3-3 3"/>',merge:'<path d="M7 3H5a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h2m10-9h2a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 12h10M9 8l-4 4 4 4m6-8 4 4-4 4"/>',image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',rotate:'<path d="M20 11a8 8 0 0 0-14-5L4 8"/><path d="M4 4v4h4M4 13a8 8 0 0 0 14 5l2-2"/><path d="M20 20v-4h-4"/>',extract:'<path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"/>',number:'<path d="M9 4h3v16H9M5 8h2M5 16h2M16 8h3m-3 8h3m-3 0 3-4-3-4"/>',watermark:'<path d="M4 20h16M6 17 17 6l3 3L9 20H6v-3Z"/><path d="m14 9 3 3"/>',shield:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>',zap:'<path d="m13 2-3 8h7l-6 12 2-9H6l7-11Z"/>',lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 5v2"/>',heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>',help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.7c-1.2 1.1-1.9 1.4-1.9 3M12 17h.01"/>',ocr:'<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 19.5V17"/><path d="M8 10h8M8 13.5h8M8 17h5"/>',unlock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.7-1.5M12 14.5v3"/>',redact:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M6.5 10.5h11" stroke-width="3"/><path d="M6.5 15h7"/>',flatten:'<path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z"/><path d="m4 12.5 8 4.5 8-4.5"/><path d="m4 17 8 4.5 8-4.5"/>',edit:'<path d="m4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17l-1 3Z"/><path d="m13.5 6.5 3 3"/>',search:'<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/>',sparkles:'<path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3ZM19 14l1.2 3.3L23 18.5l-2.8 1.2L19 23l-1.2-3.3-2.8-1.2 2.8-1.2L19 14Z"/>',check:'<path d="m5 12 4 4L19 6"/>',upload:'<path d="M12 16V4m0 0L8 8m4-4 4 4M4 16v4h16v-4"/>',sheet:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11M3 14h18"/>',docwrite:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',worddoc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6"/><path d="M8 12h8M8 16h5"/>',slides:'<rect x="3" y="3" width="18" height="13" rx="2"/><path d="M12 16v3M8 21h8"/><path d="M8 8h8M8 11h5"/>'};
+const icons={grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',wand:'<path d="m15 4 5 5M4 20 17 7M7 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2ZM18 15l1.5 3.5L23 20l-3.5 1.5L18 25l-1.5-3.5L13 20l3.5-1.5L18 15Z"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="m8.1 8.1 12 12M14.8 9.2 20 4M8 16l4-4"/>',compress:'<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3M8 8l3 3m5-3-3 3m0 2-3 3m8-3-3 3"/>',merge:'<path d="M7 3H5a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h2m10-9h2a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M7 12h10M9 8l-4 4 4 4m6-8 4 4-4 4"/>',image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',rotate:'<path d="M20 11a8 8 0 0 0-14-5L4 8"/><path d="M4 4v4h4M4 13a8 8 0 0 0 14 5l2-2"/><path d="M20 20v-4h-4"/>',extract:'<path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"/>',number:'<path d="M9 4h3v16H9M5 8h2M5 16h2M16 8h3m-3 8h3m-3 0 3-4-3-4"/>',watermark:'<path d="M4 20h16M6 17 17 6l3 3L9 20H6v-3Z"/><path d="m14 9 3 3"/>',shield:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>',zap:'<path d="m13 2-3 8h7l-6 12 2-9H6l7-11Z"/>',lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 5v2"/>',heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>',help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.7c-1.2 1.1-1.9 1.4-1.9 3M12 17h.01"/>',ocr:'<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 19.5V17"/><path d="M8 10h8M8 13.5h8M8 17h5"/>',unlock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.7-1.5M12 14.5v3"/>',redact:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M6.5 10.5h11" stroke-width="3"/><path d="M6.5 15h7"/>',flatten:'<path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z"/><path d="m4 12.5 8 4.5 8-4.5"/><path d="m4 17 8 4.5 8-4.5"/>',edit:'<path d="m4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17l-1 3Z"/><path d="m13.5 6.5 3 3"/>',search:'<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4 4"/>',sparkles:'<path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3ZM19 14l1.2 3.3L23 18.5l-2.8 1.2L19 23l-1.2-3.3-2.8-1.2 2.8-1.2L19 14Z"/>',check:'<path d="m5 12 4 4L19 6"/>',upload:'<path d="M12 16V4m0 0L8 8m4-4 4 4M4 16v4h16v-4"/>',sheet:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11M3 14h18"/>',docwrite:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',database:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>',worddoc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6"/><path d="M8 12h8M8 16h5"/>',slides:'<rect x="3" y="3" width="18" height="13" rx="2"/><path d="M12 16v3M8 21h8"/><path d="M8 8h8M8 11h5"/>'};
 function icon(name){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]||icons.wand}</svg>`}
 document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon)});
 const themeToggle=document.getElementById('themeToggle'),themePreference=window.matchMedia('(prefers-color-scheme: dark)');
@@ -27,6 +27,7 @@ const tools=[
 {id:'edit',title:'Edit PDF',description:'Tambah tulisan, gambar, dan coretan.',detail:'Tulis teks, tempel gambar, dan gambar bebas di atas halaman PDF, lalu unduh hasilnya. Halaman asli tetap utuh.',icon:'edit',color:'peach',tag:'BARU',input:'pdf',action:'Buka editor'},
 {id:'doc',title:'Pembuat PDF',description:'Tulis dokumen baru dari halaman kosong.',detail:'Editor bergaya aplikasi pengolah kata: ukuran kertas, orientasi, margin, kolom untuk teks terpilih, inden, spasi, perataan justify, gambar, dan halaman tambahan — diekspor jadi PDF rapi.',icon:'docwrite',color:'blue',tag:'BARU',input:'blank',action:'Buat PDF'},
 {id:'sheet',title:'PDF Sheet',description:'Hitung data dalam tabel seperti spreadsheet.',detail:'Grid spreadsheet lengkap dengan formula bar, variabel, rumus SUM/AVERAGE/IF, border, format angka, dan ekspor PDF. Semua perhitungan berjalan lokal di browser.',icon:'sheet',color:'mint',tag:'BARU',input:'blank',action:'Buka sheet'},
+{id:'database',title:'Database File',description:'Kelola data SQLite seperti spreadsheet.',detail:'Buka file .db yang sudah ada atau buat database baru lewat wizard ramah pemula. Sunting tabel dalam tampilan spreadsheet, simpan kembali sebagai .db, atau ekspor isinya ke PDF.',icon:'database',color:'yellow',tag:'BARU',input:'blank',action:'Buka database'},
 {id:'toWord',title:'PDF ke Word',description:'Ubah PDF jadi dokumen Word (.docx).',detail:'Teks di PDF dibaca per baris menjadi dokumen Word yang bisa diedit, lengkap dengan pemisah halaman asli.',icon:'worddoc',color:'mint',tag:'BARU',input:'pdf',action:'Konversi ke Word'},
 {id:'toPpt',title:'PDF ke PowerPoint',description:'Ubah PDF jadi presentasi (.pptx).',detail:'Setiap halaman PDF menjadi satu slide utuh di PowerPoint dengan tata letak asli yang dipertahankan.',icon:'slides',color:'peach',tag:'BARU',input:'pdf',action:'Konversi ke PPT'},
 {id:'pdfa',title:'Konversi ke PDF/A',description:'Siapkan PDF untuk penyimpanan jangka panjang.',detail:'Tambahkan profil warna sRGB, output intent, dan metadata PDF/A-2b. Hasil tetap perlu divalidasi untuk memastikan seluruh persyaratan arsip sesuai dengan isi dokumen.',icon:'shield',color:'blue',tag:'BARU',input:'pdf',action:'Buat PDF/A'},
@@ -53,7 +54,7 @@ document.getElementById('modalContent').addEventListener('click',e=>{const pageB
 let processedPreviewResizeTimer;
 window.addEventListener('resize',()=>{const s=processedPreviewState,p=processedPreviewParts();if(!s.doc||!p.preview||p.preview.hidden)return;clearTimeout(processedPreviewResizeTimer);processedPreviewResizeTimer=setTimeout(()=>renderProcessedPreviewPage(s.page,s.token),150)});
 const toolGroups=[
-{id:'tulis',title:'Tulis & Sunting',description:'Buat dokumen baru dari nol atau beri catatan di atas PDF.',ids:['doc','sheet','edit']},
+{id:'tulis',title:'Tulis & Sunting',description:'Buat dokumen baru dari nol, kelola data, atau beri catatan di atas PDF.',ids:['doc','sheet','database','edit']},
 {id:'kelola',title:'Kelola Halaman',description:'Susun, pisahkan, dan rapikan halaman dokumen Anda.',ids:['split','merge','extract','rotate','number']},
 {id:'optimal',title:'Optimasi & Keamanan',description:'Kecilkan ukuran file dan lindungi dokumen.',ids:['compress','protect','unlock','redact','flatten','watermark']},
 {id:'konversi',title:'Konversi Dokumen',description:'Ubah PDF ke format lain dan siapkan dokumen untuk arsip.',ids:['toWord','toPpt','pdfa','toJpg','ocr','images']}
@@ -64,7 +65,7 @@ function showToast(message){let el=document.getElementById('toast');el.textConte
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function formatBytes(n){if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(0)+' KB';return (n/1048576).toFixed(2)+' MB'}
 const BATCH_TOOLS=['compress','number','watermark','protect','unlock','ocr'];
-function openTool(id){processRun++;hideProgress();if(id==='doc'){openDocPage();return}if(id==='sheet'){if(modal.classList.contains('open'))closeModal();openSheetPage();return}if(modal.classList.contains('open'))closeModal();releaseProcessedPreview();activeTool=tools.find(t=>t.id===id);if(!activeTool)return;selectedFiles=[];document.getElementById('modalIcon').innerHTML=icon(activeTool.icon);document.getElementById('modalIcon').className=`modal-top-icon ${activeTool.color}`;document.getElementById('modalEyebrow').textContent='ALAT PDF';document.getElementById('modalTitle').textContent=activeTool.title;document.getElementById('modalDescription').textContent=activeTool.detail;document.querySelector('.modal-privacy').lastChild.textContent='Proses aman, file tidak pernah meninggalkan perangkat Anda';document.getElementById('modalError').classList.remove('show');document.getElementById('modalContent').innerHTML=modalFields(activeTool);document.getElementById('modalAction').disabled=false;document.getElementById('modalAction').classList.remove('loading');document.getElementById('modalAction').innerHTML=`<span>${activeTool.action}</span><span>↗</span>`;fileInput.value='';fileInput.multiple=activeTool.input==='pdf-multiple'||activeTool.input==='images'||BATCH_TOOLS.includes(activeTool.id);fileInput.accept=activeTool.input==='images'?'image/png,image/jpeg,image/webp':'.pdf,application/pdf';renderFileRows();modal.classList.toggle('split-wide',activeTool.id==='split'||activeTool.id==='edit'||activeTool.id==='redact'||activeTool.id==='number');if(activeTool.id==='split')initSplitBuilder();if(activeTool.id==='merge')initMergePreview();if(activeTool.id==='rotate')initRotate();if(activeTool.id==='number')initNumbering();if(activeTool.id==='watermark')initWatermark();if(activeTool.id==='edit')initEditor();if(activeTool.id==='redact')initRedact();modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';wireDropzone()}
+function openTool(id){processRun++;hideProgress();if(id==='doc'){openDocPage();return}if(id==='sheet'){if(modal.classList.contains('open'))closeModal();openSheetPage();return}if(id==='database'){if(modal.classList.contains('open'))closeModal();releaseProcessedPreview();openDatabasePage();return}if(modal.classList.contains('open'))closeModal();releaseProcessedPreview();activeTool=tools.find(t=>t.id===id);if(!activeTool)return;selectedFiles=[];document.getElementById('modalIcon').innerHTML=icon(activeTool.icon);document.getElementById('modalIcon').className=`modal-top-icon ${activeTool.color}`;document.getElementById('modalEyebrow').textContent='ALAT PDF';document.getElementById('modalTitle').textContent=activeTool.title;document.getElementById('modalDescription').textContent=activeTool.detail;document.querySelector('.modal-privacy').lastChild.textContent='Proses aman, file tidak pernah meninggalkan perangkat Anda';document.getElementById('modalError').classList.remove('show');document.getElementById('modalContent').innerHTML=modalFields(activeTool);document.getElementById('modalAction').disabled=false;document.getElementById('modalAction').classList.remove('loading');document.getElementById('modalAction').innerHTML=`<span>${activeTool.action}</span><span>↗</span>`;fileInput.value='';fileInput.multiple=activeTool.input==='pdf-multiple'||activeTool.input==='images'||BATCH_TOOLS.includes(activeTool.id);fileInput.accept=activeTool.input==='images'?'image/png,image/jpeg,image/webp':'.pdf,application/pdf';renderFileRows();modal.classList.toggle('split-wide',activeTool.id==='split'||activeTool.id==='edit'||activeTool.id==='redact'||activeTool.id==='number');if(activeTool.id==='split')initSplitBuilder();if(activeTool.id==='merge')initMergePreview();if(activeTool.id==='rotate')initRotate();if(activeTool.id==='number')initNumbering();if(activeTool.id==='watermark')initWatermark();if(activeTool.id==='edit')initEditor();if(activeTool.id==='redact')initRedact();modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';wireDropzone()}
 function modalFields(t){let fields='';if(t.id==='split')fields+='<div class="split-builder" id="splitBuilder"><div class="split-tabs" role="tablist" aria-label="Cara memilih rentang"><button type="button" class="split-tab active" role="tab" aria-selected="true" aria-controls="splitPanel" data-split-mode="table">Tabel</button><button type="button" class="split-tab" role="tab" aria-selected="false" aria-controls="splitPanel" data-split-mode="manual">Manual</button><button type="button" class="split-tab" role="tab" aria-selected="false" aria-controls="splitPanel" data-split-mode="picker">Pilih halaman</button></div><div class="split-panel" id="splitPanel" role="tabpanel"></div><div class="split-summary" id="splitSummary" aria-live="polite"></div></div>';if(t.id==='extract')fields+='<label class="field-label" for="rangeField">Rentang halaman</label><input id="rangeField" class="text-field" type="text" placeholder="Contoh: 1-3, 5, 8-10"><p class="field-hint">Semua halaman yang dipilih masuk ke satu file.</p>';
 if(t.id==='compress')fields+='<label class="field-label">Tingkat kompresi</label><div class="option-row"><label class="option-chip"><input type="radio" name="quality" value="low">Lebih cepat</label><label class="option-chip active"><input type="radio" name="quality" value="medium" checked>Seimbang</label><label class="option-chip"><input type="radio" name="quality" value="high">Maksimal</label></div><div class="modal-note"><span>ⓘ</span><span>Halaman tidak diubah menjadi gambar, jadi teks tetap bisa dicari dan dipilih. Gambar di dalam PDF tidak diperkecil. Jika hasilnya lebih besar, file asli dipertahankan.</span></div>';
 if(t.id==='rotate')fields+='<div class="rotate-mode" role="group" aria-label="Cara memutar halaman"><label class="option-chip active"><input type="radio" name="rotateMode" value="all" checked><span>Semua halaman</span></label><label class="option-chip"><input type="radio" name="rotateMode" value="pages"><span>Per halaman</span></label></div><div class="rotate-all-options" id="rotateAllOptions"><label class="field-label">Arah rotasi</label><div class="option-row"><label class="option-chip active"><input type="radio" name="rotation" value="90" checked>↻ 90°</label><label class="option-chip"><input type="radio" name="rotation" value="180">⟳ 180°</label><label class="option-chip"><input type="radio" name="rotation" value="270">↺ 90°</label></div></div><div class="rotate-pages-wrap" id="rotatePagesWrap" hidden><div class="rotate-pages-head"><strong>Putar halaman individu</strong><span id="rotatePagesStatus">Pilih file PDF untuk melihat halaman.</span></div><div class="rotate-pages-toolbar"><button type="button" class="mini-button" data-rotate-all="-1">↺ Putar semua kiri</button><button type="button" class="mini-button" data-rotate-all="1">↻ Putar semua kanan</button><button type="button" class="mini-button" data-rotate-reset-all>Reset semua</button></div><div class="rotate-pages-grid" id="rotatePagesGrid" aria-live="polite"></div><p class="field-hint">Klik tombol putar pada halaman tertentu. Pratinjau langsung mengikuti hasil akhirnya.</p></div>';
@@ -137,15 +138,15 @@ function showError(msg){let e=document.getElementById('modalError');e.textConten
 function filenameBase(name){return name.replace(/\.pdf$/i,'').replace(/[^\w\-]+/g,'-').replace(/^-|-$/g,'')||'dokumen'}
 function splitFileName(name){const raw=String(name||'').trim()||'dokumen',match=/^(.*?)(\.[a-z0-9]{1,10})$/i.exec(raw);if(match&&match[1].trim())return {stem:match[1],ext:match[2].toLowerCase()};return {stem:raw,ext:''}}
 function sanitizeFileStem(value,fallback){const cleaned=String(value||'').replace(/[\\/:*?"<>|\u0000-\u001f]+/g,'-').replace(/\s+/g,' ').replace(/^[.\-\s]+|[.\-\s]+$/g,'').slice(0,120);return cleaned||fallback||'dokumen'}
-const saveDialogState={data:null,type:'application/pdf',name:'',defaultStem:'',ext:'',returnFocus:null};
+const saveDialogState={data:null,type:'application/pdf',name:'',defaultStem:'',ext:'',returnFocus:null,onConfirm:null};
 function saveDialogParts(){return {dialog:document.getElementById('saveDialog'),input:document.getElementById('saveNameInput'),ext:document.getElementById('saveExt'),hint:document.getElementById('saveDialogHint'),confirm:document.getElementById('saveDialogConfirm'),presets:document.getElementById('savePresetRow')}}
 function performDownload(data,name,type){const blob=data instanceof Blob?data:new Blob([data],{type:type||'application/pdf'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
 function savePresetStem(preset){const base=saveDialogState.defaultStem||'dokumen',now=new Date(),pad=n=>String(n).padStart(2,'0');if(preset==='date')return `${base}-${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;if(preset==='datetime')return `${base}-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;return base}
 function markSavePreset(preset){const row=document.getElementById('savePresetRow');if(!row)return;row.querySelectorAll('[data-save-preset]').forEach(button=>{const active=button.dataset.savePreset===preset;button.classList.toggle('active',active);button.setAttribute('aria-pressed',active?'true':'false')})}
-function openSaveDialog(data,name,type){
+function openSaveDialog(data,name,type,onConfirm){
   const parts=saveDialogParts(),split=splitFileName(name);
-  saveDialogState.data=data;saveDialogState.type=type||'application/pdf';saveDialogState.name=name;saveDialogState.defaultStem=split.stem;saveDialogState.ext=split.ext;
-  if(!parts.dialog){performDownload(data,name,type);return}
+  saveDialogState.data=data;saveDialogState.type=type||'application/pdf';saveDialogState.name=name;saveDialogState.defaultStem=split.stem;saveDialogState.ext=split.ext;saveDialogState.onConfirm=typeof onConfirm==='function'?onConfirm:null;
+  if(!parts.dialog){performDownload(data,name,type);const cb=saveDialogState.onConfirm;saveDialogState.onConfirm=null;if(cb)try{cb()}catch(e){}return}
   if(!saveDialogState.returnFocus||!saveDialogState.returnFocus.isConnected)saveDialogState.returnFocus=document.activeElement;
   parts.input.value=split.stem;parts.ext.textContent=split.ext||'';parts.hint.textContent=split.ext?`Ekstensi ${split.ext} mengikuti hasil alat ini.`:'Ekstensi mengikuti hasil alat ini.';
   markSavePreset('default');
@@ -153,7 +154,7 @@ function openSaveDialog(data,name,type){
   document.body.classList.add('save-dialog-open');
   requestAnimationFrame(()=>{parts.input.focus();parts.input.select()});
 }
-function download(data,name,type='application/pdf'){openSaveDialog(data,name,type)}
+function download(data,name,type='application/pdf',onConfirm){openSaveDialog(data,name,type,onConfirm)}
 function closeSaveDialog(){
   const parts=saveDialogParts();if(!parts.dialog||!parts.dialog.classList.contains('open'))return;
   parts.dialog.classList.remove('open');parts.dialog.setAttribute('aria-hidden','true');document.body.classList.remove('save-dialog-open');
@@ -166,9 +167,10 @@ function confirmSaveDialog(){
   const ext=saveDialogState.ext||'',fallback=saveDialogState.defaultStem||'dokumen';
   let stem=sanitizeFileStem(parts.input.value,fallback);
   if(ext&&stem.toLowerCase().endsWith(ext.toLowerCase()))stem=sanitizeFileStem(stem.slice(0,-ext.length),fallback);
-  const name=stem+ext;
+  const name=stem+ext,cb=saveDialogState.onConfirm;
   performDownload(saveDialogState.data,name,saveDialogState.type||'application/pdf');
   closeSaveDialog();
+  if(cb)try{cb(name)}catch(e){}
 }
 (()=>{const parts=saveDialogParts();if(!parts.dialog)return;
   parts.dialog.addEventListener('click',e=>{if(e.target===parts.dialog)closeSaveDialog()});
@@ -1161,3 +1163,955 @@ let topbarScrollFrame=0;
 function syncTopbarElevation(){topbarScrollFrame=0;if(topbarElement)topbarElement.classList.toggle('is-scrolled',window.scrollY>8)}
 window.addEventListener('scroll',()=>{if(!topbarScrollFrame)topbarScrollFrame=requestAnimationFrame(syncTopbarElevation)},{passive:true});
 syncTopbarElevation();
+
+/* ============================================================
+   DATABASE FILE · SQLite lokal
+   Baca file .db, sunting seperti spreadsheet, simpan kembali,
+   ekspor ke PDF, dan wizard pembuatan database baru.
+   ============================================================ */
+const DB_PAGE_SIZE=50,DB_MAX_FILE=80*1024*1024,DB_PDF_ROW_LIMIT=5000;
+const DB_WIZARD_TYPES={
+  TEXT:{label:'Teks',sql:'TEXT',input:'text'},
+  INTEGER:{label:'Angka',sql:'INTEGER',input:'integer'},
+  REAL:{label:'Angka desimal',sql:'REAL',input:'decimal'},
+  DATE:{label:'Tanggal',sql:'DATE',input:'date'},
+  DATETIME:{label:'Tanggal & waktu',sql:'DATETIME',input:'datetime'},
+  BOOLEAN:{label:'Ya / Tidak',sql:'BOOLEAN',input:'boolean'}
+};
+const databaseState={db:null,name:'database',tables:[],active:null,page:0,rows:[],columns:[],dirty:false,view:'start',busy:false};
+const dbWizardState={step:1,name:'database-baru',tables:[],activeTable:0,error:'',focus:'',wizardReturnView:'start'};
+let databasePageInitialized=false,dbReturnFocus=null,sqlJsPromise=null,sqlJsLib=null,dbStatusTimer=0,dbConfirmResolve=null,dbWizardReplaceApproved=false;
+
+function ensureSqlJs(){
+  if(sqlJsLib)return Promise.resolve(sqlJsLib);
+  if(!sqlJsPromise){
+    if(typeof initSqlJs!=='function')sqlJsPromise=Promise.reject(Error('Mesin SQLite tidak tersedia. Muat ulang halaman lalu coba lagi.'));
+    else sqlJsPromise=initSqlJs({locateFile:file=>new URL('vendor/'+file,document.baseURI).href}).then(lib=>{sqlJsLib=lib;return lib}).catch(()=>{sqlJsPromise=null;throw Error('Mesin SQLite gagal dimuat. Periksa koneksi lalu muat ulang halaman.')});
+  }
+  return sqlJsPromise;
+}
+function dbQuoteIdent(name){return '"'+String(name??'').replace(/"/g,'""')+'"'}
+function dbQuoteLiteral(name){return "'"+String(name??'').replace(/'/g,"''")+"'"}
+function dbTypeKind(raw){
+  const type=String(raw||'').toUpperCase().trim();
+  if(!type)return 'TEXT';
+  if(type.includes('BOOL'))return 'BOOLEAN';
+  if(type.includes('DATETIME')||type.includes('TIMESTAMP'))return 'DATETIME';
+  if(type.includes('DATE'))return 'DATE';
+  if(type.includes('INT'))return 'INTEGER';
+  if(type.includes('CHAR')||type.includes('CLOB')||type.includes('TEXT'))return 'TEXT';
+  if(type.includes('BLOB'))return 'BLOB';
+  if(type.includes('REAL')||type.includes('FLOA')||type.includes('DOUB')||type.includes('NUM')||type.includes('DEC')||type.includes('MONEY'))return 'REAL';
+  return 'TEXT';
+}
+function dbTypeLabel(kind){return (DB_WIZARD_TYPES[kind]&&DB_WIZARD_TYPES[kind].label)||(kind==='BLOB'?'Biner':'Teks')}
+function dbValuesEqual(a,b){
+  if(a===null||a===undefined)return b===null||b===undefined;
+  if(b===null||b===undefined)return false;
+  if(typeof a==='number'||typeof b==='number')return Number(a)===Number(b);
+  return String(a)===String(b);
+}
+function dbDisplayValue(value){
+  if(value===null||value===undefined)return '';
+  if(typeof value==='number')return String(value);
+  if(typeof value==='string')return value;
+  if(typeof value==='object'&&value.constructor===Uint8Array)return 'Biner ('+formatBytes(value.byteLength)+')';
+  return String(value);
+}
+function dbNumberIfPossible(value){const n=Number(value);return Number.isFinite(n)&&String(value).trim()!==''?n:value}
+function dbActiveTable(){return databaseState.tables.find(t=>t.name===databaseState.active)||null}
+function dbBaseName(){
+  const input=document.getElementById('dbName');
+  const raw=(input?input.value:databaseState.name||'database').replace(/\.(db|sqlite3?)$/i,'');
+  return sanitizeFileStem(raw,databaseState.name||'database');
+}
+function dbWizardBaseName(){
+  const raw=String(dbWizardState.name||'').replace(/\.(db|sqlite3?)$/i,'');
+  return sanitizeFileStem(raw,'database-baru');
+}
+function dbParts(){return {
+  page:document.getElementById('dbPage'),start:document.getElementById('dbStart'),workspace:document.getElementById('dbWorkspace'),wizard:document.getElementById('dbWizard'),
+  name:document.getElementById('dbName'),status:document.getElementById('dbStatus'),dirty:document.getElementById('dbDirty'),
+  saveBtn:document.getElementById('dbSaveBtn'),pdfBtn:document.getElementById('dbPdfBtn'),
+  tableList:document.getElementById('dbTableList'),tableCount:document.getElementById('dbTableCount'),tablesEmpty:document.getElementById('dbTablesEmpty'),
+  activeTable:document.getElementById('dbActiveTable'),activeMeta:document.getElementById('dbActiveMeta'),
+  addRow:document.getElementById('dbAddRow'),pdfTable:document.getElementById('dbPdfTable'),grid:document.getElementById('dbGridScroll'),
+  rowInfo:document.getElementById('dbRowInfo'),pageInfo:document.getElementById('dbPageInfo'),prev:document.getElementById('dbPrevPage'),next:document.getElementById('dbNextPage'),
+  wizardBody:document.getElementById('dbWizardBody'),wizardTitle:document.getElementById('dbWizardTitle'),wizardError:document.getElementById('dbWizardError'),
+  wizardNext:document.getElementById('dbWizardNext'),wizardBack:document.getElementById('dbWizardBack'),wizardCancel:document.getElementById('dbWizardCancel'),
+  confirm:document.getElementById('dbConfirm'),confirmTitle:document.getElementById('dbConfirmTitle'),confirmCopy:document.getElementById('dbConfirmCopy'),confirmOk:document.getElementById('dbConfirmOk'),confirmCancel:document.getElementById('dbConfirmCancel')
+}}
+function dbShowView(view){
+  databaseState.view=view;
+  const p=dbParts();
+  if(p.start)p.start.hidden=view!=='start';
+  if(p.workspace)p.workspace.hidden=view!=='workspace';
+  if(p.wizard)p.wizard.hidden=view!=='wizard';
+  if(p.name)p.name.disabled=view!=='workspace';
+  dbUpdateChrome();
+}
+function dbUpdateChrome(){
+  const p=dbParts(),has=!!databaseState.db,ws=databaseState.view==='workspace',busy=databaseState.busy,t=dbActiveTable();
+  if(p.saveBtn)p.saveBtn.disabled=!has||busy||!ws;
+  if(p.pdfBtn)p.pdfBtn.disabled=!has||busy||!ws||!databaseState.tables.length;
+  if(p.dirty)p.dirty.hidden=!(has&&databaseState.dirty&&ws);
+  if(p.addRow)p.addRow.disabled=!has||busy||!t;
+  if(p.pdfTable)p.pdfTable.disabled=!has||busy||!t;
+  if(p.activeTable)p.activeTable.textContent=t?t.name:'—';
+  if(p.activeMeta)p.activeMeta.textContent=t?`${t.columns.length} kolom · ${t.rowCount.toLocaleString('id-ID')} baris`:(has?'Database ini belum memiliki tabel data.':'Pilih tabel untuk mulai.');
+  const pages=t?Math.max(1,Math.ceil(t.rowCount/DB_PAGE_SIZE)):1,page=t?Math.min(databaseState.page,pages-1):0;
+  if(p.pageInfo)p.pageInfo.textContent=`${page+1} / ${pages}`;
+  if(p.prev)p.prev.disabled=!t||busy||page<=0;
+  if(p.next)p.next.disabled=!t||busy||page>=pages-1;
+  if(p.rowInfo)p.rowInfo.textContent=t?`${t.rowCount.toLocaleString('id-ID')} baris · ${(page*DB_PAGE_SIZE+1).toLocaleString('id-ID')}–${Math.min((page+1)*DB_PAGE_SIZE,t.rowCount).toLocaleString('id-ID')}`:'0 baris';
+}
+function dbMarkDirty(){databaseState.dirty=true;dbUpdateChrome()}
+function dbMarkSaved(name){
+  databaseState.dirty=false;
+  if(name){databaseState.name=String(name).replace(/\.db$/i,'')||databaseState.name;const input=document.getElementById('dbName');if(input)input.value=databaseState.name}
+  dbUpdateChrome();dbFlashStatus('Database siap');
+}
+function dbFlashStatus(text){
+  const el=document.getElementById('dbStatus');if(!el)return;
+  clearTimeout(dbStatusTimer);
+  el.innerHTML=`<span aria-hidden="true">✓</span> ${escapeHTML(text)}`;
+  el.classList.add('show');
+  dbStatusTimer=setTimeout(()=>el.classList.remove('show'),2800);
+}
+function dbSetProgress(p,label){
+  const bar=document.getElementById('dbProgress'),fill=document.getElementById('dbProgressFill'),lbl=document.getElementById('dbProgressLabel');
+  if(!bar||!fill)return;
+  bar.classList.add('show');bar.setAttribute('aria-hidden','false');
+  if(lbl){lbl.textContent=label||'';lbl.classList.toggle('show',!!label)}
+  if(p==null||isNaN(p)){fill.classList.add('indeterminate');fill.style.width='100%';bar.removeAttribute('aria-valuenow')}
+  else{fill.classList.remove('indeterminate');const v=Math.max(2,Math.min(100,p));fill.style.width=v+'%';bar.setAttribute('aria-valuenow',String(Math.round(v)))}
+}
+function dbHideProgress(){
+  const bar=document.getElementById('dbProgress'),fill=document.getElementById('dbProgressFill'),lbl=document.getElementById('dbProgressLabel');
+  if(!bar)return;bar.classList.remove('show');bar.setAttribute('aria-hidden','true');bar.removeAttribute('aria-valuenow');
+  if(fill){fill.classList.remove('indeterminate');fill.style.width='0%'}
+  if(lbl){lbl.textContent='';lbl.classList.remove('show')}
+}
+function dbSetBusy(on,label){databaseState.busy=!!on;if(on)dbSetProgress(null,label||'Memproses…');else dbHideProgress();dbUpdateChrome()}
+function dbAskConfirm(options={}){
+  const p=dbParts();
+  if(!p.confirm||!p.confirmOk||!p.confirmCancel){return Promise.resolve(window.confirm(options.copy||'Lanjutkan?'))}
+  if(p.confirmTitle)p.confirmTitle.textContent=options.title||'Lanjutkan?';
+  if(p.confirmCopy)p.confirmCopy.textContent=options.copy||'';
+  p.confirmOk.innerHTML=`<span>${escapeHTML(options.label||'Lanjutkan')}</span><span>${options.danger===false?'→':'!'}</span>`;
+  p.confirmOk.classList.toggle('danger',options.danger!==false);
+  p.confirm.classList.add('open');p.confirm.setAttribute('aria-hidden','false');
+  return new Promise(resolve=>{
+    dbConfirmResolve=resolve;
+    requestAnimationFrame(()=>{try{p.confirmCancel.focus({preventScroll:true})}catch(e){}});
+  });
+}
+function dbResolveConfirm(value){
+  const p=dbParts();
+  if(p.confirm){p.confirm.classList.remove('open');p.confirm.setAttribute('aria-hidden','true')}
+  const resolve=dbConfirmResolve;dbConfirmResolve=null;
+  if(resolve)resolve(!!value);
+}
+function openDatabasePage(){
+  if(!databasePageInitialized)initDatabasePage();
+  const page=document.getElementById('dbPage');if(!page)return;
+  if(!page.classList.contains('open')){const active=document.activeElement;dbReturnFocus=active&&active!==document.body?active:null}
+  page.classList.add('open');page.setAttribute('aria-hidden','false');document.body.classList.add('db-writing');
+  if(databaseState.db&&databaseState.view==='start')databaseState.view='workspace';
+  dbShowView(databaseState.view||'start');
+  if(databaseState.view==='workspace')dbRenderWorkspace();
+  else if(databaseState.view==='wizard')dbRenderWizard();
+  setTimeout(()=>{
+    const target=document.querySelector('#dbPage [data-db-autofocus]')||document.querySelector('#dbPage .db-body button:not(:disabled)');
+    if(target&&target.getClientRects().length)try{target.focus({preventScroll:true})}catch(e){}
+  },70);
+}
+function closeDatabasePage(){
+  const page=document.getElementById('dbPage');if(!page||!page.classList.contains('open'))return;
+  page.classList.remove('open');page.setAttribute('aria-hidden','true');document.body.classList.remove('db-writing');
+  const target=dbReturnFocus||document.querySelector('button[data-tool="database"]');dbReturnFocus=null;
+  if(target&&document.contains(target)){try{target.focus({preventScroll:true})}catch(e){}}
+  if(databaseState.db)showToast('Database tetap tersimpan di tab ini. Simpan .db sebelum menutup tab.');
+}
+
+function dbReadTables(){
+  const s=databaseState;
+  if(!s.db){s.tables=[];s.active=null;return}
+  const res=s.db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name COLLATE NOCASE");
+  const names=res.length?res[0].values.map(row=>String(row[0])):[];
+  s.tables=names.map(name=>{
+    const quoted=dbQuoteIdent(name);
+    let columns=[];
+    try{
+      const info=s.db.exec(`PRAGMA table_info(${dbQuoteLiteral(name)})`);
+      if(info.length)columns=info[0].values.map(row=>({name:String(row[1]),type:String(row[2]||''),notnull:!!row[3],defaultValue:row[4],pk:!!row[5],kind:dbTypeKind(row[2])}));
+    }catch(e){}
+    let rowCount=0;
+    try{const count=s.db.exec(`SELECT COUNT(*) FROM ${quoted}`);rowCount=count.length?Number(count[0].values[0][0])||0:0}catch(e){}
+    let hasRowid=true;
+    try{s.db.exec(`SELECT rowid FROM ${quoted} LIMIT 1`)}catch(e){hasRowid=false}
+    let rowKey='';
+    if(hasRowid){rowKey='__paperly_rowid__';while(columns.some(c=>c.name.toLowerCase()===rowKey.toLowerCase()))rowKey='_'+rowKey}
+    return {name,columns,rowCount,hasRowid,rowKey};
+  });
+  if(!s.tables.some(t=>t.name===s.active))s.active=s.tables[0]?s.tables[0].name:null;
+}
+function dbRenderWorkspace(){
+  if(!databaseState.db){dbShowView('start');return}
+  dbRenderTableList();dbRenderGrid();dbUpdateChrome();
+}
+function dbRenderTableList(){
+  const p=dbParts(),s=databaseState;
+  if(p.tableCount)p.tableCount.textContent=String(s.tables.length);
+  if(p.tablesEmpty)p.tablesEmpty.hidden=s.tables.length>0;
+  if(p.tableList)p.tableList.innerHTML=s.tables.map(t=>`<button type="button" class="db-table-item${t.name===s.active?' active':''}" data-db-table="${escapeHTML(t.name)}"${t.name===s.active?' data-db-autofocus':''}><span class="db-table-name">${escapeHTML(t.name)}</span><span class="db-table-count">${t.rowCount.toLocaleString('id-ID')}</span></button>`).join('');
+}
+function dbSelectTable(name){
+  const t=databaseState.tables.find(table=>table.name===name);if(!t)return;
+  databaseState.active=name;databaseState.page=0;
+  dbRenderTableList();dbRenderGrid();dbUpdateChrome();
+}
+function dbNoTableHTML(){
+  return `<div class="db-grid-empty"><span class="db-empty-icon">${icon('database')}</span><strong>Belum ada tabel data</strong><p>Database ini kosong. Gunakan wizard untuk membuat tabel dan kolom tanpa menulis SQL.</p><button type="button" class="mini-button" data-db-new-wizard>Buat database baru</button></div>`;
+}
+function dbRenderGrid(){
+  const p=dbParts(),s=databaseState,t=dbActiveTable();
+  s.rows=[];s.columns=t?t.columns:[];
+  if(!p.grid)return;
+  if(!t){p.grid.innerHTML=dbNoTableHTML();dbUpdateChrome();return}
+  const pages=Math.max(1,Math.ceil(t.rowCount/DB_PAGE_SIZE));
+  s.page=Math.max(0,Math.min(pages-1,s.page));
+  let rows=[];
+  try{
+    const stmt=s.db.prepare(`SELECT ${t.rowKey?`rowid AS ${dbQuoteIdent(t.rowKey)}, `:''}* FROM ${dbQuoteIdent(t.name)} LIMIT ? OFFSET ?`);
+    stmt.bind([DB_PAGE_SIZE,s.page*DB_PAGE_SIZE]);
+    while(stmt.step())rows.push(stmt.getAsObject());
+    stmt.free();
+  }catch(e){
+    p.grid.innerHTML=`<div class="db-grid-empty"><strong>Tabel tidak dapat ditampilkan</strong><p>${escapeHTML(e.message||'Pastikan tabel masih valid dan tidak terkunci.')}</p></div>`;
+    dbUpdateChrome();return;
+  }
+  s.rows=rows;
+  let html=`<table class="db-grid" aria-label="Tabel ${escapeHTML(t.name)}"><thead><tr><th class="db-rowno-head" scope="col">#</th>`;
+  for(const col of t.columns)html+=`<th scope="col"><span class="db-col-name">${escapeHTML(col.name)}</span><span class="db-col-type">${escapeHTML(dbTypeLabel(col.kind))}${col.pk?' · kunci':''}</span></th>`;
+  html+='<th class="db-row-actions-head" scope="col"><span aria-hidden="true">×</span></th></tr></thead><tbody>';
+  if(!rows.length){
+    html+=`<tr><td class="db-empty-row" colspan="${t.columns.length+2}">Tabel ini belum memiliki baris.${t.rowKey||t.columns.some(c=>c.pk)?' Klik <strong>+ Baris</strong> untuk menambahkan.':' Baris tidak dapat ditambah karena tabel tidak memiliki kunci.'}</td></tr>`;
+  }else{
+    rows.forEach((row,i)=>{html+=dbRowHTML(t,row,i,s.page*DB_PAGE_SIZE+i)});
+  }
+  html+='</tbody></table>';
+  p.grid.innerHTML=html;p.grid.scrollTop=0;dbUpdateChrome();
+}
+function dbRowHTML(table,row,localIndex,displayIndex){
+  const canEditRow=!!table.rowKey||table.columns.some(c=>c.pk);
+  let attrs=`data-local-index="${localIndex}"`;
+  if(table.rowKey)attrs+=` data-rowid="${escapeHTML(String(row[table.rowKey]))}"`;
+  if(!table.rowKey&&table.columns.some(c=>c.pk))attrs+=` data-pk="${escapeHTML(JSON.stringify(table.columns.filter(c=>c.pk).map(c=>row[c.name]??null)))}"`;
+  const cells=table.columns.map((col,index)=>`<td class="db-cell-td">${dbCellHTML(col,row[col.name],displayIndex+1,canEditRow)}</td>`).join('');
+  return `<tr ${attrs}><th class="db-rowno" scope="row">${displayIndex+1}</th>${cells}<td class="db-row-actions"><button type="button" class="db-row-del" data-db-del-row aria-label="Hapus baris ${displayIndex+1}" title="Hapus baris"${canEditRow?'':' disabled'}>×</button></td></tr>`;
+}
+function dbCellHTML(col,value,rowNumber,canEdit){
+  if(value&&typeof value==='object'&&value.constructor===Uint8Array)return `<span class="db-blob">Biner · ${formatBytes(value.byteLength)}</span>`;
+  const isNull=value===null||value===undefined;
+  const label=`${col.name}, baris ${rowNumber}`;
+  if(col.kind==='BOOLEAN'){
+    const current=isNull?'':(Number(value)?'1':'0');
+    return `<select class="db-cell-select${isNull?' is-null':''}" data-db-cell data-col="${escapeHTML(col.name)}" aria-label="${escapeHTML(label)}"${canEdit?'':' disabled'}><option value=""${current===''?' selected':''}>NULL</option><option value="1"${current==='1'?' selected':''}>Ya</option><option value="0"${current==='0'?' selected':''}>Tidak</option></select>`;
+  }
+  const mode=col.kind==='INTEGER'?'numeric':col.kind==='REAL'?'decimal':'text';
+  return `<input class="db-cell-input${isNull?' is-null':''}" type="text" inputmode="${mode}" value="${isNull?'':escapeHTML(dbDisplayValue(value))}" placeholder="NULL" data-db-cell data-col="${escapeHTML(col.name)}" aria-label="${escapeHTML(label)}" autocomplete="off" spellcheck="false"${canEdit?'':' readonly'}>`;
+}
+function dbRowWhere(table,tr){
+  if(!tr)return null;
+  if(table.rowKey)return {sql:'rowid = ?',params:[dbNumberIfPossible(tr.dataset.rowid)]};
+  const pk=table.columns.filter(c=>c.pk);
+  if(pk.length){
+    let values=[];
+    try{values=JSON.parse(tr.dataset.pk||'[]')}catch(e){}
+    if(values.length!==pk.length||values.some(value=>value&&typeof value==='object'))return null;
+    const params=values.map((value,index)=>pk[index]&&['INTEGER','REAL','BOOLEAN'].includes(pk[index].kind)?dbNumberIfPossible(value):value);
+    return {sql:pk.map(c=>`${dbQuoteIdent(c.name)} IS ?`).join(' AND '),params};
+  }
+  return null;
+}
+function dbApplyCellVisual(input,value){
+  if(input.tagName==='SELECT'){
+    input.value=value===null||value===undefined?'':(Number(value)?'1':'0');
+    input.classList.toggle('is-null',value===null||value===undefined);
+  }else{
+    input.value=dbDisplayValue(value);
+    input.classList.toggle('is-null',value===null||value===undefined);
+  }
+}
+function dbRestoreCell(input){
+  const tr=input?input.closest('tr[data-local-index]'):null,row=tr?databaseState.rows[+tr.dataset.localIndex]:null;
+  if(!row)return;
+  dbApplyCellVisual(input,row[input.dataset.col]);
+}
+function dbCommitCell(input){
+  const s=databaseState,tr=input?input.closest('tr[data-local-index]'):null,table=dbActiveTable();
+  if(!tr||!table||!s.db||s.busy)return;
+  const col=table.columns.find(c=>c.name===input.dataset.col),row=s.rows[+tr.dataset.localIndex];
+  if(!col||!row||input.readOnly||input.disabled)return;
+  const original=row[col.name];
+  let next;
+  if(input.tagName==='SELECT'){
+    next=input.value===''?null:Number(input.value);
+  }else{
+    const raw=input.value;
+    if(raw==='')next=null;
+    else if(col.kind==='INTEGER'&&/^-?\d+$/.test(raw.trim()))next=Number(raw);
+    else if(col.kind==='REAL'&&raw.trim()!==''&&Number.isFinite(Number(raw)))next=Number(raw);
+    else next=raw;
+  }
+  if(dbValuesEqual(original,next)){dbApplyCellVisual(input,original);return}
+  const where=dbRowWhere(table,tr);
+  if(!where){dbRestoreCell(input);showToast('Tabel ini tidak memiliki kunci baris, jadi sel tidak dapat diubah.');return}
+  try{
+    s.db.run(`UPDATE ${dbQuoteIdent(table.name)} SET ${dbQuoteIdent(col.name)} = ? WHERE ${where.sql}`,[next,...where.params]);
+  }catch(e){
+    dbRestoreCell(input);showToast('Nilai gagal disimpan: '+(e.message||'terjadi kesalahan pada database'));return;
+  }
+  row[col.name]=next;dbApplyCellVisual(input,next);dbMarkDirty();
+}
+function dbFocusCell(localIndex,colIndex){
+  const tr=document.querySelector(`#dbGridScroll tr[data-local-index="${localIndex}"]`);if(!tr)return false;
+  const cell=tr.querySelectorAll('[data-db-cell]')[colIndex];if(!cell)return false;
+  cell.focus({preventScroll:false});
+  if(cell.select&&cell.tagName!=='SELECT')cell.select();
+  return true;
+}
+function dbHandleCellKey(event){
+  const input=event.target;
+  if(!input||!input.matches('[data-db-cell]'))return;
+  const tr=input.closest('tr[data-local-index]');if(!tr)return;
+  const row=+tr.dataset.localIndex,col=[...tr.querySelectorAll('[data-db-cell]')].indexOf(input);
+  if(event.key==='Enter'){
+    event.preventDefault();dbCommitCell(input);
+    if(!dbFocusCell(row+1,col))dbFocusCell(row-1,col);return;
+  }
+  if(event.key==='Escape'){event.preventDefault();dbRestoreCell(input);input.blur();return}
+  if(event.key==='ArrowDown'){event.preventDefault();dbCommitCell(input);dbFocusCell(row+1,col);return}
+  if(event.key==='ArrowUp'){event.preventDefault();dbCommitCell(input);dbFocusCell(row-1,col);return}
+  if(event.key==='ArrowLeft'&&input.selectionStart===0&&input.selectionEnd===0){event.preventDefault();dbCommitCell(input);dbFocusCell(row,col-1);return}
+  if(event.key==='ArrowRight'&&input.tagName!=='SELECT'&&input.selectionStart===input.value.length&&input.selectionEnd===input.value.length){event.preventDefault();dbCommitCell(input);dbFocusCell(row,col+1)}
+}
+function dbDefaultForColumn(col){
+  const today=new Date(),pad=n=>String(n).padStart(2,'0');
+  const iso=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  if(col.kind==='INTEGER'||col.kind==='REAL'||col.kind==='BOOLEAN')return 0;
+  if(col.kind==='DATE')return iso;
+  if(col.kind==='DATETIME')return `${iso} ${pad(today.getHours())}:${pad(today.getMinutes())}`;
+  if(col.kind==='BLOB')return new Uint8Array(0);
+  return '';
+}
+function dbAddRow(){
+  const s=databaseState,t=dbActiveTable();if(!t||!s.db||s.busy)return;
+  const writable=t.columns.filter(c=>!(c.pk&&c.kind==='INTEGER'&&t.columns.filter(x=>x.pk).length===1));
+  const values=[];
+  for(const col of writable){
+    if(!col.notnull||col.defaultValue!==null&&col.defaultValue!==undefined)continue;
+    values.push({name:col.name,value:dbDefaultForColumn(col)});
+  }
+  try{
+    if(values.length)s.db.run(`INSERT INTO ${dbQuoteIdent(t.name)} (${values.map(v=>dbQuoteIdent(v.name)).join(',')}) VALUES (${values.map(()=>'?').join(',')})`,values.map(v=>v.value));
+    else s.db.run(`INSERT INTO ${dbQuoteIdent(t.name)} DEFAULT VALUES`);
+  }catch(e){showToast('Baris gagal ditambahkan: '+(e.message||'terjadi kesalahan pada database'));return}
+  const count=s.db.exec(`SELECT COUNT(*) FROM ${dbQuoteIdent(t.name)}`);
+  t.rowCount=count.length?Number(count[0].values[0][0])||0:0;
+  s.page=Math.max(0,Math.ceil(t.rowCount/DB_PAGE_SIZE)-1);
+  dbRenderTableList();dbRenderGrid();dbMarkDirty();
+  setTimeout(()=>dbFocusCell(s.rows.length-1,0),40);
+}
+async function dbDeleteRow(tr){
+  const s=databaseState,t=dbActiveTable();if(!t||!s.db||s.busy||!tr)return;
+  const where=dbRowWhere(t,tr);
+  if(!where){showToast('Baris ini tidak memiliki kunci, jadi tidak dapat dihapus.');return}
+  const ok=await dbAskConfirm({title:'Hapus baris ini?',copy:'Isi baris akan dihapus permanen dari database. Tindakan ini tidak bisa dibatalkan.',label:'Hapus baris'});
+  if(!ok)return;
+  try{s.db.run(`DELETE FROM ${dbQuoteIdent(t.name)} WHERE ${where.sql}`,where.params)}
+  catch(e){showToast('Baris gagal dihapus: '+(e.message||'terjadi kesalahan pada database'));return}
+  const count=s.db.exec(`SELECT COUNT(*) FROM ${dbQuoteIdent(t.name)}`);
+  t.rowCount=count.length?Number(count[0].values[0][0])||0:0;
+  if(s.page>Math.max(0,Math.ceil(t.rowCount/DB_PAGE_SIZE)-1))s.page=Math.max(0,Math.ceil(t.rowCount/DB_PAGE_SIZE)-1);
+  dbRenderTableList();dbRenderGrid();dbMarkDirty();showToast('Baris dihapus dari database.');
+}
+function dbChangePage(delta){
+  const t=dbActiveTable();if(!t)return;
+  const pages=Math.max(1,Math.ceil(t.rowCount/DB_PAGE_SIZE));
+  const next=Math.max(0,Math.min(pages-1,databaseState.page+delta));
+  if(next===databaseState.page)return;
+  databaseState.page=next;dbRenderGrid();
+}
+
+function dbDisposeDatabase(){
+  const db=databaseState.db;
+  if(db){try{db.close()}catch(e){}}
+  databaseState.db=null;databaseState.tables=[];databaseState.active=null;databaseState.page=0;databaseState.rows=[];databaseState.columns=[];
+}
+function dbLoadDatabase(db,name,options={}){
+  if(databaseState.db&&databaseState.db!==db){
+    try{databaseState.db.close()}catch(e){}
+  }
+  databaseState.db=db;
+  databaseState.name=sanitizeFileStem(String(name||'database').replace(/\.(db|sqlite3?)$/i,''),'database');
+  databaseState.dirty=!!options.dirty;
+  databaseState.page=0;
+  const input=document.getElementById('dbName');if(input)input.value=databaseState.name;
+  dbReadTables();
+  dbShowView('workspace');
+  dbRenderWorkspace();
+  if(databaseState.dirty)dbUpdateChrome();
+}
+function dbSaveDatabase(){
+  const s=databaseState;if(!s.db||s.busy)return;
+  try{
+    const bytes=s.db.export(),blob=new Blob([bytes],{type:'application/vnd.sqlite3'});
+    download(blob,dbBaseName()+'.db','application/vnd.sqlite3',name=>dbMarkSaved(name));
+  }catch(e){showToast('Database gagal disimpan: '+(e.message||'terjadi kesalahan pada database'))}
+}
+function dbStartError(message){
+  const el=document.getElementById('dbStartError');
+  if(el){el.textContent=message||'';el.hidden=!message}
+  if(message)showToast(message);
+}
+async function dbOpenFile(file){
+  if(!file)return;
+  if(file.size>DB_MAX_FILE){dbStartError('Ukuran file melebihi 80 MB. Mesin SQLite di browser memuat seluruh file ke memori.');return}
+  if(databaseState.db&&databaseState.dirty){
+    const ok=await dbAskConfirm({title:'Ganti database yang sedang dibuka?',copy:'Database saat ini masih memiliki perubahan yang belum disimpan. File baru akan menggantinya.',label:'Ganti database',danger:false});
+    if(!ok)return;
+  }
+  dbSetBusy(true,'Membaca file database…');dbStartError('');
+  try{
+    const SQL=await ensureSqlJs();
+    const bytes=new Uint8Array(await file.arrayBuffer());
+    if(bytes.length<16){throw Error('File terlalu kecil untuk menjadi database SQLite yang valid.')}
+    let header='';for(let i=0;i<16;i++)header+=String.fromCharCode(bytes[i]);
+    if(header!=='SQLite format 3\u0000')throw Error('File ini bukan database SQLite standar. Pastikan file tidak dienkripsi.');
+    let db=null;
+    try{
+      db=new SQL.Database(bytes);
+      const probe=db.exec('SELECT count(*) FROM sqlite_master');
+      if(!probe.length)throw Error('Struktur database tidak dapat dibaca.');
+    }catch(e){if(db)try{db.close()}catch(err){};throw e}
+    const name=file.name.replace(/\.(db|sqlite3?)$/i,'')||'database';
+    dbLoadDatabase(db,name);
+    const total=databaseState.tables.length;
+    showToast(`Database dibuka. ${total} tabel ditemukan.`);
+  }catch(e){
+    dbStartError('Gagal membuka database: '+(e.message||'file tidak dikenali'));
+  }finally{
+    dbSetBusy(false);
+  }
+}
+function dbHandleDroppedFile(event){
+  event.preventDefault();
+  const drop=document.getElementById('dbDropzone');if(drop)drop.classList.remove('dragover');
+  const file=event.dataTransfer&&event.dataTransfer.files&&event.dataTransfer.files[0];
+  if(file)dbOpenFile(file);
+}
+
+function dbFetchAllRows(name,limit){
+  const rows=[],stmt=databaseState.db.prepare(`SELECT * FROM ${dbQuoteIdent(name)} LIMIT ?`);
+  stmt.bind([limit]);while(stmt.step())rows.push(stmt.getAsObject());stmt.free();return rows;
+}
+function dbPdfText(value){
+  if(value===null||value===undefined)return 'NULL';
+  if(typeof value==='object'&&value.constructor===Uint8Array)return `Biner (${formatBytes(value.byteLength)})`;
+  let text=String(value).replace(/[\r\n\t]+/g,' ').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,'-').replace(/\u2026/g,'...');
+  return text.replace(/[^\x20-\x7E\xA0-\xFF]/g,'?');
+}
+function dbWrapPdfText(text,font,size,maxWidth,maxLines){
+  const words=String(text||'').split(/\s+/).filter(Boolean),lines=[];let current='';
+  const fits=value=>{try{return font.widthOfTextAtSize(value,size)<=maxWidth}catch(e){return false}};
+  for(const word of words){
+    if(!fits(word)&&word.length>1){
+      let piece='';
+      for(const char of word){
+        if(fits(piece+char))piece+=char;
+        else{if(piece)lines.push(piece);piece=char}
+      }
+      if(piece){if(current&&fits(current+' '+piece))current+=' '+piece;else{if(current)lines.push(current);current=piece}}
+    }else if(!current)current=word;
+    else if(fits(current+' '+word))current+=' '+word;
+    else{lines.push(current);current=word}
+  }
+  if(current)lines.push(current);
+  if(!lines.length)lines.push('');
+  if(lines.length<=maxLines)return lines;
+  const trimmed=lines.slice(0,maxLines);let last=trimmed[maxLines-1];
+  while(last.length>1&&!fits(last+'…'))last=last.slice(0,-1);
+  trimmed[maxLines-1]=last+'…';return trimmed;
+}
+function dbColumnWidths(columns,rows,available){
+  const weights=columns.map(col=>{
+    let longest=col.name.length;
+    for(const row of rows.slice(0,120)){
+      const length=dbPdfText(row[col.name]).length;
+      if(length>longest)longest=length;
+    }
+    return Math.max(5,Math.min(longest,34));
+  });
+  const total=weights.reduce((a,b)=>a+b,0)||1;
+  let widths=weights.map(weight=>Math.max(42,available*weight/total));
+  const sum=widths.reduce((a,b)=>a+b,0);
+  if(sum>available)widths=widths.map(width=>width*available/sum);
+  const leftover=available-widths.reduce((a,b)=>a+b,0);
+  if(leftover>0.5)widths=widths.map(width=>width+leftover/columns.length);
+  return widths;
+}
+async function dbBuildPdf(names,onProgress){
+  const doc=await PDFDocument.create();
+  const font=await doc.embedFont(StandardFonts.Helvetica),bold=await doc.embedFont(StandardFonts.HelveticaBold);
+  const pageW=842,pageH=595,margin=36,contentW=pageW-2*margin;
+  const ink=rgb(.227,.188,.098),muted=rgb(.478,.443,.365),line=rgb(.91,.882,.824),headFill=rgb(.965,.945,.898),altFill=rgb(.984,.976,.957);
+  const pages=[];let page=null,y=0;
+  const newPage=()=>{
+    page=doc.addPage([pageW,pageH]);pages.push(page);y=pageH-margin;
+  };
+  newPage();
+  page.drawText('Database SQLite',{x:margin,y:y-20,size:20,font:bold,color:ink});
+  page.drawText(dbPdfText(dbBaseName()+'.db'),{x:margin,y:y-37,size:10,font,color:muted});
+  page.drawText(dbPdfText(new Date().toLocaleString('id-ID')),{x:margin,y:y-50,size:8,font,color:muted});
+  y-=68;
+  const totalRows=names.reduce((sum,name)=>sum+(databaseState.tables.find(t=>t.name===name)?.rowCount||0),0);
+  page.drawText(dbPdfText(`${names.length} tabel · ${totalRows.toLocaleString('id-ID')} baris`),{x:margin,y:y-10,size:8.5,font,color:muted});
+  y-=24;
+  if(!names.length)page.drawText('Tidak ada tabel untuk diekspor.',{x:margin,y:y-12,size:9,font,color:muted});
+  let processed=0;
+  for(const name of names){
+    const table=databaseState.tables.find(t=>t.name===name);if(!table)continue;
+    const allRows=dbFetchAllRows(name,DB_PDF_ROW_LIMIT);
+    const truncated=table.rowCount>allRows.length;
+    const columns=table.columns;
+    if(!columns.length){y-=24;continue}
+    const fontSize=columns.length>14?5.6:columns.length>10?6.2:columns.length>7?6.8:7.6;
+    const lineHeight=fontSize+2.4,headerHeight=fontSize*2.2+10;
+    const widths=dbColumnWidths(columns,allRows,contentW);
+    if(y-30-headerHeight-lineHeight*2<margin+22)newPage(name,`${allRows.length} baris · ${columns.length} kolom`);
+    page.drawText(dbPdfText(name),{x:margin,y:y-11,size:12,font:bold,color:ink});
+    const meta=`${allRows.length.toLocaleString('id-ID')} baris · ${columns.length} kolom${truncated?' · dibatasi '+DB_PDF_ROW_LIMIT.toLocaleString('id-ID')+' baris':''}`;
+    let metaWidth=70;try{metaWidth=font.widthOfTextAtSize(dbPdfText(meta),7.5)}catch(e){}
+    page.drawText(dbPdfText(meta),{x:pageW-margin-metaWidth,y:y-10,size:7.5,font,color:muted});
+    y-=30;
+    const drawHeader=()=>{
+      page.drawRectangle({x:margin,y:y-headerHeight,width:contentW,height:headerHeight,color:headFill});
+      let x=margin;
+      columns.forEach((col,index)=>{
+        const label=dbWrapPdfText(dbPdfText(col.name)+' · '+dbTypeLabel(col.kind),bold,fontSize*.88,widths[index]-8,1)[0]||'';
+        page.drawText(label,{x:x+4,y:y-headerHeight/2-fontSize*.34,size:fontSize*.88,font:bold,color:ink});
+        x+=widths[index];
+      });
+      let gx=margin;
+      widths.forEach(width=>{gx+=width;if(gx<margin+contentW-.2)page.drawLine({start:{x:gx,y:y-headerHeight},end:{x:gx,y:y},thickness:.4,color:line})});
+      page.drawLine({start:{x:margin,y:y-headerHeight},end:{x:margin+contentW,y:y-headerHeight},thickness:.6,color:line});
+      y-=headerHeight;
+    };
+    drawHeader();
+    if(!allRows.length){
+      page.drawText('Tidak ada baris pada tabel ini.',{x:margin+4,y:y-14,size:8,font,color:muted});
+      y-=24;
+    }
+    for(let index=0;index<allRows.length;index++){
+      const row=allRows[index];
+      const cellLines=columns.map(col=>dbWrapPdfText(dbPdfText(row[col.name]),font,fontSize,widths[columns.indexOf(col)]-8,4));
+      let maxLines=1;for(const lines of cellLines)if(lines.length>maxLines)maxLines=lines.length;
+      const rowHeight=Math.max(fontSize+7,maxLines*lineHeight+5);
+      if(y-rowHeight<margin+22){newPage(name+' (lanjutan)',`${allRows.length.toLocaleString('id-ID')} baris · ${columns.length} kolom`);drawHeader()}
+      if(index%2===1)page.drawRectangle({x:margin,y:y-rowHeight,width:contentW,height:rowHeight,color:altFill});
+      let x=margin;
+      cellLines.forEach((lines,colIndex)=>{
+        let textY=y-4-fontSize;
+        for(const text of lines){if(text)page.drawText(text,{x:x+4,y:textY,size:fontSize,font,color:ink});textY-=lineHeight}
+        x+=widths[colIndex];
+      });
+      let gx=margin;
+      widths.forEach(width=>{gx+=width;if(gx<margin+contentW-.2)page.drawLine({start:{x:gx,y:y-rowHeight},end:{x:gx,y:y},thickness:.3,color:line})});
+      page.drawLine({start:{x:margin,y:y-rowHeight},end:{x:margin+contentW,y:y-rowHeight},thickness:.4,color:line});
+      y-=rowHeight;
+      processed++;
+      if(onProgress&&processed%150===0){onProgress(processed/Math.max(1,totalRows));await new Promise(resolve=>setTimeout(resolve,0))}
+    }
+    y-=18;
+  }
+  const total=pages.length;
+  pages.forEach((item,index)=>{
+    item.drawText(dbPdfText(`Paperly · Database SQLite · ${index+1} / ${total}`),{x:margin,y:18,size:7,font,color:muted});
+    item.drawLine({start:{x:margin,y:29},end:{x:pageW-margin,y:29},thickness:.35,color:line});
+  });
+  if(onProgress)onProgress(1);
+  return doc.save();
+}
+async function dbExportPdf(names){
+  const s=databaseState,button=document.getElementById('dbPdfBtn');
+  if(!s.db||s.busy||!names.length)return;
+  dbSetBusy(true,'Menyusun PDF dari database…');
+  if(button){button.disabled=true;button.classList.add('loading');button.innerHTML='<span class="button-spinner" aria-hidden="true"></span><span>Menyusun…</span>'}
+  try{
+    const bytes=await dbBuildPdf(names,fraction=>dbSetProgress(Math.max(2,Math.min(98,fraction*90)),'Menyusun tabel ke PDF…'));
+    const suffix=names.length===1?'-'+sanitizeFileStem(names[0],'tabel'):'';
+    download(bytes,dbBaseName()+suffix+'.pdf','application/pdf');
+    dbFlashStatus('PDF siap disimpan');
+  }catch(e){showToast('PDF gagal dibuat: '+(e.message||'terjadi kesalahan'))}
+  finally{
+    dbSetBusy(false);
+    if(button){button.classList.remove('loading');button.innerHTML='<span>Ekspor PDF</span><span>↓</span>'}
+  }
+}
+
+function dbResetWizard(){
+  const w=dbWizardState;w.step=1;w.name='database-baru';w.activeTable=0;w.error='';w.focus='';
+  w.tables=[{name:'Tabel 1',columns:[{name:'Nama',type:'TEXT'},{name:'Keterangan',type:'TEXT'}],rows:[]}];
+  dbWizardReplaceApproved=false;
+}
+function dbStartWizard(){
+  dbWizardState.wizardReturnView=databaseState.view==='workspace'?'workspace':'start';
+  dbResetWizard();dbShowView('wizard');dbRenderWizard();
+  setTimeout(()=>{const input=document.getElementById('wzDbName');if(input)try{input.focus({preventScroll:true});input.select()}catch(e){}},60);
+}
+function dbWizardTable(){return dbWizardState.tables[dbWizardState.activeTable]||dbWizardState.tables[0]||null}
+function dbWizardSqlPreview(){
+  return dbWizardState.tables.map(table=>{
+    const columns=table.columns.map(col=>`  ${dbQuoteIdent(col.name)} ${DB_WIZARD_TYPES[col.type].sql}${col.notnull?' NOT NULL':''}`);
+    return `CREATE TABLE ${dbQuoteIdent(table.name)} (\n  "id" INTEGER PRIMARY KEY AUTOINCREMENT,\n${columns.join(',\n')}\n);`;
+  }).join('\n\n');
+}
+function dbRenderWizard(){
+  const w=dbWizardState,titles=['Nama & pengaturan dasar','Struktur tabel & kolom','Isi data awal (opsional)','Selesai & unduh'];
+  const p=dbParts();
+  if(p.wizardTitle)p.wizardTitle.textContent=titles[w.step-1]||titles[0];
+  document.querySelectorAll('#dbStepper li').forEach(li=>{
+    const step=Number(li.dataset.wzStep);
+    li.classList.toggle('active',step===w.step);
+    li.classList.toggle('done',step<w.step);
+  });
+  if(p.wizardBack)p.wizardBack.hidden=w.step===1;
+  if(p.wizardNext)p.wizardNext.innerHTML=w.step===4?'<span>Buat &amp; unduh .db</span><span>↓</span>':'<span>Lanjut</span><span>→</span>';
+  if(p.wizardError){p.wizardError.textContent=w.error||'';p.wizardError.hidden=!w.error}
+  if(!p.wizardBody)return;
+  const scroll=p.wizardBody.scrollTop;
+  if(w.activeTable>=w.tables.length)w.activeTable=Math.max(0,w.tables.length-1);
+  p.wizardBody.innerHTML=[dbWizardStep1HTML,dbWizardStep2HTML,dbWizardStep3HTML,dbWizardStep4HTML][w.step-1]();
+  p.wizardBody.scrollTop=scroll;
+  if(w.focus){
+    const selector=w.focus;w.focus='';
+    requestAnimationFrame(()=>{const target=p.wizardBody.querySelector(selector);if(target){target.focus({preventScroll:true});if(target.select)target.select()}});
+  }
+}
+function dbWizardStep1HTML(){
+  return `<div class="wz-panel">
+    <div class="wz-intro"><span class="wz-step-note">LANGKAH 1 DARI 4</span><h3>Beri nama database Anda</h3><p>Nama ini dipakai sebagai nama file <strong>.db</strong> saat diunduh. Anda tetap bisa menggantinya nanti.</p></div>
+    <label class="field-label" for="wzDbName">Nama file database</label>
+    <div class="wz-name-row"><input id="wzDbName" class="text-field" type="text" maxlength="64" autocomplete="off" spellcheck="false" value="${escapeHTML(dbWizardState.name)}" placeholder="Contoh: data-toko"><span>.db</span></div>
+    <p class="field-hint">Gunakan huruf, angka, spasi, titik, atau tanda hubung. Karakter yang tidak didukung akan diganti otomatis.</p>
+    <div class="wz-info"><span aria-hidden="true">✓</span><span>Database dibuat sepenuhnya di browser Anda. Tidak perlu akun atau koneksi internet.</span></div>
+  </div>`;
+}
+function dbWizardStep2HTML(){
+  const tables=dbWizardState.tables.map((table,tableIndex)=>{
+    const columns=table.columns.map((col,colIndex)=>{
+      const options=Object.entries(DB_WIZARD_TYPES).map(([key,meta])=>`<option value="${key}"${col.type===key?' selected':''}>${meta.label}</option>`).join('');
+      return `<div class="wz-col-row">
+        <input class="text-field" type="text" maxlength="48" value="${escapeHTML(col.name)}" data-wz-col-name aria-label="Nama kolom ${colIndex+1} pada ${escapeHTML(table.name)}" placeholder="Nama kolom">
+        <select class="text-field" data-wz-col-type aria-label="Tipe data kolom ${colIndex+1}">${options}</select>
+        <label class="wz-check"><input type="checkbox" data-wz-col-required${col.notnull?' checked':''} aria-label="Wajib diisi kolom ${colIndex+1}"> Wajib</label>
+        <button type="button" class="wz-icon-btn" data-wz-del-col aria-label="Hapus kolom ${colIndex+1}"${table.columns.length<=1?' disabled':''}>×</button>
+      </div>`;
+    }).join('');
+    return `<article class="wz-table-card">
+      <header class="wz-table-head"><div><span class="field-label">Nama tabel ${tableIndex+1}</span><input class="text-field" type="text" maxlength="48" value="${escapeHTML(table.name)}" data-wz-table-name aria-label="Nama tabel ${tableIndex+1}" placeholder="Nama tabel"></div><button type="button" class="mini-button" data-wz-del-table${dbWizardState.tables.length<=1?' disabled':''}>Hapus tabel</button></header>
+      <div class="wz-col-head"><span>Nama kolom</span><span>Tipe data</span><span>Wajib</span><span aria-hidden="true"></span></div>
+      <div class="wz-cols">${columns}</div>
+      <button type="button" class="mini-button" data-wz-add-col>+ Tambah kolom</button>
+    </article>`;
+  }).join('');
+  return `<div class="wz-panel">
+    <div class="wz-intro"><span class="wz-step-note">LANGKAH 2 DARI 4</span><h3>Susun tabel dan kolom</h3><p>Tambahkan tabel lalu tentukan kolom beserta tipe datanya. Tidak perlu menulis SQL — kami menyiapkan strukturnya untuk Anda.</p></div>
+    <div class="wz-tables">${tables}</div>
+    <button type="button" class="button-quiet" data-wz-add-table>+ Tambah tabel</button>
+    <p class="field-hint">Setiap tabel otomatis mendapat kolom <code>id</code> sebagai kunci utama. Hindari nama kolom <code>id</code> karena sudah disiapkan.</p>
+  </div>`;
+}
+function dbWizardCellHTML(col,value,rowNumber){
+  const label=`${col.name}, baris ${rowNumber}`,safeValue=escapeHTML(String(value??''));
+  if(col.type==='BOOLEAN'){
+    const current=String(value??'');
+    return `<select class="wz-cell" data-wz-cell aria-label="${escapeHTML(label)}"><option value=""${current===''?' selected':''}>— (kosong)</option><option value="1"${current==='1'?' selected':''}>Ya</option><option value="0"${current==='0'?' selected':''}>Tidak</option></select>`;
+  }
+  let type='text',extra='';
+  if(col.type==='DATE')type='date';
+  else if(col.type==='DATETIME')type='datetime-local';
+  else if(col.type==='INTEGER')extra=' inputmode="numeric"';
+  else if(col.type==='REAL')extra=' inputmode="decimal"';
+  return `<input class="wz-cell" type="${type}"${extra} value="${safeValue}" data-wz-cell aria-label="${escapeHTML(label)}" autocomplete="off">`;
+}
+function dbWizardStep3HTML(){
+  const table=dbWizardTable();
+  if(!table)return `<div class="wz-panel"><div class="wz-intro"><h3>Belum ada tabel</h3><p>Kembali ke langkah sebelumnya untuk menambahkan tabel.</p></div></div>`;
+  const tabs=dbWizardState.tables.map((item,index)=>`<button type="button" class="wz-tab${item===table?' active':''}" data-wz-tab="${index}">${escapeHTML(item.name||`Tabel ${index+1}`)}</button>`).join('');
+  const head=`<tr><th class="wz-rowno" scope="col">#</th>${table.columns.map(col=>`<th scope="col"><span>${escapeHTML(col.name)}</span><small>${escapeHTML(DB_WIZARD_TYPES[col.type].label)}</small></th>`).join('')}<th scope="col"><span aria-hidden="true">×</span></th></tr>`;
+  const rows=table.rows.map((row,rowIndex)=>`<tr data-wz-row="${rowIndex}"><th class="wz-rowno" scope="row">${rowIndex+1}</th>${table.columns.map((col,colIndex)=>`<td>${dbWizardCellHTML(col,row[colIndex],rowIndex+1)}</td>`).join('')}<td><button type="button" class="wz-icon-btn" data-wz-del-row="${rowIndex}" aria-label="Hapus baris ${rowIndex+1}">×</button></td></tr>`).join('');
+  return `<div class="wz-panel">
+    <div class="wz-intro"><span class="wz-step-note">LANGKAH 3 DARI 4</span><h3>Isi data awal (opsional)</h3><p>Anda bisa mengisi beberapa baris sekarang, atau langsung lanjut. Data tetap bisa ditambahkan lewat editor setelah database dibuat.</p></div>
+    <div class="wz-tabs" role="tablist" aria-label="Pilih tabel">${tabs}</div>
+    <div class="wz-sheet-wrap"><table class="wz-sheet"><thead>${head}</thead><tbody>${rows||`<tr><td class="wz-empty-row" colspan="${table.columns.length+2}">Belum ada baris. Klik tombol di bawah untuk menambahkan.</td></tr>`}</tbody></table></div>
+    <button type="button" class="mini-button" data-wz-add-row>+ Tambah baris pada ${escapeHTML(table.name||'tabel ini')}</button>
+    <p class="field-hint">Kosongkan sel bila nilainya belum ada. Kolom <code>id</code> diisi otomatis oleh SQLite.</p>
+  </div>`;
+}
+function dbWizardStep4HTML(){
+  const w=dbWizardState,totalColumns=w.tables.reduce((sum,t)=>sum+t.columns.length,0),totalRows=w.tables.reduce((sum,t)=>sum+t.rows.length,0);
+  return `<div class="wz-panel">
+    <div class="wz-finish"><span class="wz-finish-icon" aria-hidden="true">✓</span><span class="wz-step-note">LANGKAH 4 DARI 4</span><h3>Database siap dibuat</h3><p>Periksa ringkasan berikut. Tombol <strong>Buat &amp; unduh .db</strong> akan menyimpan file database dan membukanya di editor.</p></div>
+    <dl class="wz-summary">
+      <div><dt>Nama file</dt><dd>${escapeHTML(dbWizardBaseName())}.db</dd></div>
+      <div><dt>Jumlah tabel</dt><dd>${w.tables.length}</dd></div>
+      <div><dt>Total kolom</dt><dd>${totalColumns}</dd></div>
+      <div><dt>Baris awal</dt><dd>${totalRows}</dd></div>
+    </dl>
+    <div class="wz-table-summary">${w.tables.map(t=>`<article><strong>${escapeHTML(t.name)}</strong><span>${t.columns.length} kolom · ${t.rows.length} baris awal</span><small>${t.columns.map(c=>escapeHTML(c.name)).join(', ')}</small></article>`).join('')}</div>
+    <details class="wz-sql"><summary>Lihat struktur SQL yang akan dibuat</summary><pre>${escapeHTML(dbWizardSqlPreview())}</pre></details>
+    <button type="button" class="button-quiet" data-wz-open>Buat dan buka di editor saja</button>
+  </div>`;
+}
+
+function dbWizardValidate(step){
+  const w=dbWizardState;
+  if(step===1)return String(w.name||'').trim()?'':'Nama file database wajib diisi.';
+  if(step===2){
+    if(!w.tables.length)return 'Tambahkan minimal satu tabel.';
+    const tableNames=new Set();
+    for(const table of w.tables){
+      const name=String(table.name||'').trim();
+      if(!name)return 'Nama tabel wajib diisi.';
+      if(/^sqlite_/i.test(name))return `Nama tabel "${name}" tidak boleh diawali sqlite_.`;
+      if(tableNames.has(name.toLowerCase()))return `Nama tabel "${name}" sudah digunakan.`;
+      tableNames.add(name.toLowerCase());
+      if(!table.columns.length)return `Tabel "${name}" harus memiliki minimal satu kolom.`;
+      const columnNames=new Set();
+      for(const col of table.columns){
+        const columnName=String(col.name||'').trim();
+        if(!columnName)return `Nama kolom pada tabel "${name}" wajib diisi.`;
+        if(columnName.toLowerCase()==='id')return 'Kolom "id" dibuat otomatis. Gunakan nama lain.';
+        if(columnNames.has(columnName.toLowerCase()))return `Kolom "${columnName}" sudah ada di tabel "${name}".`;
+        columnNames.add(columnName.toLowerCase());
+        if(!DB_WIZARD_TYPES[col.type])return `Tipe data kolom "${columnName}" tidak dikenali.`;
+      }
+    }
+    return '';
+  }
+  if(step===3){
+    for(const table of w.tables){
+      for(const row of table.rows){
+        for(let index=0;index<table.columns.length;index++){
+          const col=table.columns[index],raw=String(row[index]??'').trim();
+          if(!raw){
+            if(col.notnull)return `Kolom "${col.name}" pada ${table.name} wajib diisi.`;
+            continue;
+          }
+          if(col.type==='INTEGER'&&!/^-?\d+$/.test(raw))return `Kolom "${col.name}" hanya menerima bilangan bulat. Baris: ${raw}.`;
+          if(col.type==='REAL'&&!Number.isFinite(Number(raw.replace(',','.'))))return `Kolom "${col.name}" hanya menerima angka. Baris: ${raw}.`;
+        }
+      }
+    }
+  }
+  return '';
+}
+function dbWizardGo(direction){
+  const w=dbWizardState;
+  if(direction>0){
+    const error=dbWizardValidate(w.step);
+    if(error){w.error=error;dbRenderWizard();return}
+    w.error='';
+    if(w.step<4){w.step++;dbRenderWizard();return}
+    dbWizardFinish(false);return;
+  }
+  if(w.step>1){w.step--;w.error='';dbRenderWizard()}
+}
+function dbWizardValue(value,type){
+  const raw=String(value??'').trim();
+  if(!raw)return null;
+  if(type==='INTEGER'){const number=Number.parseInt(raw,10);return Number.isFinite(number)?number:null}
+  if(type==='REAL'){const number=Number(raw.replace(',','.'));return Number.isFinite(number)?number:null}
+  if(type==='BOOLEAN')return raw==='1'?1:0;
+  return raw;
+}
+function dbWizardBuild(){
+  const db=new sqlJsLib.Database();
+  for(const table of dbWizardState.tables){
+    const name=table.name.trim();
+    const definitions=['"id" INTEGER PRIMARY KEY AUTOINCREMENT',...table.columns.map(col=>`${dbQuoteIdent(col.name.trim())} ${DB_WIZARD_TYPES[col.type].sql}${col.notnull?' NOT NULL':''}`)];
+    db.run(`CREATE TABLE ${dbQuoteIdent(name)} (${definitions.join(', ')})`);
+    const columns=table.columns.map(col=>dbQuoteIdent(col.name.trim())).join(', ');
+    const placeholders=table.columns.map(()=>'?').join(', ');
+    const stmt=db.prepare(`INSERT INTO ${dbQuoteIdent(name)} (${columns}) VALUES (${placeholders})`);
+    for(const row of table.rows){
+      if(!row.some(value=>String(value??'').trim()))continue;
+      stmt.run(table.columns.map((col,index)=>dbWizardValue(row[index],col.type)));
+    }
+    stmt.free();
+  }
+  return db;
+}
+async function dbWizardFinish(openOnly){
+  const w=dbWizardState;
+  for(let step=1;step<=3;step++){
+    const error=dbWizardValidate(step);
+    if(error){w.step=step;w.error=error;dbRenderWizard();return}
+  }
+  if(databaseState.db&&databaseState.dirty&&!dbWizardReplaceApproved){
+    const ok=await dbAskConfirm({title:'Ganti database yang sedang dibuka?',copy:'Database saat ini masih memiliki perubahan yang belum disimpan. Database baru akan menggantinya.',label:'Lanjutkan',danger:false});
+    if(!ok)return;
+    dbWizardReplaceApproved=true;
+  }
+  dbSetBusy(true,'Membuat struktur database…');
+  try{
+    await ensureSqlJs();
+    const db=dbWizardBuild(),name=dbWizardBaseName();
+    dbLoadDatabase(db,name,{dirty:true});
+    dbMarkDirty();
+    if(openOnly){showToast('Database baru dibuat. Simpan sebagai .db lewat tombol di atas.')}
+    else{
+      const blob=new Blob([db.export()],{type:'application/vnd.sqlite3'});
+      download(blob,name+'.db','application/vnd.sqlite3',saved=>dbMarkSaved(saved));
+    }
+    dbResetWizard();
+  }catch(e){
+    w.error='Database gagal dibuat: '+(e.message||'terjadi kesalahan pada database');
+    dbRenderWizard();
+  }finally{dbSetBusy(false)}
+}
+function dbHandleWizardClick(event){
+  const button=event.target.closest('button');if(!button)return;
+  const w=dbWizardState;
+  if(button.id==='dbWizardBack'){dbWizardGo(-1);return}
+  if(button.id==='dbWizardNext'){dbWizardGo(1);return}
+  if(button.id==='dbWizardCancel'){
+    const view=w.wizardReturnView==='workspace'&&databaseState.db?'workspace':'start';
+    dbShowView(view);
+    if(view==='workspace')dbRenderWorkspace();
+    return;
+  }
+  if(button.hasAttribute('data-wz-open')){dbWizardFinish(true);return}
+  const stepItem=button.closest('[data-wz-step]');
+  if(stepItem){const step=Number(stepItem.dataset.wzStep);if(step<w.step){w.step=step;w.error='';dbRenderWizard()}return}
+  const tableCard=button.closest('.wz-table-card');
+  const tableIndex=tableCard?[...tableCard.parentElement.children].indexOf(tableCard):w.activeTable;
+  const table=w.tables[tableIndex];
+  if(button.hasAttribute('data-wz-add-table')){
+    w.tables.push({name:`Tabel ${w.tables.length+1}`,columns:[{name:'Nama',type:'TEXT'}],rows:[]});
+    w.activeTable=w.tables.length-1;w.focus='.wz-table-card:last-child [data-wz-table-name]';dbRenderWizard();return;
+  }
+  if(button.hasAttribute('data-wz-del-table')){
+    if(w.tables.length<=1)return;
+    w.tables.splice(tableIndex,1);w.activeTable=Math.max(0,Math.min(w.activeTable,w.tables.length-1));dbRenderWizard();return;
+  }
+  if(button.hasAttribute('data-wz-add-col')&&table){
+    table.columns.push({name:`Kolom ${table.columns.length+1}`,type:'TEXT'});
+    table.rows.forEach(row=>row.push(''));
+    w.focus=`.wz-table-card:nth-child(${tableIndex+1}) .wz-col-row:last-child [data-wz-col-name]`;dbRenderWizard();return;
+  }
+  if(button.hasAttribute('data-wz-del-col')&&table){
+    if(table.columns.length<=1)return;
+    const rowElement=button.closest('.wz-col-row'),colIndex=rowElement?[...rowElement.parentElement.children].indexOf(rowElement):table.columns.length-1;
+    table.columns.splice(colIndex,1);table.rows.forEach(row=>row.splice(colIndex,1));dbRenderWizard();return;
+  }
+  if(button.hasAttribute('data-wz-tab')){w.activeTable=Number(button.dataset.wzTab);dbRenderWizard();return}
+  if(button.hasAttribute('data-wz-add-row')&&table){
+    table.rows.push(table.columns.map(()=>''));
+    const rowIndex=table.rows.length-1;
+    w.focus=`[data-wz-row="${rowIndex}"] [data-wz-cell]`;dbRenderWizard();return;
+  }
+  if(button.hasAttribute('data-wz-del-row')&&table){
+    table.rows.splice(Number(button.dataset.wzDelRow),1);dbRenderWizard();
+  }
+}
+function dbHandleWizardInput(event){
+  const target=event.target,w=dbWizardState;
+  if(target.id==='wzDbName'){w.name=target.value;return}
+  const card=target.closest('.wz-table-card');
+  const tableIndex=card?[...card.parentElement.children].indexOf(card):w.activeTable;
+  const table=w.tables[tableIndex];if(!table)return;
+  if(target.matches('[data-wz-table-name]')){table.name=target.value;return}
+  const colRow=target.closest('.wz-col-row');
+  if(colRow){
+    const colIndex=[...colRow.parentElement.children].indexOf(colRow),col=table.columns[colIndex];if(!col)return;
+    if(target.matches('[data-wz-col-name]'))col.name=target.value;
+    else if(target.matches('[data-wz-col-type]'))col.type=target.value;
+    else if(target.matches('[data-wz-col-required]'))col.notnull=target.checked;
+    return;
+  }
+  const tr=target.closest('tr[data-wz-row]');
+  if(tr&&target.matches('[data-wz-cell]')){
+    const rowIndex=+tr.dataset.wzRow,colIndex=[...tr.querySelectorAll('[data-wz-cell]')].indexOf(target);
+    if(table.rows[rowIndex])table.rows[rowIndex][colIndex]=target.value;
+  }
+}
+
+function initDatabasePage(){
+  if(databasePageInitialized)return;
+  databasePageInitialized=true;
+  const p=dbParts();
+  document.getElementById('dbBackBtn')?.addEventListener('click',closeDatabasePage);
+  document.getElementById('dbPickFile')?.addEventListener('click',()=>document.getElementById('dbFileInput')?.click());
+  document.getElementById('dbStartWizard')?.addEventListener('click',dbStartWizard);
+  const fileInput=document.getElementById('dbFileInput');
+  fileInput?.addEventListener('change',()=>{dbOpenFile(fileInput.files&&fileInput.files[0]);fileInput.value=''});
+  const drop=document.getElementById('dbDropzone');
+  if(drop){
+    ['dragenter','dragover'].forEach(type=>drop.addEventListener(type,event=>{event.preventDefault();drop.classList.add('dragover')}));
+    ['dragleave','dragend'].forEach(type=>drop.addEventListener(type,()=>drop.classList.remove('dragover')));
+    drop.addEventListener('drop',dbHandleDroppedFile);
+  }
+  p.page?.addEventListener('dragover',event=>{if(event.dataTransfer&&[...event.dataTransfer.types].includes('Files'))event.preventDefault()});
+  p.page?.addEventListener('drop',event=>{if(drop&&(event.target===drop||drop.contains(event.target)))return;event.preventDefault()});
+  p.name?.addEventListener('input',()=>{databaseState.name=dbBaseName();dbUpdateChrome()});
+  p.saveBtn?.addEventListener('click',dbSaveDatabase);
+  p.pdfBtn?.addEventListener('click',()=>dbExportPdf(databaseState.tables.map(t=>t.name)));
+  p.pdfTable?.addEventListener('click',()=>{const t=dbActiveTable();if(t)dbExportPdf([t.name])});
+  p.addRow?.addEventListener('click',dbAddRow);
+  p.prev?.addEventListener('click',()=>dbChangePage(-1));
+  p.next?.addEventListener('click',()=>dbChangePage(1));
+  p.tableList?.addEventListener('click',event=>{
+    const button=event.target.closest('[data-db-table]');if(button)dbSelectTable(button.dataset.dbTable);
+  });
+  p.grid?.addEventListener('change',event=>{if(event.target.matches('[data-db-cell]'))dbCommitCell(event.target)});
+  p.grid?.addEventListener('keydown',dbHandleCellKey);
+  p.grid?.addEventListener('click',event=>{
+    const remove=event.target.closest('[data-db-del-row]');
+    if(remove){dbDeleteRow(remove.closest('tr[data-local-index]'));return}
+    if(event.target.closest('[data-db-new-wizard]'))dbStartWizard();
+  });
+  p.confirmOk?.addEventListener('click',()=>dbResolveConfirm(true));
+  p.confirmCancel?.addEventListener('click',()=>dbResolveConfirm(false));
+  p.confirm?.addEventListener('click',event=>{if(event.target===p.confirm)dbResolveConfirm(false)});
+  p.confirm?.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dbResolveConfirm(false);return}
+    if(event.key!=='Tab')return;
+    const focusable=[...p.confirm.querySelectorAll('button:not(:disabled)')];
+    if(!focusable.length)return;
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+  });
+  p.wizard?.addEventListener('click',dbHandleWizardClick);
+  p.wizardBody?.addEventListener('input',dbHandleWizardInput);
+  p.wizardBody?.addEventListener('change',dbHandleWizardInput);
+  p.wizardBody?.addEventListener('keydown',event=>{
+    if(event.key==='Enter'&&dbWizardState.step===1&&event.target.matches('input')){event.preventDefault();dbWizardGo(1)}
+  });
+  document.addEventListener('keydown',event=>{
+    const page=document.getElementById('dbPage');
+    if(!page||!page.classList.contains('open'))return;
+    if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='s'){
+      event.preventDefault();if(databaseState.view==='workspace')dbSaveDatabase();
+    }
+  });
+  window.addEventListener('beforeunload',event=>{
+    if(!databaseState.db||!databaseState.dirty)return;
+    event.preventDefault();event.returnValue='';
+  });
+  dbShowView(databaseState.view||'start');
+}
