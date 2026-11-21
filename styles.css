@@ -2181,6 +2181,7 @@ body.db-writing{overflow:hidden}
 .db-actions .button-quiet,.db-actions .button-primary{height:34px}
 .db-body{position:relative;flex:1;min-height:0;overflow:auto}
 .db-body>section{min-height:100%}
+.db-body>section[hidden]{display:none}
 
 /* Layar awal */
 .db-start{display:flex;align-items:center;justify-content:center;padding:38px 22px 46px;background:radial-gradient(80% 70% at 50% 0%,rgba(246,232,198,.32),transparent 68%)}
@@ -2272,9 +2273,10 @@ body.db-writing{overflow:hidden}
 .db-progress-area{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:min(420px,calc(100% - 30px));pointer-events:none;z-index:3;text-align:center}
 
 /* Wizard pembuatan database */
-.db-wizard{display:flex;flex-direction:column;min-height:0;background:#fbf9f4}
+.db-wizard{display:flex;flex-direction:column;height:100%;min-height:0;background:#fbf9f4}
 .db-wizard[hidden]{display:none}
 .db-wizard-head{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:16px 24px 13px;border-bottom:1px solid #f0ebdf;background:rgba(255,255,255,.66)}
+.db-wizard-head>div:first-child{min-width:0}
 .db-wizard-head h2{font:700 17px Manrope,sans-serif;letter-spacing:-.4px;color:#5c4d32;margin:2px 0 0}
 .db-stepper{list-style:none;display:flex;align-items:center;gap:5px;margin:0;padding:0}
 .db-stepper li{display:flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid transparent;border-radius:999px;color:#a29882;font:600 9px 'DM Sans',sans-serif;white-space:nowrap}
@@ -2410,6 +2412,7 @@ body[data-theme="dark"] .wz-sheet-wrap,
 body[data-theme="dark"] .wz-sheet thead th,
 body[data-theme="dark"] .wz-sheet .wz-rowno,
 body[data-theme="dark"] .wz-table-card,
+body[data-theme="dark"] .wz-col-row,
 body[data-theme="dark"] .wz-summary>div,
 body[data-theme="dark"] .wz-table-summary article,
 body[data-theme="dark"] .wz-sql{background:#3b3322;border-color:#5c523d}
@@ -2466,8 +2469,9 @@ body[data-theme="dark"] .db-stepper li.done b{background:#435231;color:#bcd395}
   .db-statusbar .db-hint{margin-right:auto}
   .db-wizard-head{gap:8px;padding:12px 12px 10px}
   .db-wizard-head h2{font-size:15px}
-  .db-stepper{width:100%;justify-content:space-between;gap:2px}
-  .db-stepper li{flex-direction:column;gap:3px;padding:4px 3px;font-size:8px}
+  .db-stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:4px}
+  .db-stepper li{justify-content:center;min-width:0;flex-direction:column;gap:3px;padding:4px 2px;font-size:8px;text-align:center}
+  .db-stepper li b{width:16px;height:16px}
   .db-wizard-body{padding:14px 12px 20px}
   .db-wizard-foot{padding:9px 12px 12px}
   .wz-col-head,.wz-col-row{grid-template-columns:minmax(100px,1fr) minmax(110px,.85fr) 56px 28px;gap:5px}
@@ -2481,9 +2485,19 @@ body[data-theme="dark"] .db-stepper li.done b{background:#435231;color:#bcd395}
   .db-actions .button-quiet span:first-child::after{content:'PDF';font-size:9px}
   .db-actions .button-primary{padding:0 8px}
   .db-choice-steps li{font-size:9px}
-  .db-wizard-actions{flex-direction:column-reverse}
-  .db-wizard-actions button{width:100%;justify-content:center}
+  .db-wizard-actions{flex-direction:row;flex-wrap:wrap;gap:6px}
+  .db-wizard-actions #dbWizardNext{order:-1;flex:1 0 100%}
+  .db-wizard-actions #dbWizardBack,.db-wizard-actions #dbWizardCancel{flex:1 1 calc(50% - 3px)}
+  .db-wizard-actions #dbWizardCancel.full-width{flex-basis:100%}
+  .db-wizard-actions button{min-width:0;justify-content:center}
   .wz-name-row{max-width:none}
+  .wz-col-head{display:none}
+  .wz-cols{gap:8px}
+  .wz-col-row{display:grid;grid-template-columns:minmax(0,1fr) 30px;grid-template-areas:"name del" "type del" "check del";gap:6px;padding:9px;border:1px solid #f1ece1;border-radius:11px;background:#fffdf8}
+  .wz-col-row .wz-col-name-input{grid-area:name}
+  .wz-col-row .wz-col-type-input{grid-area:type}
+  .wz-col-row .wz-check{grid-area:check}
+  .wz-col-row .wz-icon-btn{grid-area:del;align-self:center;width:30px;height:30px}
   .wz-summary{grid-template-columns:1fr 1fr}
 }
 

@@ -1230,7 +1230,7 @@ function dbWizardBaseName(){
   return sanitizeFileStem(raw,'database-baru');
 }
 function dbParts(){return {
-  page:document.getElementById('dbPage'),start:document.getElementById('dbStart'),workspace:document.getElementById('dbWorkspace'),wizard:document.getElementById('dbWizard'),
+  page:document.getElementById('dbPage'),body:document.getElementById('dbBody'),start:document.getElementById('dbStart'),workspace:document.getElementById('dbWorkspace'),wizard:document.getElementById('dbWizard'),
   name:document.getElementById('dbName'),status:document.getElementById('dbStatus'),dirty:document.getElementById('dbDirty'),
   saveBtn:document.getElementById('dbSaveBtn'),pdfBtn:document.getElementById('dbPdfBtn'),
   tableList:document.getElementById('dbTableList'),tableCount:document.getElementById('dbTableCount'),tablesEmpty:document.getElementById('dbTablesEmpty'),
@@ -1248,6 +1248,7 @@ function dbShowView(view){
   if(p.workspace)p.workspace.hidden=view!=='workspace';
   if(p.wizard)p.wizard.hidden=view!=='wizard';
   if(p.name)p.name.disabled=view!=='workspace';
+  if(p.body)p.body.scrollTop=0;
   dbUpdateChrome();
 }
 function dbUpdateChrome(){
@@ -1766,9 +1767,15 @@ function dbResetWizard(){
   w.tables=[{name:'Tabel 1',columns:[{name:'Nama',type:'TEXT'},{name:'Keterangan',type:'TEXT'}],rows:[]}];
   dbWizardReplaceApproved=false;
 }
+function dbWizardRenderStep(){
+  const p=dbParts();
+  if(p.body)p.body.scrollTop=0;
+  if(p.wizardBody)p.wizardBody.scrollTop=0;
+  dbRenderWizard();
+}
 function dbStartWizard(){
   dbWizardState.wizardReturnView=databaseState.view==='workspace'?'workspace':'start';
-  dbResetWizard();dbShowView('wizard');dbRenderWizard();
+  dbResetWizard();dbShowView('wizard');dbWizardRenderStep();
   setTimeout(()=>{const input=document.getElementById('wzDbName');if(input)try{input.focus({preventScroll:true});input.select()}catch(e){}},60);
 }
 function dbWizardTable(){return dbWizardState.tables[dbWizardState.activeTable]||dbWizardState.tables[0]||null}
@@ -1788,6 +1795,7 @@ function dbRenderWizard(){
     li.classList.toggle('done',step<w.step);
   });
   if(p.wizardBack)p.wizardBack.hidden=w.step===1;
+  if(p.wizardCancel)p.wizardCancel.classList.toggle('full-width',w.step===1);
   if(p.wizardNext)p.wizardNext.innerHTML=w.step===4?'<span>Buat &amp; unduh .db</span><span>↓</span>':'<span>Lanjut</span><span>→</span>';
   if(p.wizardError){p.wizardError.textContent=w.error||'';p.wizardError.hidden=!w.error}
   if(!p.wizardBody)return;
@@ -1814,8 +1822,8 @@ function dbWizardStep2HTML(){
     const columns=table.columns.map((col,colIndex)=>{
       const options=Object.entries(DB_WIZARD_TYPES).map(([key,meta])=>`<option value="${key}"${col.type===key?' selected':''}>${meta.label}</option>`).join('');
       return `<div class="wz-col-row">
-        <input class="text-field" type="text" maxlength="48" value="${escapeHTML(col.name)}" data-wz-col-name aria-label="Nama kolom ${colIndex+1} pada ${escapeHTML(table.name)}" placeholder="Nama kolom">
-        <select class="text-field" data-wz-col-type aria-label="Tipe data kolom ${colIndex+1}">${options}</select>
+        <input class="text-field wz-col-name-input" type="text" maxlength="48" value="${escapeHTML(col.name)}" data-wz-col-name aria-label="Nama kolom ${colIndex+1} pada ${escapeHTML(table.name)}" placeholder="Nama kolom">
+        <select class="text-field wz-col-type-input" data-wz-col-type aria-label="Tipe data kolom ${colIndex+1}">${options}</select>
         <label class="wz-check"><input type="checkbox" data-wz-col-required${col.notnull?' checked':''} aria-label="Wajib diisi kolom ${colIndex+1}"> Wajib</label>
         <button type="button" class="wz-icon-btn" data-wz-del-col aria-label="Hapus kolom ${colIndex+1}"${table.columns.length<=1?' disabled':''}>×</button>
       </div>`;
@@ -1923,12 +1931,12 @@ function dbWizardGo(direction){
   const w=dbWizardState;
   if(direction>0){
     const error=dbWizardValidate(w.step);
-    if(error){w.error=error;dbRenderWizard();return}
+    if(error){w.error=error;dbWizardRenderStep();return}
     w.error='';
-    if(w.step<4){w.step++;dbRenderWizard();return}
+    if(w.step<4){w.step++;dbWizardRenderStep();return}
     dbWizardFinish(false);return;
   }
-  if(w.step>1){w.step--;w.error='';dbRenderWizard()}
+  if(w.step>1){w.step--;w.error='';dbWizardRenderStep()}
 }
 function dbWizardValue(value,type){
   const raw=String(value??'').trim();
@@ -1959,7 +1967,7 @@ async function dbWizardFinish(openOnly){
   const w=dbWizardState;
   for(let step=1;step<=3;step++){
     const error=dbWizardValidate(step);
-    if(error){w.step=step;w.error=error;dbRenderWizard();return}
+    if(error){w.step=step;w.error=error;dbWizardRenderStep();return}
   }
   if(databaseState.db&&databaseState.dirty&&!dbWizardReplaceApproved){
     const ok=await dbAskConfirm({title:'Ganti database yang sedang dibuka?',copy:'Database saat ini masih memiliki perubahan yang belum disimpan. Database baru akan menggantinya.',label:'Lanjutkan',danger:false});
@@ -1996,7 +2004,7 @@ function dbHandleWizardClick(event){
   }
   if(button.hasAttribute('data-wz-open')){dbWizardFinish(true);return}
   const stepItem=button.closest('[data-wz-step]');
-  if(stepItem){const step=Number(stepItem.dataset.wzStep);if(step<w.step){w.step=step;w.error='';dbRenderWizard()}return}
+  if(stepItem){const step=Number(stepItem.dataset.wzStep);if(step<w.step){w.step=step;w.error='';dbWizardRenderStep()}return}
   const tableCard=button.closest('.wz-table-card');
   const tableIndex=tableCard?[...tableCard.parentElement.children].indexOf(tableCard):w.activeTable;
   const table=w.tables[tableIndex];
