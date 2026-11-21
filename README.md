@@ -24,6 +24,7 @@
 
 - Ukuran kertas (A4, A5, B5, Letter, Legal, F4/Folio, A3) dan margin atas, kanan, bawah, kiri.
 - Orientasi halaman portrait atau landscape.
+- Pratinjau kertas memakai proporsi dan pembungkusan baris yang sama dengan PDF, dengan kontrol zoom serta tombol Fit untuk layar kecil.
 - Jumlah kolom yang berlaku khusus pada teks yang dipilih/diblok, bukan seluruh dokumen.
 - Inden kiri, inden baris pertama, spasi baris, dan spasi paragraf.
 - Perataan teks rata kiri, tengah, kanan, dan rata kiri-kanan (justify).
