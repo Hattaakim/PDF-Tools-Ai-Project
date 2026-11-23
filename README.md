@@ -77,3 +77,13 @@ Warna kaca kini memakai satu set token untuk kedua tema, sehingga tidak ada lagi
 - Ilustrasi hero, kartu panduan, banner privasi, dan halaman Tentang mengikuti tema yang sama; gradien emas tetap dipakai sebagai aksen, bukan sebagai latar yang membanjiri layar.
 - Warna `theme-color` dan scrollbar browser ikut berubah saat tema diganti, termasuk scrollbar akar halaman.
 - Kontras teks sekunder pada modal, tabel rentang halaman, dan catatan pratinjau dinaikkan agar tetap terbaca di latar gelap.
+
+## Penyimpanan offline dan pemulihan otomatis
+
+Pekerjaan di grup **Tulis & Sunting** kini memiliki salinan lokal yang dibuat otomatis di browser:
+
+- **Edit PDF, Pembuat PDF, PDF Sheet, dan Database SQLite** menyimpan salinan dokumen beserta suntingannya ke IndexedDB setiap kali ada perubahan. File PDF asli dan data SQLite ikut disimpan, sehingga pekerjaan tidak hilang saat tab atau browser ditutup.
+- Saat situs dibuka kembali, aplikasi menampilkan dialog **Lanjutkan pekerjaan Anda?** dengan ringkasan backup terbaru. Pilih **Muat backup** untuk melanjutkan atau **Mulai dari awal** untuk menghapus salinan lokal tersebut.
+- Aset antarmuka (HTML, CSS, JavaScript, pustaka vendor, dan WASM) disimpan dalam cache service worker. Halaman tetap dapat dibuka dan dipakai tanpa koneksi setelah kunjungan pertama.
+- Manajemen cache berjalan di latar belakang: entri cache yang lebih tua dari 30 hari atau melebihi batas jumlah dihapus, cache versi lama dibersihkan saat service worker diperbarui, dan backup IndexedDB yang sudah tidak diakses lebih dari 14 hari ikut dibuang.
+- Status **PDF siap disimpan** kini berada di dalam dialog **Simpan sebagai**, bukan lagi mengambang di bilah judul editor.
