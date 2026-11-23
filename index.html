@@ -282,6 +282,17 @@
       </div>
     </section>
   </div>
+  <div class="doc-confirm-backdrop" id="editorLeaveDialog" aria-hidden="true">
+    <section class="doc-confirm" role="alertdialog" aria-modal="true" aria-labelledby="editorLeaveTitle" aria-describedby="editorLeaveCopy">
+      <span class="doc-confirm-icon" aria-hidden="true">←</span>
+      <h2 id="editorLeaveTitle">Tutup Tulis &amp; Sunting?</h2>
+      <p id="editorLeaveCopy">Suntingan Anda belum disimpan ke PDF. Jika ditutup sekarang, teks, gambar, dan coretan akan hilang. Tetap di sini untuk melanjutkan, atau tutup untuk membuang suntingan.</p>
+      <div class="doc-confirm-actions">
+        <button type="button" class="button-quiet" id="editorLeaveCancel">Tetap di sini</button>
+        <button type="button" class="button-primary" id="editorLeaveConfirm"><span>Ya, tutup</span><span>←</span></button>
+      </div>
+    </section>
+  </div>
   <section class="db-page" id="dbPage" aria-hidden="true">
     <header class="db-topbar">
       <button class="button-quiet db-back-btn" id="dbBackBtn" aria-label="Kembali ke halaman utama">← Kembali</button>
