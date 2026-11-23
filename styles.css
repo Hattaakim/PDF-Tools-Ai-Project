@@ -451,6 +451,22 @@ body[data-theme="dark"] .doc-confirm h2{color:#f9f6ee}
 body[data-theme="dark"] .doc-confirm p{color:#c2b8a1}
 @media(max-width:480px){.doc-confirm{padding:22px 20px 18px}.doc-confirm-actions{flex-direction:column-reverse}.doc-confirm-actions .button-quiet,.doc-confirm-actions .button-primary{width:100%;justify-content:center}}
 
+/* --- Pemulihan backup offline --- */
+.offline-restore-backdrop{z-index:80}
+.offline-restore{width:min(100%,440px)}
+.offline-restore .doc-confirm-icon svg{width:19px;height:19px}
+.offline-restore-eyebrow{display:block;margin:0 0 6px;font-size:8.5px;font-weight:700;letter-spacing:1.4px;color:#a17b27}
+.offline-restore p{margin-bottom:13px}
+.offline-restore-meta{display:grid;gap:5px;margin:0 0 18px;padding:10px 12px;border:1px solid #f1ece1;border-radius:10px;background:rgba(253,251,246,.9)}
+.offline-restore-meta strong{display:block;font-size:11.5px;color:#5d5138}
+.offline-restore-meta span{display:block;font-size:9.5px;color:#887c64;line-height:1.5}
+.offline-restore-note{margin:13px 0 0!important;font-size:9px!important;color:#948a75!important}
+body[data-theme="dark"] .offline-restore-eyebrow{color:#e7c878}
+body[data-theme="dark"] .offline-restore-meta{background:#3a3121;border-color:#5a4f39}
+body[data-theme="dark"] .offline-restore-meta strong{color:#f0e6d0}
+body[data-theme="dark"] .offline-restore-meta span{color:#b8ab8f}
+body[data-theme="dark"] .offline-restore-note{color:#9b9077!important}
+
 /* ===== PDF Sheet: spreadsheet lokal ===== */
 .sheet-page{display:none;position:fixed;inset:0;z-index:30;background:#fbf9f4;flex-direction:column;color:#3a3019}
 .sheet-page.open{display:flex}
@@ -2106,6 +2122,9 @@ body.save-dialog-open{overflow:hidden}
 .save-preset:focus-visible{outline:3px solid #e4d2ab;outline-offset:2px}
 .save-dialog .field-hint{min-height:14px}
 .save-dialog .doc-confirm-actions{margin-top:18px}
+.save-ready{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;margin:-4px 0 14px;padding:5px 10px;border:1px solid #dcecdc;border-radius:999px;background:#f2faf2;color:#397044;font-size:9.5px;font-weight:700;line-height:1.3}
+.save-ready span[aria-hidden]{font-size:11px;line-height:1}
+body[data-theme="dark"] .save-ready{background:#263a28;border-color:#3f5b40;color:#a9d8ad}
 body[data-theme="dark"] .save-ext{background:#403725;border-color:#5c523d;color:#c9bb9c}
 body[data-theme="dark"] .save-preset-label{color:#9a8a68}
 body[data-theme="dark"] .save-preset{background:#3d3422;border-color:#5c523d;color:#c9bb9c}
