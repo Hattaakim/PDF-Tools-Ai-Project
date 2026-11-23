@@ -591,7 +591,7 @@ body[data-theme="dark"] .sheet-mini-btn{background:#55492f;border-color:#6d5c39;
 body[data-theme="dark"] .sheet-var-fields span{color:#a99a76}
 body[data-theme="dark"] .sheet-statusbar{color:#a99a76}
 body[data-theme="dark"] .sheet-selinfo{background:#55492f;color:#f0d79a}
-@media(max-width:980px){.sheet-topbar{flex-wrap:wrap;gap:8px}.sheet-title{order:2;flex-basis:100%}.sheet-actions{order:1;width:auto;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}.sheet-main{flex-direction:column;overflow:auto;padding:10px 12px 6px}.sheet-grid-wrap{min-height:50vh;flex:none}.sheet-vars{position:fixed;left:12px;right:12px;bottom:36px;width:auto;max-height:min(62vh,430px);z-index:35;flex:none;box-shadow:0 20px 55px -18px rgba(53,44,23,.45)}.sheet-shortcut-hint{display:none}}
+@media(max-width:980px){.sheet-topbar{flex-wrap:wrap;gap:8px}.sheet-title{order:2;flex-basis:100%}.sheet-actions{order:1;width:auto;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}.sheet-main{flex-direction:column;overflow:hidden;padding:10px 12px 6px}.sheet-grid-wrap{min-height:0;flex:1}.sheet-vars{position:fixed;left:12px;right:12px;bottom:36px;width:auto;max-height:min(62vh,430px);z-index:35;flex:none;box-shadow:0 20px 55px -18px rgba(53,44,23,.45)}.sheet-shortcut-hint{display:none}}
 @media(max-width:600px){.sheet-topbar{padding:9px 12px}.sheet-toolbar{padding:7px 10px}.sheet-tools{gap:5px}.sheet-tool-group{padding-right:5px}.sheet-actions{gap:6px}.sheet-dirty{display:none}.sheet-actions .button-quiet,.sheet-actions .button-primary{height:32px;padding:0 10px}.sheet-name{max-width:170px;font-size:15px}.sheet-formula-row{gap:5px}.sheet-cellref{min-width:48px}.sheet-statusbar{padding:5px 12px 8px;gap:8px}.sheet-grid-wrap{min-height:44vh}}
 @media(prefers-reduced-motion:reduce){.sheet-page,.sheet-cell,.sheet-tool{transition:none!important}}
 
@@ -628,12 +628,12 @@ body[data-theme="dark"] .sheet-formula-note code{background:#55492f;color:#f0d79
 
 .sheet-preview-backdrop{position:fixed;inset:0;z-index:48;display:none;place-items:center;padding:18px;background:radial-gradient(90% 90% at 50% 8%,rgba(196,142,27,.18),transparent 62%),rgba(52,43,24,.42);backdrop-filter:blur(16px) saturate(135%);-webkit-backdrop-filter:blur(16px) saturate(135%)}
 .sheet-preview-backdrop.open{display:grid}
-.sheet-preview-panel{width:min(1120px,96vw);height:min(90vh,860px);display:flex;flex-direction:column;background:#fbf9f4;border:1px solid #ece5d6;border-radius:18px;box-shadow:0 40px 100px -30px rgba(53,44,23,.6);overflow:hidden;color:#3a3019}
+.sheet-preview-panel{width:min(1120px,96vw);height:min(90vh,860px);height:min(90dvh,860px);display:flex;flex-direction:column;background:#fbf9f4;border:1px solid #ece5d6;border-radius:18px;box-shadow:0 40px 100px -30px rgba(53,44,23,.6);overflow:hidden;color:#3a3019}
 .sheet-preview-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #f0ebdf;background:#fffdf8;flex-shrink:0}
 .sheet-preview-heading h2{margin:2px 0 0;font:700 16px Manrope,sans-serif;letter-spacing:-.5px;color:#5c4f31}
 .sheet-preview-close{width:32px;height:32px;border:1px solid #efe9dc;border-radius:8px;background:#fff;color:#8a7f68;font-size:18px;line-height:1;cursor:pointer}
 .sheet-preview-close:hover{background:#fbf5e6;border-color:#e9d9ac;color:#8a6c25}
-.sheet-preview-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.sheet-preview-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px;overflow:hidden}
 .sheet-preview-stage{min-width:0;min-height:0;display:flex;flex-direction:column;gap:8px;padding:14px 16px 10px;background:radial-gradient(120% 120% at 50% 0%,#fffdf8,#f2ecdf)}
 .sheet-preview-canvas-wrap{flex:1;min-height:0;display:grid;place-items:center;position:relative}
 .sheet-preview-canvas-wrap canvas{max-width:100%;max-height:100%;border-radius:4px;background:#fff;box-shadow:0 18px 45px -20px rgba(83,69,35,.55)}
@@ -675,8 +675,8 @@ body[data-theme="dark"] .sheet-preview-page{color:#f0e6cc}
 body[data-theme="dark"] .sheet-preview-meta{color:#a99a76;border-color:#53492f}
 body[data-theme="dark"] .sheet-preview-note{color:#b2a586}
 body[data-theme="dark"] .sheet-preview-note.error{color:#f0a3ad}
-@media(max-width:980px){.sheet-preview-panel{height:min(94vh,900px)}.sheet-preview-body{grid-template-columns:1fr;grid-template-rows:minmax(220px,1fr) auto}.sheet-preview-controls{max-height:42vh;border-left:0;border-top:1px solid #f0ebdf;display:grid;grid-template-columns:1fr 1fr;align-items:start}.sheet-preview-foot{flex-wrap:wrap}.sheet-preview-note{flex:1 1 100%}}
-@media(max-width:600px){.sheet-preview-backdrop{padding:0}.sheet-preview-panel{width:100vw;height:100vh;border-radius:0;border:0}.sheet-preview-head{padding:11px 14px}.sheet-preview-controls{grid-template-columns:1fr;max-height:38vh;padding:10px 12px}.sheet-preview-stage{padding:10px}.sheet-preview-foot{padding:9px 14px}.sheet-preview-actions .button-quiet,.sheet-preview-actions .button-primary{height:32px;padding:0 12px}.sheet-formula-list{grid-template-columns:1fr}.sheet-formula-menu{max-height:64vh;left:0;right:0;width:auto}}
+@media(max-width:980px){.sheet-preview-panel{height:min(94vh,900px);height:min(94dvh,900px)}.sheet-preview-body{display:block;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.sheet-preview-stage{height:clamp(200px,48dvh,440px);padding:12px 14px 8px}.sheet-preview-controls{max-height:none;overflow:visible;border-left:0;border-top:1px solid #f0ebdf;display:grid;grid-template-columns:1fr 1fr;align-items:start;padding:12px 14px}.sheet-preview-foot{flex-wrap:wrap;row-gap:8px}.sheet-preview-note{flex:1 1 100%}}
+@media(max-width:600px){.sheet-preview-backdrop{padding:0}.sheet-preview-panel{width:100vw;height:100vh;height:100dvh;max-height:100dvh;border-radius:0;border:0}.sheet-preview-head{padding:11px 14px;padding-top:calc(11px + env(safe-area-inset-top))}.sheet-preview-body{overscroll-behavior:contain}.sheet-preview-stage{height:clamp(170px,44dvh,340px);padding:10px}.sheet-preview-controls{grid-template-columns:1fr;max-height:none;padding:10px 12px}.sheet-preview-foot{padding:9px 14px calc(9px + env(safe-area-inset-bottom))}.sheet-preview-note{font-size:9.5px}.sheet-preview-actions{width:100%;gap:8px}.sheet-preview-actions .button-quiet,.sheet-preview-actions .button-primary{height:38px;padding:0 12px;flex:1;justify-content:center}.sheet-formula-list{grid-template-columns:1fr}.sheet-formula-menu{max-height:64vh;left:0;right:0;width:auto}}
 
 /* ===== Groupbox alat di halaman utama ===== */
 .tools-groups{display:grid;gap:14px}
@@ -2658,4 +2658,91 @@ body[data-theme="dark"] .file-order-index{background:#5e5032;color:#f0e5cd}
 @media(max-width:360px){
   .page-grid,.jpg-page-grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
   .file-meta strong{max-width:104px}
+}
+
+/* --- Akses mobile: Pembuat PDF & PDF Sheet --- */
+@media(max-width:640px){
+  /* Pembuat PDF: topbar ringkas, alat bisa digeser, tombol Buat PDF di bawah */
+  .doc-write-topbar{flex-wrap:nowrap;gap:8px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top));backdrop-filter:none;-webkit-backdrop-filter:none;background:#fffdf8}
+  .doc-write.open>.doc-write-topbar{animation:none}
+  body[data-theme="dark"] .doc-write-topbar{background:#30291b}
+  .doc-write-title{order:0;width:auto;flex:1;min-width:0}
+  .doc-write-title h2{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .doc-write-eyebrow{display:none}
+  .doc-write-actions{position:fixed;left:0;right:0;bottom:0;z-index:6;width:auto;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:rgba(255,253,248,.97);border-top:1px solid #f0ebdf;box-shadow:0 -10px 26px -18px rgba(83,69,35,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);justify-content:space-between;gap:10px}
+  body[data-theme="dark"] .doc-write-actions{background:rgba(48,41,27,.97);border-color:#5d523c}
+  .doc-write-actions .button-primary{height:38px;min-width:132px;justify-content:center}
+  .doc-page-label{font-size:9.5px}
+  .doc-write-body{padding:10px 10px calc(80px + env(safe-area-inset-bottom))}
+  .doc-write-body .doc-toolbar{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px;gap:4px;top:0}
+  .doc-write-body .doc-toolbar::-webkit-scrollbar{display:none}
+  .doc-write-body .doc-toolbar>*{flex:0 0 auto}
+  .doc-toolbar .editor-btn{min-width:36px;min-height:34px;padding:6px 8px;font-size:12px}
+  .doc-select,#docColor{height:34px}
+  .doc-zoom{margin-left:6px;padding-left:6px;border-left:1px solid #efebe3}
+  body[data-theme="dark"] .doc-zoom{border-color:#5c523d}
+  .doc-write-body .doc-zoom-viewport{height:clamp(240px,calc(100vh - 220px),880px);height:clamp(240px,calc(100dvh - 220px),880px)}
+
+  /* PDF Sheet: topbar satu baris dan toolbar bisa digeser agar grid lega */
+  .sheet-topbar{flex-wrap:nowrap;gap:8px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top))}
+  .sheet-eyebrow{display:none}
+  .sheet-title{order:0;flex-basis:auto;flex:1;min-width:0}
+  .sheet-title-row{margin-top:0;flex-wrap:nowrap}
+  .sheet-name{font-size:15px;max-width:40vw;padding:0 4px}
+  .sheet-dirty{display:none}
+  .sheet-actions{gap:6px;order:0}
+  .sheet-actions .button-quiet,.sheet-actions .button-primary{height:34px;padding:0 10px;font-size:10px}
+  .sheet-toolbar{padding:6px 10px;gap:5px}
+  .sheet-formula-row{gap:6px}
+  .sheet-cellref{min-width:48px;height:32px}
+  .sheet-formula{height:32px}
+  .sheet-formula-apply{width:32px;height:32px}
+  .sheet-tools{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:6px;padding-bottom:2px}
+  .sheet-tools::-webkit-scrollbar{display:none}
+  .sheet-tool-group{flex:0 0 auto;padding-right:6px}
+  .sheet-tool{min-width:32px;height:32px}
+  .sheet-select{height:32px}
+  .sheet-main{padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+  body.doc-writing .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
+  body.sheet-writing .toast{bottom:calc(44px + env(safe-area-inset-bottom))}
+}
+@media(max-width:420px){
+  #sheetVarsBtn{font-size:0;width:34px;padding:0}
+  #sheetVarsBtn::before{content:'ƒ';font-size:13px}
+  .sheet-name{max-width:34vw}
+  .doc-write-actions .button-primary{min-width:118px}
+}
+@media(max-width:360px){
+  .sheet-back-btn,.doc-back-btn{font-size:0;width:36px;min-width:36px;padding:0;justify-content:center}
+  .sheet-back-btn::before,.doc-back-btn::before{content:'←';font-size:15px}
+  .sheet-name{min-width:56px;max-width:26vw}
+  .sheet-actions .button-quiet,.sheet-actions .button-primary{padding:0 8px}
+  #sheetExport{font-size:9px}
+  .doc-write-actions{padding-left:10px;padding-right:10px}
+}
+/* Layar ponsel lanskap: chrome diringkas agar grid dan editor tetap lega */
+@media(max-height:520px) and (orientation:landscape){
+  .sheet-topbar{flex-wrap:nowrap;gap:8px;padding:6px 10px;padding-top:calc(6px + env(safe-area-inset-top))}
+  .sheet-eyebrow{display:none}
+  .sheet-title{order:0;flex-basis:auto;flex:1;min-width:0}
+  .sheet-title-row{margin-top:0;flex-wrap:nowrap}
+  .sheet-name{font-size:14px;max-width:24vw;padding:0 4px}
+  .sheet-dirty{display:none}
+  .sheet-actions{order:0;gap:6px;flex-wrap:nowrap}
+  .sheet-actions .button-quiet,.sheet-actions .button-primary{height:30px;padding:0 9px;font-size:9px}
+  .sheet-toolbar{padding:5px 10px;gap:4px}
+  .sheet-formula-row{gap:6px}
+  .sheet-cellref,.sheet-formula,.sheet-formula-apply{height:30px}
+  .sheet-tools{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:6px;padding-bottom:1px}
+  .sheet-tools::-webkit-scrollbar{display:none}
+  .sheet-tool-group{flex:0 0 auto;padding-right:6px}
+  .sheet-tool{min-width:30px;height:30px}
+  .sheet-select{height:30px}
+  .sheet-main{padding:6px 8px}
+  .doc-write-body .doc-toolbar{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:5px;gap:4px}
+  .doc-write-body .doc-toolbar::-webkit-scrollbar{display:none}
+  .doc-write-body .doc-toolbar>*{flex:0 0 auto}
+  .doc-toolbar .editor-btn{min-width:32px;min-height:30px;padding:5px 7px;font-size:11px}
+  .doc-select,#docColor{height:30px}
+  .doc-write-body{padding:8px 10px 14px}
 }
