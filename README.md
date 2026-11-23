@@ -87,3 +87,31 @@ Pekerjaan di grup **Tulis & Sunting** kini memiliki salinan lokal yang dibuat ot
 - Aset antarmuka (HTML, CSS, JavaScript, pustaka vendor, dan WASM) disimpan dalam cache service worker. Halaman tetap dapat dibuka dan dipakai tanpa koneksi setelah kunjungan pertama.
 - Manajemen cache berjalan di latar belakang: entri cache yang lebih tua dari 30 hari atau melebihi batas jumlah dihapus, cache versi lama dibersihkan saat service worker diperbarui, dan backup IndexedDB yang sudah tidak diakses lebih dari 14 hari ikut dibuang.
 - Status **PDF siap disimpan** kini berada di dalam dialog **Simpan sebagai**, bukan lagi mengambang di bilah judul editor.
+
+## Ruang kerja Edit PDF mandiri dan anotasi
+
+**Edit PDF** sekarang dibuka sebagai halaman kerja penuh yang terpisah dari dialog alat:
+
+- Halaman mandiri memakai seluruh area layar dengan bilah atas berisi tombol **Kembali**, **Ganti PDF**, **Simpan PDF**, penanda **Belum disimpan**, dan **Riwayat backup**.
+- File PDF dapat dipilih lewat tombol **Pilih file PDF**, **Ganti PDF**, atau dengan menyeret dan melepaskan file ke area utama.
+- Tata letak menyesuaikan layar ponsel, tablet, dan desktop. Pratinjau halaman tetap bisa digulirkan tanpa mengubah lebar jendela.
+- Peringatan **Suntingan Anda belum disimpan** muncul saat menutup halaman, berpindah alat, atau memuat ulang tab selama masih ada anotasi.
+
+Anotasi yang tersedia langsung di atas pratinjau halaman:
+
+- **Teks** — klik untuk menambah teks yang bisa diketik dan dipindah.
+- **Sorot**, **Garis bawah**, **Coret**, dan **Kotak** — seret untuk menandai area; warna bisa dipilih dari toolbar.
+- **Catatan** — klik untuk menaruh catatan berisi teks bebas.
+- **Gambar** — sisipkan PNG/JPG, lalu seret atau ubah ukurannya.
+- **Pensil** — gambar coretan bebas.
+
+Semua anotasi ikut ditulis ke PDF saat **Simpan PDF** ditekan. Teks asli halaman tidak dirasterisasi, sehingga hasil tetap bisa dicari dan dipilih.
+
+## Beberapa backup dan riwayat per fitur
+
+Penyimpanan lokal tidak lagi dibatasi satu salinan per fitur:
+
+- Tombol **Riwayat backup** muncul otomatis pada **Edit PDF, Pembuat PDF, PDF Sheet, dan Database SQLite** begitu ada backup untuk fitur tersebut.
+- Dialog riwayat menampilkan setiap salinan beserta waktu, ukuran, dan jenisnya (otomatis atau manual). Salinan dapat **dipulihkan** atau **dihapus** satu per satu.
+- Tombol **Simpan salinan sekarang** membuat salinan manual tambahan tanpa menunggu penulisan otomatis.
+- Autosave memakai ID unik per salinan, menggabungkan penulisan dalam jendela 2 menit, dan membatasi penyimpanan menjadi 5 salinan per fitur / 12 salinan total / 80 MB / 30 hari.

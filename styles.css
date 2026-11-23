@@ -2765,3 +2765,105 @@ body[data-theme="dark"] .file-order-index{background:#5e5032;color:#f0e5cd}
   .doc-select,#docColor{height:30px}
   .doc-write-body{padding:8px 10px 14px}
 }
+
+/* ===== Ruang kerja mandiri Edit PDF + riwayat backup ===== */
+body.editing{overflow:hidden}
+.edit-page{display:none;position:fixed;inset:0;z-index:30;background:#fbf9f4;flex-direction:column;color:var(--ink)}
+.edit-page.open{display:flex}
+body[data-theme="dark"] .edit-page{background:linear-gradient(160deg,#2b2517,#282215);color:#eee6d5}
+.edit-topbar{display:flex;align-items:center;gap:16px;padding:12px 3%;border-bottom:1px solid rgba(240,235,225,.74);background:rgba(255,255,255,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative;z-index:2}
+body[data-theme="dark"] .edit-topbar{background:rgba(48,41,25,.9);border-color:#534936}
+.edit-back-btn{flex-shrink:0}
+.edit-title{min-width:0}
+.edit-eyebrow{display:block;font-size:8px;letter-spacing:1.5px;color:#827863;font-weight:700}
+.edit-title h2{font:700 17px Manrope,sans-serif;letter-spacing:-.5px;color:#655634;margin:2px 0 0}
+body[data-theme="dark"] .edit-eyebrow{color:#a99b7d}
+body[data-theme="dark"] .edit-title h2{color:#f2e9d7}
+.edit-actions{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.edit-dirty{font:700 9px 'DM Sans',sans-serif;color:#b47c16;background:#fdf4dc;border:1px solid #f3e4ba;border-radius:20px;padding:4px 9px;white-space:nowrap}
+body[data-theme="dark"] .edit-dirty{background:#4b3f23;border-color:#6b5b32;color:#efd489}
+.backup-history-btn[hidden]{display:none}
+.edit-body{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;width:100%;scroll-behavior:smooth}
+.edit-start{flex:1;display:grid;place-items:center;padding:32px 16px}
+.edit-start[hidden],.edit-workspace[hidden]{display:none}
+.edit-start-inner{width:min(100%,520px);text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 28px;border:1px solid rgba(222,211,187,.8);border-radius:22px;background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(253,249,239,.78));box-shadow:var(--shadow)}
+body[data-theme="dark"] .edit-start-inner{background:linear-gradient(160deg,#393120,#332c1d);border-color:#5b5039}
+.edit-start-badge{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:#fbf3de;color:#b7831a;font-size:23px}
+body[data-theme="dark"] .edit-start-badge{background:#4c4028;color:#e7c878}
+.edit-start-inner h1{font:800 clamp(25px,4vw,34px)/1.2 Manrope,sans-serif;letter-spacing:-1px;color:#4b3f24;margin:2px 0 0}
+.edit-start-inner h1 span{display:block;color:#b2862a}
+body[data-theme="dark"] .edit-start-inner h1{color:#f4ecd9}
+.edit-start-inner p{font:500 11.5px/1.65 'DM Sans',sans-serif;color:#746a55;max-width:400px;margin:0}
+body[data-theme="dark"] .edit-start-inner p{color:#b7aa8d}
+.edit-start-inner .button-primary{margin-top:6px;min-width:180px;justify-content:center}
+.edit-drop{width:100%;padding:14px;border:1.5px dashed #e4d8bd;border-radius:12px;font:500 10.5px 'DM Sans',sans-serif;color:#8a7f68;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.edit-drop strong{color:#9a7526}
+.edit-drop:hover,.edit-drop.dragover{background:#fdf7e8;border-color:#d8bd7c;color:#8a6c25}
+body[data-theme="dark"] .edit-drop{border-color:#675a3f;color:#a99b7d}
+.edit-start-note{font-size:9.5px!important;color:#9a907b!important}
+.edit-start-error,.edit-progress-area .modal-error{color:#b84636;font:600 10.5px 'DM Sans',sans-serif;line-height:1.5}
+.edit-start-error[hidden]{display:none}
+.edit-progress-area{position:relative;z-index:2;padding:0 3% 10px;flex-shrink:0}
+.edit-progress-area .modal-progress,.edit-progress-area .modal-progress-label{display:none}
+.edit-progress-area .modal-progress.show,.edit-progress-area .modal-progress-label.show{display:block}
+.edit-progress-area .modal-error.show{display:block;padding:7px 10px;border-radius:8px;background:#fff1ee}
+.edit-workspace{width:100%;padding:14px 3% 30px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.edit-file-row{width:100%;max-width:1120px;display:flex;align-items:center;gap:9px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.7)}
+body[data-theme="dark"] .edit-file-row{background:#3b3321;border-color:#574c37}
+.edit-workspace .editor-wrap{width:100%;max-width:1120px;margin-top:0}
+.edit-workspace .editor-toolbar{position:sticky;top:0;z-index:2;box-shadow:0 4px 16px rgba(100,83,45,.06)}
+.edit-workspace .editor-scroll{width:100%;overflow:auto;padding:12px 0;justify-content:flex-start}
+.edit-workspace .editor-stage{margin:0 auto;flex-shrink:0;max-width:none}
+.edit-workspace .editor-stage canvas{max-width:none;width:auto;height:auto}
+.editor-item.is-shape{border:0;box-sizing:border-box}
+.editor-item.is-highlight{background:currentColor;opacity:.38;mix-blend-mode:multiply}
+.editor-item.is-rect{border:2px solid currentColor!important;background:rgba(255,255,255,.06)}
+.editor-item.is-underline{border-bottom:3px solid currentColor!important;height:0!important;min-height:3px}
+.editor-item.is-strikeout{border-top:3px solid currentColor!important;height:0!important;min-height:3px}
+.editor-item.is-note{width:auto!important;height:auto!important}
+.editor-note-text{display:block;min-width:90px;max-width:220px;min-height:54px;padding:9px 10px;border:2px solid #c48e1b;border-radius:8px;background:#fff8df;color:#4a3d22;font:500 10px/1.45 'DM Sans',sans-serif;white-space:pre-wrap;outline:none;box-shadow:0 4px 14px rgba(88,70,28,.16)}
+body[data-theme="dark"] .editor-note-text{background:#4a3f26;color:#f4ecd9}
+.editor-shape-preview{position:absolute;border:2px dashed #c48e1b;background:rgba(196,142,27,.12);pointer-events:none;line-height:0}
+.editor-shape-preview.is-highlight{background:rgba(196,142,27,.24)}
+.backup-history-backdrop{z-index:90}
+.backup-history{width:min(100%,520px);text-align:left}
+.backup-history .doc-confirm-icon{background:#fbf3de;color:#b7831a}
+body[data-theme="dark"] .backup-history .doc-confirm-icon{background:#4c4028;color:#e7c878}
+.backup-history-list{display:grid;gap:8px;max-height:min(46vh,360px);overflow-y:auto;margin:0 0 12px;padding:2px}
+.backup-history-item{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 11px;border:1px solid #eee8da;border-radius:10px;background:rgba(253,251,246,.92)}
+body[data-theme="dark"] .backup-history-item{background:#3a3221;border-color:#5b5039}
+.backup-history-meta{display:grid;gap:3px;min-width:0}
+.backup-history-meta strong{font:700 11px 'DM Sans',sans-serif;color:#544930;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.backup-history-meta span{font:500 9.5px 'DM Sans',sans-serif;color:#8b8069}
+body[data-theme="dark"] .backup-history-meta strong{color:#f0e6d0}
+body[data-theme="dark"] .backup-history-meta span{color:#b1a486}
+.backup-history-actions{display:flex;gap:5px;flex-shrink:0}
+.backup-history-actions .mini-button{padding:5px 9px;font-size:9.5px}
+.backup-history-empty{margin:0;padding:16px;border:1px dashed #e4d8bd;border-radius:10px;font:500 10.5px/1.55 'DM Sans',sans-serif;color:#8b8069;text-align:center}
+.backup-history-note{margin:0 0 12px!important;font-size:9px!important;color:#9a907b!important}
+body[data-theme="dark"] .backup-history-note{color:#9b9077!important}
+@media(max-width:900px){
+  .edit-topbar{flex-wrap:wrap;padding:10px 16px;gap:9px}
+  .edit-title{order:2;width:100%}
+  .edit-actions{order:1;width:auto;margin-left:auto}
+  .edit-start-inner{padding:26px 20px}
+  .edit-workspace{padding:12px 12px 26px}
+}
+@media(max-width:600px){
+  .edit-actions{gap:6px}
+  .edit-actions .button-quiet,.edit-actions .button-primary{height:32px;padding:0 10px;font-size:10px}
+  .edit-dirty{display:none}
+  .edit-start{padding:20px 12px}
+  .edit-start-inner{border-radius:16px;gap:8px}
+  .edit-start-inner h1{font-size:24px}
+  .edit-workspace .editor-toolbar{gap:6px;padding:8px}
+  .editor-tools{flex-wrap:wrap;gap:4px}
+  .editor-btn{padding:7px 9px;font-size:9.5px}
+  .editor-field{font-size:9.5px}
+  .edit-workspace .editor-scroll{padding:8px 0}
+  .backup-history-item{align-items:flex-start;flex-direction:column}
+  .backup-history-actions{width:100%}
+  .backup-history-actions .mini-button{flex:1;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){.edit-page,.edit-drop,.editor-btn{transition:none!important}}
+.editor-empty[hidden]{display:none}
