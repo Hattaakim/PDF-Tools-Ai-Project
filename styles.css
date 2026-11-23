@@ -2615,3 +2615,47 @@ html[data-perf="lite"] .sheet-preview-backdrop.open .sheet-preview-panel,
 html[data-perf="lite"] .db-body>.db-start>.db-start-inner,
 html[data-perf="lite"] .db-body>.db-workspace,
 html[data-perf="lite"] .wz-panel{animation:none!important}
+
+/* --- Pratinjau halaman lebih besar: Pisah PDF dan PDF ke JPG --- */
+.tool-modal.split-wide{width:min(100%,680px)}
+.page-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;max-height:460px;padding:3px 5px 4px 3px}
+.page-thumb{padding:5px 5px 0;border-radius:11px}
+.page-thumb-label{font-size:9.5px;padding:2px 0 5px}
+
+/* --- PDF ke JPG: pilihan semua/rentang/picker dengan pratinjau besar --- */
+.tool-modal.media-wide{width:min(100%,720px)}
+.jpg-builder{margin-top:16px;border-top:1px solid #f5f3ef;padding-top:14px}
+.jpg-range-wrap .field-label{margin-top:11px}
+.jpg-picker-head{margin-top:12px}
+.jpg-page-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;max-height:460px}
+.jpg-page-grid .page-thumb-canvas{background:#f7f5f0}
+.jpg-empty{grid-column:1/-1}
+body[data-theme="dark"] .jpg-builder{border-color:#5c523d}
+body[data-theme="dark"] .jpg-page-grid .page-thumb-canvas{background:#30291a}
+
+/* --- Urutan gambar pada Gambar ke PDF --- */
+.file-thumb{width:32px;height:36px;border-radius:6px;overflow:hidden;background:#f7f4ee;flex:0 0 auto;display:grid;place-items:center}
+.file-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.file-order-index{width:18px;height:18px;border-radius:5px;background:#f6f1e6;color:#967a3a;font:700 8.5px 'DM Sans',sans-serif;display:grid;place-items:center;flex:0 0 auto}
+body[data-theme="dark"] .file-thumb{background:#413823}
+body[data-theme="dark"] .file-order-index{background:#5e5032;color:#f0e5cd}
+
+@media(max-width:860px){
+  .tool-modal.media-wide{width:100%}
+  .page-grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:9px;max-height:400px}
+  .jpg-page-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));max-height:400px}
+  .jpg-picker-head{flex-direction:column}
+  .jpg-picker-head .picker-actions{align-self:flex-end}
+}
+@media(max-width:540px){
+  .page-grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;max-height:360px}
+  .jpg-page-grid{grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:8px;max-height:360px}
+  .jpg-modes .split-tab{font-size:9.5px;padding:8px 3px}
+  .tool-modal.media-wide{padding-left:16px;padding-right:16px}
+  .file-thumb{width:29px;height:32px}
+  .file-order-index{width:16px;height:16px}
+}
+@media(max-width:360px){
+  .page-grid,.jpg-page-grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+  .file-meta strong{max-width:104px}
+}
