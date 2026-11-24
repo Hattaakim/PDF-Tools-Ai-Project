@@ -339,10 +339,23 @@ body[data-theme="dark"] .editor-field input[type="color"]{border-color:#5c523d}
 .editor-field select{font:600 10.5px 'DM Sans',sans-serif;color:var(--ink);border:1px solid #f2ede3;border-radius:7px;padding:5px;background:#fff}
 body[data-theme="dark"] .editor-field select{background:#605439;border-color:#5c523d;color:#f6f1e6}
 .editor-scroll{max-width:100%;overflow:auto;display:flex;justify-content:center}
-.editor-stage{position:relative;line-height:0;border-radius:10px;box-shadow:0 8px 26px rgba(107,88,46,.14);overflow:hidden;touch-action:none;background:#fff}
+.editor-stage{position:relative;line-height:0;border-radius:10px;box-shadow:0 8px 26px rgba(107,88,46,.14);overflow:hidden;touch-action:pan-x pan-y;background:#fff}
+.editor-stage.draw-mode{touch-action:none}
 .editor-stage canvas{display:block;max-width:100%;height:auto}
-.editor-stage #editorInkCanvas{position:absolute;inset:0;width:100%;height:100%}
-.editor-items{position:absolute;inset:0}
+.editor-stage #editorPageCanvas{position:relative;z-index:0}
+.editor-stage #editorInkCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+.editor-text-layer{position:absolute;inset:0;overflow:hidden;line-height:1;pointer-events:none;user-select:none;-webkit-user-select:none;z-index:2}
+.editor-text-layer.active{pointer-events:auto;user-select:text;-webkit-user-select:text;cursor:text}
+.editor-text-layer span{position:absolute;transform-origin:0 0;color:transparent;white-space:pre;cursor:text}
+.editor-text-layer.active span::selection{background:rgba(74,93,240,.35)}
+.editor-items{position:absolute;inset:0;z-index:3}
+.editor-items.text-selecting{pointer-events:none}
+.editor-zoom{display:inline-flex;align-items:center;gap:2px;margin-left:auto;padding-left:6px;border-left:1px solid #efebe3}
+.editor-zoom .editor-btn{padding:7px 8px;min-width:30px}
+.editor-zoom-label{min-width:42px;text-align:center;font:700 10px 'DM Sans',sans-serif;color:#7b715e;font-variant-numeric:tabular-nums}
+body[data-theme="dark"] .editor-zoom{border-color:#5c523d}
+body[data-theme="dark"] .editor-zoom-label{color:#c2b8a1}
+@media(pointer:coarse){.editor-item-resize{width:22px;height:22px;right:-11px;bottom:-11px}}
 .editor-empty{position:absolute;inset:0;display:grid;place-items:center;background:#fbf9f4;color:var(--muted);font:500 11px 'DM Sans',sans-serif;line-height:1.5;text-align:center;padding:12px}
 body[data-theme="dark"] .editor-empty{background:#3a3220;color:#867858}
 body[data-theme="dark"] .doc-toolbar{background:#3f3725;border-color:#5c523d}
@@ -416,6 +429,10 @@ body.doc-writing{overflow:hidden}
 .doc-write-title{min-width:0}
 .doc-write-eyebrow{display:block;font-size:8px;letter-spacing:1.5px;color:#827863;font-weight:700}
 .doc-write-title h2{font:700 17px Manrope,sans-serif;letter-spacing:-.5px;color:#655634;margin:2px 0 0}
+.doc-title-input{display:block;width:100%;max-width:360px;min-width:0;margin:2px 0 0;padding:2px 6px;border:1px solid transparent;border-radius:7px;background:transparent;font:700 17px Manrope,sans-serif;letter-spacing:-.5px;color:#655634;outline:none;transition:background .2s,border-color .2s}
+.doc-title-input:hover,.doc-title-input:focus{border-color:#eadfc4;background:#fffdf8}
+body[data-theme="dark"] .doc-title-input{color:#f9f6ee}
+body[data-theme="dark"] .doc-title-input:hover,body[data-theme="dark"] .doc-title-input:focus{background:#4a3f27;border-color:#665738}
 .doc-write-actions{margin-left:auto;display:flex;align-items:center;gap:14px;flex-shrink:0}
 .doc-page-label{font-size:10px;color:#7b715e;white-space:nowrap}
 .doc-write-body{flex:1;overflow:auto;padding:22px 4% 40px;display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
@@ -2687,6 +2704,7 @@ body[data-theme="dark"] .file-order-index{background:#5e5032;color:#f0e5cd}
   body[data-theme="dark"] .doc-write-topbar{background:#30291b}
   .doc-write-title{order:0;width:auto;flex:1;min-width:0}
   .doc-write-title h2{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .doc-title-input{font-size:15px;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 4px}
   .doc-write-eyebrow{display:none}
   .doc-write-actions{position:fixed;left:0;right:0;bottom:0;z-index:6;width:auto;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:rgba(255,253,248,.97);border-top:1px solid #f0ebdf;box-shadow:0 -10px 26px -18px rgba(83,69,35,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);justify-content:space-between;gap:10px}
   body[data-theme="dark"] .doc-write-actions{background:rgba(48,41,27,.97);border-color:#5d523c}
@@ -2711,6 +2729,9 @@ body[data-theme="dark"] .file-order-index{background:#5e5032;color:#f0e5cd}
   .sheet-dirty{display:none}
   .sheet-actions{gap:6px;order:0}
   .sheet-actions .button-quiet,.sheet-actions .button-primary{height:34px;padding:0 10px;font-size:10px}
+  /* Tombol riwayat backup menjadi ikon agar tidak menutupi judul sheet di layar sempit. */
+  .sheet-actions .backup-history-btn,.doc-write-actions .backup-history-btn,.edit-actions .backup-history-btn{font-size:0;width:34px;min-width:34px;padding:0;justify-content:center}
+  .sheet-actions .backup-history-btn::before,.doc-write-actions .backup-history-btn::before,.edit-actions .backup-history-btn::before{content:'↺';font-size:15px;line-height:1}
   .sheet-toolbar{padding:6px 10px;gap:5px}
   .sheet-formula-row{gap:6px}
   .sheet-cellref{min-width:48px;height:32px}
@@ -2860,6 +2881,8 @@ body[data-theme="dark"] .backup-history-note{color:#9b9077!important}
   .editor-tools{flex-wrap:wrap;gap:4px}
   .editor-btn{padding:7px 9px;font-size:9.5px}
   .editor-field{font-size:9.5px}
+  .editor-zoom{margin-left:0;padding-left:0;border-left:0}
+  .editor-zoom-label{min-width:36px}
   .edit-workspace .editor-scroll{padding:8px 0}
   .backup-history-item{align-items:flex-start;flex-direction:column}
   .backup-history-actions{width:100%}

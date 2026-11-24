@@ -22,6 +22,7 @@
 
 **Pembuat PDF** menulis dokumen baru langsung di browser lalu mengekspornya menjadi PDF. Selain format teks dasar, editor menyediakan pengaturan tata letak:
 
+- Kolom judul di bilah atas dengan nilai awal **Dokumen baru**. Judul yang diketik dipakai sebagai nama file PDF dan metadata judul di dalam dokumen.
 - Ukuran kertas (A4, A5, B5, Letter, Legal, F4/Folio, A3) dan margin atas, kanan, bawah, kiri.
 - Orientasi halaman portrait atau landscape.
 - Pratinjau kertas memakai proporsi dan pembungkusan baris yang sama dengan PDF, dengan kontrol zoom serta tombol Fit untuk layar kecil.
@@ -95,6 +96,9 @@ Pekerjaan di grup **Tulis & Sunting** kini memiliki salinan lokal yang dibuat ot
 - Halaman mandiri memakai seluruh area layar dengan bilah atas berisi tombol **Kembali**, **Ganti PDF**, **Simpan PDF**, penanda **Belum disimpan**, dan **Riwayat backup**.
 - File PDF dapat dipilih lewat tombol **Pilih file PDF**, **Ganti PDF**, atau dengan menyeret dan melepaskan file ke area utama.
 - Tata letak menyesuaikan layar ponsel, tablet, dan desktop. Pratinjau halaman tetap bisa digulirkan tanpa mengubah lebar jendela.
+- Pratinjau dirender mengikuti kerapatan piksel layar (high-DPI) sehingga teks dan garis tidak lagi blur, termasuk saat diperbesar.
+- Kontrol **zoom − / + / Fit** membantu membaca dan menempatkan anotasi dengan presisi; **100%** berarti halaman pas dengan lebar layar.
+- Mode **Pilih teks** mengaktifkan lapisan teks asli PDF agar pengguna dapat memblok dan menyalin isi dokumen. Anotasi dinonaktifkan sementara selama mode ini aktif.
 - Peringatan **Suntingan Anda belum disimpan** muncul saat menutup halaman, berpindah alat, atau memuat ulang tab selama masih ada anotasi.
 
 Anotasi yang tersedia langsung di atas pratinjau halaman:
@@ -111,7 +115,7 @@ Semua anotasi ikut ditulis ke PDF saat **Simpan PDF** ditekan. Teks asli halaman
 
 Penyimpanan lokal tidak lagi dibatasi satu salinan per fitur:
 
-- Tombol **Riwayat backup** muncul otomatis pada **Edit PDF, Pembuat PDF, PDF Sheet, dan Database SQLite** begitu ada backup untuk fitur tersebut.
+- Tombol **Riwayat backup** muncul otomatis pada **Edit PDF, Pembuat PDF, PDF Sheet, dan Database SQLite** begitu ada backup untuk fitur tersebut. Di layar sempit tombol ini tampil sebagai ikon riwayat agar tidak menutupi judul sheet atau bilah alat.
 - Dialog riwayat menampilkan setiap salinan beserta waktu, ukuran, dan jenisnya (otomatis atau manual). Salinan dapat **dipulihkan** atau **dihapus** satu per satu.
 - Tombol **Simpan salinan sekarang** membuat salinan manual tambahan tanpa menunggu penulisan otomatis.
 - Autosave memakai ID unik per salinan, menggabungkan penulisan dalam jendela 2 menit, dan membatasi penyimpanan menjadi 5 salinan per fitur / 12 salinan total / 80 MB / 30 hari.
