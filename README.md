@@ -51,6 +51,13 @@ Mesin SQLite memakai [sql.js](https://sql.js.org/) yang disimpan lokal di `vendo
 - Rumus kondisional didukung: `IF(kondisi; nilai_benar; nilai_salah)`, `IFS(...)` untuk beberapa kondisi, `IFERROR(rumus; cadangan)`, dan fungsi `ELSE(nilai)` sebagai penanda nilai cadangan.
 - Contoh: `=IF(B2>=75;"Lulus";ELSE("Belum"))`, `=IFS(A1>=90;"A";A1>=75;"B";A1>=0;"C")`.
 
+## Tampilan beranda & performa
+
+- **Animasi dokumen di mobile**: animasi dokumen hero tetap tampil pada layar kecil dengan tata letak yang disesuaikan agar tidak menutupi konten.
+- **Tombol Jelajahi Alat**: jarak tombol ke statistik/konten di bawahnya diperbaiki agar tidak terlihat menempel.
+- **Performa/lazy loading**: animasi hero dan ambient dijeda saat pengguna meninggalkan beranda atau saat ada proses berat berlangsung (`home-away` / `is-busy`), sehingga beban UI dinamis berkurang.
+- **Widget Alat Populer**: alat populer di sidebar diacak otomatis sekali per hari dan riwayat shuffle disimpan di IndexedDB, sehingga daftar terasa dinamis saat jendela dibuka di hari berbeda.
+
 ## Perbaikan progress bar
 
 Progress bar pada alat PDF tidak lagi terlihat penuh (100%) saat file diganti atau saat proses baru dimulai:

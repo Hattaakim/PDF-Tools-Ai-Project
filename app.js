@@ -60,7 +60,7 @@ const toolGroups=[
 {id:'konversi',title:'Konversi Dokumen',description:'Ubah PDF ke format lain dan siapkan dokumen untuk arsip.',ids:['toWord','toPpt','pdfa','toJpg','ocr','images']}
 ];
 function toolCard(t,i=0,noAnim=false){return `<button class="tool-card" data-tool="${t.id}" style="--i:${i}${noAnim?';animation:none':''}"><span class="tool-top"><span class="tool-icon ${t.color}">${icon(t.icon)}</span><span class="tool-arrow">↗</span></span>${t.tag?`<span class="tool-tag ${t.tag==='BARU'?'new':''}">${t.tag}</span>`:''}<h3>${t.title}</h3><p>${t.description}</p></button>`}
-function renderTools(filter='',isFilter=false){const q=filter.toLowerCase();let total=0;const html=toolGroups.map(g=>{const found=g.ids.map(id=>tools.find(t=>t.id===id)).filter(t=>(t.title+' '+t.description).toLowerCase().includes(q));total+=found.length;if(!found.length)return '';return `<section class="tool-group"><header class="tool-group-head"><div><h3>${g.title}</h3><p>${g.description}</p></div><span class="tool-group-count">${found.length} alat</span></header><div class="tool-group-grid">${found.map((t,i)=>toolCard(t,i,isFilter)).join('')}</div></section>`}).join('');grid.innerHTML=total?html:'<div class="empty-search">Tidak ada alat yang cocok. Coba kata kunci lain.</div>';grid.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{setSidebarOpen(false);openTool(b.dataset.tool)}));if(isFilter&&canAnimate()&&typeof grid.animate==='function')grid.animate([{opacity:.62},{opacity:1}],{duration:180,easing:'ease-out'})}renderTools();
+function renderTools(filter='',isFilter=false){const q=filter.toLowerCase();let total=0;const html=toolGroups.map(g=>{const found=g.ids.map(id=>tools.find(t=>t.id===id)).filter(t=>(t.title+' '+t.description).toLowerCase().includes(q));total+=found.length;if(!found.length)return '';return `<section class="tool-group"><header class="tool-group-head"><div><h3>${g.title}</h3><p>${g.description}</p></div><span class="tool-group-count">${found.length} alat</span></header><div class="tool-group-grid">${found.map((t,i)=>toolCard(t,i,isFilter)).join('')}</div></section>`}).join('');grid.innerHTML=total?html:'<div class="empty-search">Tidak ada alat yang cocok. Coba kata kunci lain.</div>';if(isFilter&&canAnimate()&&typeof grid.animate==='function')grid.animate([{opacity:.62},{opacity:1}],{duration:180,easing:'ease-out'})}renderTools();
 function showToast(message){let el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800)}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function formatBytes(n){if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(0)+' KB';return (n/1048576).toFixed(2)+' MB'}
@@ -943,8 +943,9 @@ if(id==='protect'){const pw=document.getElementById('protectPassword').value,own
 if(id==='unlock'){const pw=document.getElementById('unlockPassword').value;report(.2);let doc;try{doc=await CantooPDFDocument.load(await file.arrayBuffer(),{password:pw})}catch(e){if(e.name==='EncryptedPDFError'||/encrypt|password/i.test(e.message))throw Error('Kata sandi salah atau file tidak bisa dibuka. Periksa kembali kata sandi PDF Anda.');throw e}report(.85);return {name:`${base}-terbuka.pdf`,data:await doc.save()}}
 if(id==='ocr')return runOcr(file,report);
 throw Error('Alat tidak dikenal.')}
+let paperlyBusyCount=0;function setPaperlyBusy(on){paperlyBusyCount=Math.max(0,paperlyBusyCount+(on?1:-1));document.documentElement.classList.toggle('is-busy',paperlyBusyCount>0)}
 async function processTool(){if(processedPreviewBlob&&activeTool&&['merge','extract','rotate'].includes(activeTool.id)){download(processedPreviewBlob,processedPreviewName);showToast('Beri nama file pada dialog simpan.');return}if(activeTool.id!=='doc'&&!selectedFiles.length){showError(activeTool.input==='images'?'Pilih setidaknya satu gambar.':'Pilih file PDF terlebih dahulu.');return}if(activeTool.id==='merge'&&selectedFiles.length<2){showError('Tambahkan minimal dua file PDF untuk digabungkan.');return}const run=++processRun,progress=(p,label)=>{if(run===processRun)setProgress(p,label)};
-const button=document.getElementById('modalAction');button.disabled=true;button.classList.add('loading');button.innerHTML='<span class="button-spinner" aria-hidden="true"></span><span>Sedang memproses…</span>';document.getElementById('modalError').classList.remove('show');setProgress(null,'Menyiapkan…');let previewReady=false;try{compressionFallbackCount=0;
+const button=document.getElementById('modalAction');button.disabled=true;button.classList.add('loading');button.innerHTML='<span class="button-spinner" aria-hidden="true"></span><span>Sedang memproses…</span>';document.getElementById('modalError').classList.remove('show');setProgress(null,'Menyiapkan…');setPaperlyBusy(true);let previewReady=false;try{compressionFallbackCount=0;
 switch(activeTool.id){
 case'split':{const {doc}=await readPDF(selectedFiles[0]),total=doc.getPageCount(),ranges=currentSplitRanges(total);if(!ranges.length)throw Error('Tentukan setidaknya satu rentang halaman.');progress(30,`Menyiapkan ${ranges.length} rentang…`);const files=[];for(let i=0;i<ranges.length;i++){const ids=ranges[i].ids;if(!ids.length||ids.some(n=>!Number.isInteger(n)||n<0||n>=total))throw Error('Rentang halaman tidak valid. Muat ulang PDF lalu coba lagi.');const piece=await PDFDocument.create(),copied=await piece.copyPages(doc,ids);if(copied.length!==ids.length)throw Error('Jumlah halaman hasil tidak sesuai dengan rentang yang diminta.');copied.forEach(p=>piece.addPage(p));const suffix=ranges.length>1?`-bagian-${i+1}`:'';files.push({name:`${filenameBase(selectedFiles[0].name)}-halaman-${ranges[i].slug}${suffix}.pdf`,data:await piece.save()});progress(30+(i+1)/ranges.length*50,'Membuat file hasil…')}if(files.length===1)run===processRun&&download(files[0].data,files[0].name);else{progress(88,'Membuat arsip ZIP…');const zipped={};for(const f of files)zipped[f.name]=new Uint8Array(f.data);run===processRun&&download(fflate.zipSync(zipped,{level:6}),`${filenameBase(selectedFiles[0].name)}-hasil-pisah.zip`,'application/zip')}progress(100,'Selesai');break}
 case'merge':{const merged=await PDFDocument.create(),files=selectedFiles.slice(),orderedPages=mergeState.pages;if(!mergeState.ready||mergeState.files.length!==files.length||mergeState.files.some((f,i)=>f!==files[i])||!orderedPages.length)throw Error('Pratinjau urutan halaman belum siap. Tunggu hingga halaman selesai dimuat lalu coba lagi.');const sourceDocs=new Map();for(let i=0;i<orderedPages.length;i++){const item=orderedPages[i];if(!files.includes(item.file))throw Error('Urutan halaman berubah. Muat ulang pratinjau sebelum menggabungkan.');let source=sourceDocs.get(item.file);if(!source){source=(await readPDF(item.file)).doc;sourceDocs.set(item.file,source)}const pageIndex=Number(item.page)-1;if(!Number.isInteger(pageIndex)||pageIndex<0||pageIndex>=source.getPageCount())throw Error('Pratinjau berisi halaman yang tidak valid. Muat ulang daftar file.');const [copied]=await merged.copyPages(source,[pageIndex]);merged.addPage(copied);progress((i+1)/orderedPages.length*90,`Menyatukan halaman ${i+1} dari ${orderedPages.length}…`)}progress(95,'Menyimpan…');run===processRun&&showProcessedPreview(await merged.save(),`paperly-gabungan-${Date.now()}.pdf`);previewReady=true;break}
@@ -957,7 +958,7 @@ case'pdfa':{progress(5,'Merender halaman dan menyiapkan metadata PDF/A…');run=
 case'redact':{progress(5,'Menyusun halaman redaksi…');run===processRun&&download(await applyRedaction(selectedFiles[0],f=>progress(5+f*.8,'Merender halaman yang ditandai…')),`${filenameBase(selectedFiles[0].name)}-redaksi.pdf`);progress(100,'Selesai');break}
 case'flatten':{progress(6,'Merender halaman resolusi tinggi…');run===processRun&&download(await flattenPdf(selectedFiles[0],f=>progress(6+f*.84,'Merender halaman resolusi tinggi…')),`${filenameBase(selectedFiles[0].name)}-flat.pdf`);progress(100,'Selesai');break}
  default:{const files=selectedFiles,total=files.length,outputs=[];for(let i=0;i<total;i++){const f=files[i];const report=frac=>progress(((i+(frac==null?.5:frac))/total)*100,total>1?`File ${i+1}/${total} — ${f.name}`:f.name);outputs.push(await runSingle(activeTool.id,f,report))}if(outputs.length===1){const o=outputs[0];if(['extract','rotate'].includes(activeTool.id)){run===processRun&&showProcessedPreview(o.data,o.name);previewReady=true}else run===processRun&&download(o.data,o.name,o.type)}else{progress(96,'Membuat arsip ZIP…');const z={};for(let i=0;i<outputs.length;i++){const o=outputs[i];let n=o.name,c=1;while(z[n])n=o.name.replace(/(\.[^./]+)?$/,`-${++c}$1`);z[n]=new Uint8Array(o.data instanceof Blob?await o.data.arrayBuffer():o.data)}run===processRun&&download(fflate.zipSync(z,{level:6}),`${filenameBase(files[0].name)}-${activeTool.id}-hasil.zip`,'application/zip')}progress(100,'Selesai')}}
-if(run!==processRun)return;if(previewReady)showToast('PDF hasil siap diperiksa. Simpan untuk mengunduh file yang sama.');else{closeModal(false);hideProgress();showToast(activeTool.id==='compress'?(compressionFallbackCount?'Hasil kompresi lebih besar pada '+compressionFallbackCount+' file, jadi file aslinya dipertahankan.':'PDF selesai dikompres. Beri nama file pada dialog simpan.'):'Selesai! Beri nama file pada dialog simpan.');}}catch(e){if(run===processRun){hideProgress();showError(e.message||'Terjadi kesalahan saat memproses file.')}}finally{if(run===processRun&&!previewReady){button.disabled=false;button.classList.remove('loading');button.innerHTML=`<span>${activeTool.action}</span><span>↗</span>`}}}
+if(run!==processRun)return;if(previewReady)showToast('PDF hasil siap diperiksa. Simpan untuk mengunduh file yang sama.');else{closeModal(false);hideProgress();showToast(activeTool.id==='compress'?(compressionFallbackCount?'Hasil kompresi lebih besar pada '+compressionFallbackCount+' file, jadi file aslinya dipertahankan.':'PDF selesai dikompres. Beri nama file pada dialog simpan.'):'Selesai! Beri nama file pada dialog simpan.');}}catch(e){if(run===processRun){hideProgress();showError(e.message||'Terjadi kesalahan saat memproses file.')}}finally{setPaperlyBusy(false);if(run===processRun&&!previewReady){button.disabled=false;button.classList.remove('loading');button.innerHTML=`<span>${activeTool.action}</span><span>↗</span>`}}}
 
 document.addEventListener('click',e=>{const brand=e.target.closest('.brand,.topbar-brand');if(!brand)return;brand.classList.remove('logo-click');void brand.offsetWidth;brand.classList.add('logo-click')});
 document.addEventListener('animationend',e=>{if(e.animationName!=='logo-pop')return;const brand=e.target.closest('.brand.logo-click,.topbar-brand.logo-click');if(brand)brand.classList.remove('logo-click')});
@@ -966,7 +967,8 @@ document.getElementById('editorLeaveCancel').addEventListener('click',()=>closeE
 document.getElementById('editorLeaveConfirm').addEventListener('click',()=>{const nextAction=closeEditorLeaveDialog(false);editor.items={};editor.selected=null;redrawEditorInk();updateEditorChrome();if(nextAction)nextAction();else if(editPageIsOpen())closeEditPage();else closeModal(false)});
 document.getElementById('editorLeaveDialog').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEditorLeaveDialog()});
 document.getElementById('editorLeaveDialog').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const focusable=[...e.currentTarget.querySelectorAll('button:not(:disabled)')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}});
-document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{setSidebarOpen(false);openTool(b.dataset.tool)}));document.getElementById('toolSearch').addEventListener('input',e=>renderTools(e.target.value,true));document.querySelector('[data-scroll-tools]').addEventListener('click',()=>{location.hash='tools'});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-tool]');if(!t||e.target.closest('.tool-modal,[data-skip-tool]'))return;setSidebarOpen(false);openTool(t.dataset.tool)});
+document.getElementById('toolSearch').addEventListener('input',e=>renderTools(e.target.value,true));document.querySelector('[data-scroll-tools]').addEventListener('click',()=>{location.hash='tools'});
 const sidebar=document.getElementById('sidebar'),sidebarScrim=document.getElementById('sidebarScrim'),mobileMenu=document.getElementById('mobileMenu'),mainContent=document.querySelector('.main-content'),mobileQuery=window.matchMedia('(max-width:860px)');let sidebarOpen=false;
 function setSidebarOpen(open,options={}){sidebarOpen=!!open&&mobileQuery.matches;sidebar.classList.toggle('open',sidebarOpen);sidebarScrim.classList.toggle('open',sidebarOpen);document.body.classList.toggle('sidebar-open',sidebarOpen);mobileMenu.setAttribute('aria-expanded',String(sidebarOpen));mobileMenu.setAttribute('aria-label',sidebarOpen?'Tutup menu':'Buka menu');const hidden=mobileQuery.matches&&!sidebarOpen;sidebar.toggleAttribute('inert',hidden);mainContent.toggleAttribute('inert',mobileQuery.matches&&sidebarOpen);if(hidden)sidebar.setAttribute('aria-hidden','true');else sidebar.removeAttribute('aria-hidden');if(sidebarOpen){requestAnimationFrame(()=>{if(sidebarOpen)sidebar.focus({preventScroll:true})})}else if(options.restoreFocus)mobileMenu.focus({preventScroll:true})}
 mobileMenu.addEventListener('click',()=>setSidebarOpen(!sidebarOpen));sidebarScrim.addEventListener('click',()=>setSidebarOpen(false));document.querySelector('.brand').addEventListener('click',()=>setSidebarOpen(false));mobileQuery.addEventListener?.('change',()=>setSidebarOpen(false));setSidebarOpen(false);
@@ -978,6 +980,7 @@ function commitPage(target){
   if(context)context.textContent={home:'Beranda',tools:'Alat PDF',about:'Tentang'}[target];
   document.querySelectorAll('.page-section').forEach(section=>section.classList.toggle('active',section.dataset.page===target));
   document.querySelectorAll('.nav-link').forEach(link=>{const active=link.dataset.nav===target;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current')});
+  document.documentElement.classList.toggle('home-away',target!=='home');
   setSidebarOpen(false);
 }
 function showPage(page){
@@ -2687,8 +2690,9 @@ async function offlineCapture(kind){
 async function offlinePrune(){
   const records=await offlineGetAll();
   if(!Array.isArray(records)||!records.length){refreshBackupButtons();return []}
-  const now=Date.now(),valid=[],removed=[];
+  const now=Date.now(),valid=[],removed=[],meta=[];
   for(const record of records){
+    if(!record||record.kind==='meta'||record.id==='quick-shuffle'){meta.push(record);continue}
     const saved=record.savedAt||0,accessed=record.lastAccessed||saved;
     if(now-saved>OFFLINE_MAX_AGE||now-accessed>OFFLINE_MAX_IDLE){removed.push(record.id);continue}
     valid.push(record);
@@ -2700,7 +2704,7 @@ async function offlinePrune(){
     byKind.set(record.kind,list);
   }
   let keep=offlineSort([...byKind.values()].flat()).slice(0,OFFLINE_MAX_RECORDS);
-  for(const record of records)if(!keep.some(item=>item.id===record.id)&&!removed.includes(record.id))removed.push(record.id);
+  for(const record of records)if(record&&record.kind!=='meta'&&record.id!=='quick-shuffle'&&!keep.some(item=>item.id===record.id)&&!removed.includes(record.id))removed.push(record.id);
   let bytes=keep.reduce((total,record)=>total+(record.size||0),0);
   for(let index=keep.length-1;index>=0&&bytes>OFFLINE_MAX_BYTES;index--){
     removed.push(keep[index].id);bytes-=(keep[index].size||0);keep.splice(index,1);
@@ -2915,7 +2919,7 @@ function offlineClosePrompt(restoreFocus=true){
   if(restoreFocus&&target&&document.contains(target)){try{target.focus({preventScroll:true})}catch(error){}}
 }
 function offlineShowPrompt(records){
-  const record=records.filter(item=>item&&item.kind).sort((a,b)=>(b.savedAt||0)-(a.savedAt||0))[0];
+  const record=records.filter(item=>item&&OFFLINE_LABELS[item.kind]).sort((a,b)=>(b.savedAt||0)-(a.savedAt||0))[0];
   if(!record)return;
   let skip=false;
   try{skip=sessionStorage.getItem('paperly-offline-restored')===`${record.kind}:${record.savedAt}`}catch(error){}
@@ -2974,8 +2978,34 @@ function offlineRegisterServiceWorker(){
     offlineCacheTimer=setInterval(trim,6*60*60*1000);
   }).catch(()=>{});
 }
+function quickNavShuffleIds(){
+  const pool=tools.map(t=>t.id);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+  return pool.slice(0,4);
+}
+function renderQuickNav(ids){
+  const nav=document.querySelector('.quick-nav');
+  if(!nav)return;
+  const picked=ids.map(id=>tools.find(t=>t.id===id)).filter(Boolean).slice(0,4);
+  if(!picked.length)return;
+  nav.innerHTML=picked.map(t=>`<button class="quick-link" data-tool="${t.id}"><span class="quick-icon ${t.color}" data-icon="${t.icon}"></span><span class="quick-label">${t.title}</span></button>`).join('');
+  nav.querySelectorAll('[data-icon]').forEach(el=>{const svg=icon(el.dataset.icon);if(svg)el.innerHTML=svg});
+}
+async function initQuickNavShuffle(){
+  const today=new Date().toISOString().slice(0,10);
+  try{
+    const all=await offlineGetAll();
+    const rec=Array.isArray(all)?all.find(r=>r&&r.id==='quick-shuffle'):null;
+    const ids=rec&&rec.date===today&&Array.isArray(rec.ids)&&rec.ids.length===4&&rec.ids.every(id=>tools.some(t=>t.id===id))?rec.ids:quickNavShuffleIds();
+    renderQuickNav(ids);
+    await offlinePut({id:'quick-shuffle',kind:'meta',date:today,ids,at:Date.now()});
+  }catch(e){
+    renderQuickNav(quickNavShuffleIds());
+  }
+}
 async function offlineStart(){
   wireOfflineAutosave();wireOfflinePrompt();wireBackupHistory();offlineRegisterServiceWorker();
+  initQuickNavShuffle();
   const records=await offlinePrune();
   if(!records||!records.length)return;
   if(records.length)setTimeout(()=>offlineShowPrompt(records),650);
