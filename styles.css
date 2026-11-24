@@ -1482,12 +1482,22 @@ body[data-theme="dark"] .doc-write-topbar,body[data-theme="dark"] .sheet-topbar{
   .welcome-copy{font-size:12.5px;max-width:100%}
   .quick-guide{grid-template-columns:1fr;gap:8px;margin-bottom:18px}
   .guide-card{padding:13px 14px}
-  .hero-card{min-height:0;padding:22px 20px;margin-bottom:22px;border-radius:22px}
+  .hero-card{min-height:0;padding:22px 20px 20px;margin-bottom:22px;border-radius:22px}
   .hero-copy{max-width:100%}
   .hero-copy h2{font-size:clamp(25px,6.6vw,32px);letter-spacing:-1.1px}
   .hero-copy p{max-width:100%;font-size:11.5px}
-  .hero-art{display:none}
-  .hero-stats{position:static;margin-top:18px;gap:14px;flex-wrap:wrap;padding:0;background:none;box-shadow:none;backdrop-filter:none}
+  .hero-cta{margin-top:16px;margin-bottom:0}
+  .hero-art{display:block;position:relative;width:min(100%,320px);height:160px;right:auto;top:auto;bottom:auto;left:auto;margin:16px auto 0;opacity:1;overflow:hidden;pointer-events:none}
+  .hero-art .art-glow{right:50%;margin-right:-120px;top:-10px;width:220px;height:220px}
+  .hero-art .page-back{right:50%;margin-right:-18px;top:20px;transform:rotate(-12deg) scale(.82);transform-origin:top center}
+  .hero-art .page-mid{right:50%;margin-right:-72px;top:12px;transform:rotate(8deg) scale(.82);transform-origin:top center}
+  .hero-art .page-front{right:50%;margin-right:-112px;top:4px;transform:rotate(-3deg) scale(.82);transform-origin:top center}
+  .hero-art .art-orbit{right:50%;margin-right:-150px;top:38px;transform:rotate(-20deg) scale(.85)}
+  .hero-art .orbit-two{right:50%;margin-right:-125px;top:24px;transform:rotate(39deg) scale(.85)}
+  .hero-art .spark-a{right:50%;margin-right:-145px;top:8px}
+  .hero-art .spark-b{right:50%;margin-right:90px;top:52px}
+  .hero-art .art-orb{right:50%;margin-right:-128px;top:132px}
+  .hero-stats{position:static;margin-top:24px;gap:14px;flex-wrap:wrap;padding:0;background:none;box-shadow:none;backdrop-filter:none}
   .tool-group{padding:14px;border-radius:20px}
   .tool-group-head{align-items:flex-start}
   .tool-group-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px}
@@ -1544,7 +1554,31 @@ html[data-perf="lite"] body[data-theme="dark"] .sidebar,
 html[data-perf="lite"] body[data-theme="dark"] .topbar,
 html[data-perf="lite"] body[data-theme="dark"] .tool-modal{background:#2b2416!important}
 html.is-paused .ambient,
-html.is-paused .hero-card::before{animation-play-state:paused}
+html.is-paused .hero-card::before,
+html.is-paused .hero-art .art-glow,
+html.is-paused .hero-art .art-page,
+html.is-paused .hero-art .art-sparkle,
+html.is-paused .hero-art .art-orbit,
+html.is-paused .hero-art .art-orb{animation-play-state:paused}
+html.home-away .hero-card::before,
+html.home-away .ambient,
+html.home-away .hero-art .art-glow,
+html.home-away .hero-art .art-page,
+html.home-away .hero-art .art-sparkle,
+html.home-away .hero-art .art-orbit,
+html.home-away .hero-art .art-orb,
+html.home-away .brand-icon,
+html.home-away .topbar-brand-dot,
+html.home-away .eyebrow-dot,
+html.home-away .hero-kicker-dot,
+html.home-away .local-status-dot{animation-play-state:paused!important}
+html.is-busy .hero-card::before,
+html.is-busy .ambient,
+html.is-busy .hero-art .art-glow,
+html.is-busy .hero-art .art-page,
+html.is-busy .hero-art .art-sparkle,
+html.is-busy .hero-art .art-orbit,
+html.is-busy .hero-art .art-orb{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){
   .hero-card::before,.ambient{animation:none!important}
   .tool-card,.guide-card{transition-duration:.01ms!important}
