@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=50">
+  <link rel="stylesheet" href="styles.css?v=51">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -86,7 +86,7 @@
       </div>
       <div class="edit-actions">
         <span class="edit-dirty" id="editDirty" hidden>Belum disimpan</span>
-        <button type="button" class="button-quiet backup-history-btn" id="editBackupBtn" data-backup-kind="edit" hidden>Riwayat backup</button>
+        <button type="button" class="button-quiet backup-history-btn" id="editBackupBtn" data-backup-kind="edit" title="Riwayat backup" aria-label="Riwayat backup" hidden>Riwayat backup</button>
         <button type="button" class="button-quiet" id="editPickBtn">Ganti PDF</button>
         <button type="button" class="button-primary" id="editSave"><span>Simpan PDF</span><span>↓</span></button>
       </div>
@@ -117,15 +117,22 @@
               <button type="button" class="editor-btn" data-etool="note" title="Tambah catatan">Catatan</button>
               <button type="button" class="editor-btn" data-etool="image" title="Sisip gambar">Gambar</button>
               <button type="button" class="editor-btn" data-etool="ink" title="Gambar bebas">Pensil</button>
+              <button type="button" class="editor-btn" data-etool="select" title="Pilih dan salin teks PDF">Pilih teks</button>
             </div>
             <label class="editor-field">Warna <input type="color" id="editorColor" value="#4a5df0"></label>
             <label class="editor-field">Ukuran teks <select id="editorSize" aria-label="Ukuran teks"><option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option></select></label>
+            <div class="editor-zoom" role="group" aria-label="Zoom tampilan halaman">
+              <button type="button" class="editor-btn" data-ezoom="-1" title="Perkecil tampilan" aria-label="Perkecil tampilan">−</button>
+              <span class="editor-zoom-label" id="editorZoomLabel" aria-live="polite">100%</span>
+              <button type="button" class="editor-btn" data-ezoom="1" title="Perbesar tampilan" aria-label="Perbesar tampilan">+</button>
+              <button type="button" class="editor-btn" id="editorZoomFit" title="Sesuaikan halaman ke layar" aria-label="Sesuaikan halaman ke layar">Fit</button>
+            </div>
             <div class="editor-tools">
               <button type="button" class="editor-btn ghost" data-eact="delete-item">Hapus terpilih</button>
               <button type="button" class="editor-btn ghost" data-eact="clear-page">Kosongkan halaman</button>
             </div>
           </div>
-          <div class="editor-scroll"><div class="editor-stage" id="editorStage"><canvas id="editorPageCanvas"></canvas><canvas id="editorInkCanvas"></canvas><div class="editor-items" id="editorItems"></div><div class="editor-empty" id="editorEmpty" hidden>Pilih file PDF untuk mulai menyunting.</div></div></div>
+          <div class="editor-scroll"><div class="editor-stage" id="editorStage"><canvas id="editorPageCanvas"></canvas><canvas id="editorInkCanvas"></canvas><div class="editor-text-layer" id="editorTextLayer" aria-hidden="true"></div><div class="editor-items" id="editorItems"></div><div class="editor-empty" id="editorEmpty" hidden>Pilih file PDF untuk mulai menyunting.</div></div></div>
           <div class="editor-footer">
             <button type="button" class="mini-button" id="editorPrev" disabled>← Sebelumnya</button>
             <span class="editor-page-label" id="editorPageLabel">Halaman — dari —</span>
@@ -146,8 +153,8 @@
   <section class="doc-write" id="docWritePage" aria-hidden="true">
     <header class="doc-write-topbar">
       <button class="button-quiet doc-back-btn" id="docBackBtn" aria-label="Kembali ke halaman utama">← Kembali</button>
-      <div class="doc-write-title"><span class="doc-write-eyebrow">PEMBUAT PDF</span><h2>Tulis dokumen baru</h2></div>
-      <div class="doc-write-actions"><span class="doc-page-label" id="docPageLabel"></span><button type="button" class="button-quiet backup-history-btn" data-backup-kind="doc" hidden>Riwayat backup</button><button class="button-primary" id="docExport"><span>Buat PDF</span><span>↗</span></button></div>
+      <div class="doc-write-title"><span class="doc-write-eyebrow">PEMBUAT PDF</span><input class="doc-title-input" id="docTitle" value="Dokumen baru" maxlength="80" aria-label="Judul dokumen" autocomplete="off" spellcheck="false"></div>
+      <div class="doc-write-actions"><span class="doc-page-label" id="docPageLabel"></span><button type="button" class="button-quiet backup-history-btn" data-backup-kind="doc" title="Riwayat backup" aria-label="Riwayat backup" hidden>Riwayat backup</button><button class="button-primary" id="docExport"><span>Buat PDF</span><span>↗</span></button></div>
     </header>
     <div class="doc-write-body"><div class="doc-builder" id="docBuilder"><div class="doc-toolbar"><button type="button" class="editor-btn" data-cmd="bold" title="Tebal" aria-label="Tebal"><b>B</b></button><button type="button" class="editor-btn" data-cmd="italic" title="Miring" aria-label="Miring"><i>I</i></button><button type="button" class="editor-btn" data-cmd="underline" title="Garis bawah" aria-label="Garis bawah"><u>U</u></button><button type="button" class="editor-btn" data-cmd="strikeThrough" title="Coret" aria-label="Coret"><s>S</s></button><button type="button" class="editor-btn" data-cmd="justifyLeft" title="Rata kiri" aria-label="Rata kiri">◧</button><button type="button" class="editor-btn" data-cmd="justifyCenter" title="Rata tengah" aria-label="Rata tengah">▣</button><button type="button" class="editor-btn" data-cmd="justifyRight" title="Rata kanan" aria-label="Rata kanan">◨</button><button type="button" class="editor-btn" data-cmd="justifyFull" title="Rata kiri-kanan (justify)" aria-label="Rata kiri-kanan (justify)">≣</button><button type="button" class="editor-btn" data-cmd="insertUnorderedList" title="Daftar poin" aria-label="Daftar poin">• ≡</button><button type="button" class="editor-btn" data-cmd="insertOrderedList" title="Daftar nomor" aria-label="Daftar nomor">1. ≡</button><select id="docFont" class="doc-select" title="Jenis huruf" aria-label="Jenis huruf"><option value="Arial">Arial (sans)</option><option value="Times New Roman">Times (serif)</option><option value="Courier New">Courier (mono)</option></select><span class="doc-spinbox"><button type="button" class="editor-btn" data-dsize="-1" title="Perkecil huruf" aria-label="Perkecil huruf">−</button><input id="docSizePx" class="doc-size-input" type="number" min="8" max="96" step="1" value="14" title="Ukuran huruf (piksel)" aria-label="Ukuran huruf (piksel)"><button type="button" class="editor-btn" data-dsize="1" title="Perbesar huruf" aria-label="Perbesar huruf">+</button></span><input id="docColor" type="color" value="#17243c" title="Warna teks" aria-label="Warna teks"><span class="doc-toolbar-sep"></span><button type="button" class="editor-btn" data-doc="image" title="Sisip gambar" aria-label="Sisip gambar">🖼</button><button type="button" class="editor-btn" data-doc="sheet" title="Sisip tabel" aria-label="Sisip tabel">▦</button><button type="button" class="editor-btn" data-doc="font" title="Unggah font sendiri (TTF/OTF)" aria-label="Unggah font sendiri">🔤</button><button type="button" class="editor-btn" data-doc="add-page" title="Tambah halaman" aria-label="Tambah halaman">+ Hal</button><button type="button" class="editor-btn" data-doc="remove-page" title="Hapus halaman terakhir" aria-label="Hapus halaman terakhir">− Hal</button><button type="button" class="editor-btn" data-doc="clear" title="Kosongkan semua" aria-label="Kosongkan semua">Kosongkan</button><span class="doc-toolbar-sep"></span><button type="button" class="editor-btn doc-layout-toggle" id="docLayoutToggle" title="Pengaturan tata letak" aria-label="Pengaturan tata letak" aria-expanded="false" aria-controls="docLayoutPanel">Tata letak ▾</button><span class="doc-zoom" role="group" aria-label="Zoom tampilan halaman"><button type="button" class="editor-btn" data-doczoom="-1" title="Perkecil tampilan" aria-label="Perkecil tampilan halaman">−</button><span class="doc-zoom-label" id="docZoomLabel" aria-live="polite" title="100% berarti pas lebar layar">100%</span><button type="button" class="editor-btn" data-doczoom="1" title="Perbesar tampilan" aria-label="Perbesar tampilan halaman">+</button><button type="button" class="editor-btn doc-zoom-fit" id="docZoomFit" title="Sesuaikan halaman ke lebar layar" aria-label="Sesuaikan halaman ke lebar layar">Fit</button></span></div><div class="doc-layout-panel" id="docLayoutPanel" hidden><div class="doc-layout-grid"><label class="doc-layout-field"><span>Ukuran kertas</span><select id="docPaper" class="doc-select"><option value="a4">A4 (210 × 297 mm)</option><option value="a5">A5 (148 × 210 mm)</option><option value="b5">B5 (176 × 250 mm)</option><option value="letter">Letter (216 × 279 mm)</option><option value="legal">Legal (216 × 356 mm)</option><option value="f4">F4 / Folio (216 × 330 mm)</option><option value="a3">A3 (297 × 420 mm)</option></select></label><label class="doc-layout-field"><span>Orientasi</span><select id="docOrientation" class="doc-select"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label><label class="doc-layout-field"><span>Margin atas (mm)</span><input id="docMarginTop" class="doc-layout-input" type="number" min="5" max="100" step="0.5" value="25.4"></label><label class="doc-layout-field"><span>Margin kanan (mm)</span><input id="docMarginRight" class="doc-layout-input" type="number" min="5" max="100" step="0.5" value="25.4"></label><label class="doc-layout-field"><span>Margin bawah (mm)</span><input id="docMarginBottom" class="doc-layout-input" type="number" min="5" max="100" step="0.5" value="25.4"></label><label class="doc-layout-field"><span>Margin kiri (mm)</span><input id="docMarginLeft" class="doc-layout-input" type="number" min="5" max="100" step="0.5" value="25.4"></label><label class="doc-layout-field"><span>Kolom teks terpilih</span><select id="docColumns" class="doc-select"><option value="1">1 kolom</option><option value="2">2 kolom</option><option value="3">3 kolom</option></select></label><label class="doc-layout-field"><span>Inden kiri (cm)</span><input id="docIndentLeft" class="doc-layout-input" type="number" min="0" max="12" step="0.25" value="0"></label><label class="doc-layout-field"><span>Inden baris pertama (cm)</span><input id="docIndentFirst" class="doc-layout-input" type="number" min="0" max="12" step="0.25" value="0"></label><label class="doc-layout-field"><span>Spasi baris</span><select id="docLineSpacing" class="doc-select"><option value="1">1,0</option><option value="1.15">1,15</option><option value="1.5">1,5</option><option value="2">2,0</option><option value="1.7" selected>1,7 (standar)</option></select></label><label class="doc-layout-field"><span>Spasi paragraf (pt)</span><input id="docSpaceAfter" class="doc-layout-input" type="number" min="0" max="72" step="1" value="6"></label></div><p class="doc-layout-hint">Kolom, inden, dan spasi berlaku pada teks yang dipilih. Ukuran kertas, orientasi, dan margin berlaku untuk seluruh dokumen.</p></div><div class="doc-zoom-viewport" id="docZoomViewport"><div class="doc-zoom-track" id="docZoomTrack"><div class="doc-pages" id="docPages"><div class="doc-page" contenteditable="true" spellcheck="false"></div></div></div></div><input id="docImageInput" type="file" accept="image/png,image/jpeg" hidden><input id="docFontFile" type="file" accept=".ttf,.otf,font/ttf,font/otf" hidden></div>
     <div class="modal-progress" id="docProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-hidden="true"><div class="modal-progress-fill" id="docProgressFill"></div></div><div class="modal-progress-label" id="docProgressLabel" aria-live="polite"></div><div class="modal-error" id="docError" role="alert"></div></div>
@@ -163,7 +170,7 @@
       </div>
       <div class="sheet-actions">
         <span class="sheet-dirty" id="sheetDirty">Belum diekspor</span>
-        <button type="button" class="button-quiet backup-history-btn" data-backup-kind="sheet" hidden>Riwayat backup</button>
+        <button type="button" class="button-quiet backup-history-btn" data-backup-kind="sheet" title="Riwayat backup" aria-label="Riwayat backup" hidden>Riwayat backup</button>
         <button type="button" class="button-quiet" id="sheetVarsBtn" aria-expanded="false" aria-controls="sheetVars">ƒ Variabel</button>
         <button type="button" class="button-primary" id="sheetExport"><span>Ekspor PDF</span><span>↓</span></button>
       </div>
@@ -525,6 +532,6 @@
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/fflate.js"></script>
   <script src="vendor/sql-wasm.js"></script>
-  <script src="app.js?v=50"></script>
+  <script src="app.js?v=51"></script>
 </body>
 </html>

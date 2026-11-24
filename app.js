@@ -258,10 +258,12 @@ const EDITOR_HINTS={
   rect:'Seret di halaman untuk menggambar kotak.',
   note:'Klik halaman untuk menambah catatan, lalu ketik isinya.',
   image:'Pilih gambar dari perangkat, lalu klik halaman untuk menempatkannya.',
-  ink:'Gambar bebas dengan pensil di atas halaman.'
+  ink:'Gambar bebas dengan pensil di atas halaman.',
+  select:'Seret di atas teks PDF untuk memilih dan menyalinnya. Anotasi dinonaktifkan sementara.'
 };
-const editor={doc:null,file:null,total:0,page:1,items:{},tool:'text',color:'#4a5df0',size:16,token:0,renderToken:0,selected:null,canvasW:0,canvasH:0,pageW:595,pageH:842,pendingImageAt:null,drawing:null,preview:null,initialized:false};
-let editorLeaveReturnFocus=null,editorLeaveNextAction=null,editPageReturnFocus=null;
+const EDITOR_ZOOM_MIN=.5,EDITOR_ZOOM_MAX=3,EDITOR_ZOOM_STEP=.15;
+const editor={doc:null,file:null,total:0,page:1,items:{},tool:'text',color:'#4a5df0',size:16,zoom:1,token:0,renderToken:0,selected:null,canvasW:0,canvasH:0,pageW:595,pageH:842,pendingImageAt:null,drawing:null,preview:null,initialized:false};
+let editorLeaveReturnFocus=null,editorLeaveNextAction=null,editPageReturnFocus=null,editorResizeTimer=0;
 
 function initEditor(){
   const wrap=document.getElementById('pdfEditor');
@@ -270,17 +272,45 @@ function initEditor(){
   wrap.querySelectorAll('[data-etool]').forEach(button=>button.addEventListener('click',()=>{
     editor.tool=button.dataset.etool;
     wrap.querySelectorAll('[data-etool]').forEach(item=>item.classList.toggle('active',item===button));
-    setEditorHint();
+    setEditorHint();updateEditorInteractionMode();
   }));
   wrap.querySelectorAll('[data-eact]').forEach(button=>button.addEventListener('click',()=>{
     if(button.dataset.eact==='delete-item')deleteEditorSelected();else clearEditorPage();
   }));
+  wrap.querySelectorAll('[data-ezoom]').forEach(button=>button.addEventListener('click',()=>{
+    button.blur();setEditorZoom(editor.zoom+(Number(button.dataset.ezoom)||0)*EDITOR_ZOOM_STEP);
+  }));
+  document.getElementById('editorZoomFit')?.addEventListener('click',event=>{event.currentTarget.blur();setEditorZoom(1)});
   document.getElementById('editorColor').addEventListener('input',event=>{editor.color=event.target.value});
   document.getElementById('editorSize').addEventListener('change',event=>{editor.size=Number(event.target.value)||16});
   document.getElementById('editorPrev').addEventListener('click',()=>gotoEditorPage(editor.page-1));
   document.getElementById('editorNext').addEventListener('click',()=>gotoEditorPage(editor.page+1));
   document.getElementById('editorImageInput').addEventListener('change',event=>{addEditorImage(event.target.files[0]);event.target.value=''});
   document.getElementById('editorStage').addEventListener('pointerdown',onEditorStagePointerDown);
+  window.addEventListener('resize',()=>{
+    if(!editPageIsOpen()||!editor.doc)return;
+    clearTimeout(editorResizeTimer);
+    editorResizeTimer=setTimeout(()=>{if(editPageIsOpen()&&editor.doc)renderEditorPage()},160);
+  });
+}
+function setEditorZoom(value){
+  editor.zoom=Math.max(EDITOR_ZOOM_MIN,Math.min(EDITOR_ZOOM_MAX,Math.round((Number(value)||1)*100)/100));
+  updateEditorZoomLabel();
+  if(editor.doc)renderEditorPage();
+}
+function updateEditorZoomLabel(){
+  const label=document.getElementById('editorZoomLabel');
+  if(label){const percent=Math.round(editor.zoom*100);label.textContent=`${percent}%`;label.title=`${percent}% zoom tampilan · 100% berarti pas lebar layar`;label.setAttribute('aria-label',`Zoom tampilan ${percent}%`)}
+  const out=document.querySelector('[data-ezoom="-1"]'),inn=document.querySelector('[data-ezoom="1"]');
+  if(out)out.disabled=editor.zoom<=EDITOR_ZOOM_MIN;
+  if(inn)inn.disabled=editor.zoom>=EDITOR_ZOOM_MAX;
+}
+function updateEditorInteractionMode(){
+  const stage=document.getElementById('editorStage'),layer=document.getElementById('editorTextLayer'),items=document.getElementById('editorItems');
+  const draw=['ink','highlight','underline','strikeout','rect'].includes(editor.tool);
+  if(stage){stage.classList.toggle('draw-mode',draw);stage.classList.toggle('select-mode',editor.tool==='select')}
+  if(layer)layer.classList.toggle('active',editor.tool==='select');
+  if(items)items.classList.toggle('text-selecting',editor.tool==='select');
 }
 function setEditorHint(){const hint=document.getElementById('editorHint');if(hint)hint.textContent=EDITOR_HINTS[editor.tool]||EDITOR_HINTS.text}
 function editPageIsOpen(){const page=document.getElementById('editPage');return !!page&&page.classList.contains('open')}
@@ -291,7 +321,7 @@ function openEditPage(){
   if(!page.classList.contains('open'))editPageReturnFocus=document.activeElement;
   activeTool=tools.find(tool=>tool.id==='edit')||activeTool;
   page.classList.add('open');page.setAttribute('aria-hidden','false');document.body.classList.add('editing');
-  initEditor();setEditorHint();
+  initEditor();setEditorHint();updateEditorInteractionMode();updateEditorZoomLabel();
   updateEditorChrome();
   if(editor.doc)renderEditorPage();else renderEditorPage();
   const target=editor.file?document.getElementById('editPickBtn'):document.getElementById('editStartPick');
@@ -347,8 +377,8 @@ async function setEditorFile(file){
   if(file.size>100*1024*1024){showError('Ukuran PDF maksimal 100 MB.');return}
   setEditProgress(null,'Membaca PDF…');
   if(editor.doc){try{editor.doc.destroy()}catch(error){}}
-  editor.file=file;editor.doc=null;editor.total=0;editor.page=1;editor.items={};editor.selected=null;editor.pendingImageAt=null;
-  selectedFiles=[file];
+  editor.file=file;editor.doc=null;editor.total=0;editor.page=1;editor.items={};editor.selected=null;editor.pendingImageAt=null;editor.zoom=1;
+  selectedFiles=[file];updateEditorChrome();
   const token=++editor.token;
   try{
     const bytes=new Uint8Array(await file.arrayBuffer()),doc=await pdfjsLib.getDocument({data:bytes}).promise;
@@ -378,20 +408,61 @@ function renderEditorChrome(){
   if(prev)prev.disabled=editor.page<=1;if(next)next.disabled=!editor.total||editor.page>=editor.total;
   updateEditorChrome();
 }
-function gotoEditorPage(p){if(!editor.doc||p<1||p>editor.total)return;editor.page=p;editor.selected=null;renderEditorPage();renderEditorChrome()}
+function gotoEditorPage(p){if(!editor.doc||p<1||p>editor.total)return;editor.page=p;editor.selected=null;renderEditorPage();renderEditorChrome();const scroll=document.querySelector('#editWorkspace .editor-scroll');if(scroll)scroll.scrollTop=0}
 async function renderEditorPage(){
-  const canvas=document.getElementById('editorPageCanvas'),ink=document.getElementById('editorInkCanvas'),layer=document.getElementById('editorItems'),empty=document.getElementById('editorEmpty');
+  const canvas=document.getElementById('editorPageCanvas'),ink=document.getElementById('editorInkCanvas'),layer=document.getElementById('editorItems'),empty=document.getElementById('editorEmpty'),textLayer=document.getElementById('editorTextLayer');
   if(!canvas)return;
-  if(!editor.doc){canvas.width=ink.width=canvas.height=ink.height=10;layer.innerHTML='';if(empty)empty.hidden=false;return}
+  if(!editor.doc){canvas.width=ink.width=canvas.height=ink.height=10;layer.innerHTML='';if(textLayer)textLayer.innerHTML='';if(empty)empty.hidden=false;updateEditorZoomLabel();return}
   if(empty)empty.hidden=true;
   const token=++editor.renderToken,page=await editor.doc.getPage(editor.page);
   if(token!==editor.renderToken)return;
-  const base=page.getViewport({scale:1}),scale=Math.min(720/base.width,620/base.height,2),vp=page.getViewport({scale});
-  editor.canvasW=Math.ceil(vp.width);editor.canvasH=Math.ceil(vp.height);editor.pageW=base.width;editor.pageH=base.height;
-  canvas.width=ink.width=editor.canvasW;canvas.height=ink.height=editor.canvasH;
+  const base=page.getViewport({scale:1}),scroll=document.querySelector('#editWorkspace .editor-scroll');
+  let available=scroll&&scroll.clientWidth?scroll.clientWidth-24:0;
+  if(!available)available=Math.min(1120,Math.max(320,(window.innerWidth||1024)-48));
+  const fitScale=Math.min(available/base.width,1.6),logicalScale=Math.max(.15,fitScale*editor.zoom);
+  let dpr=Math.min(window.devicePixelRatio||1,2);
+  const cssW=base.width*logicalScale,cssH=base.height*logicalScale,maxDim=4096;
+  if(cssW*dpr>maxDim)dpr=Math.max(1,maxDim/cssW);
+  if(cssH*dpr>maxDim)dpr=Math.min(dpr,Math.max(1,maxDim/cssH));
+  const renderScale=logicalScale*dpr,vp=page.getViewport({scale:renderScale});
+  editor.canvasW=Math.ceil(cssW);editor.canvasH=Math.ceil(cssH);editor.pageW=base.width;editor.pageH=base.height;
+  canvas.width=ink.width=Math.ceil(vp.width);canvas.height=ink.height=Math.ceil(vp.height);
+  canvas.style.width=ink.style.width=editor.canvasW+'px';canvas.style.height=ink.style.height=editor.canvasH+'px';
   await page.render({canvasContext:canvas.getContext('2d'),viewport:vp,background:'#ffffff'}).promise;
   if(token!==editor.renderToken)return;
-  redrawEditorInk();renderEditorItems();
+  redrawEditorInk();renderEditorItems();updateEditorZoomLabel();
+  renderEditorTextLayer(page,logicalScale,token);
+}
+async function renderEditorTextLayer(page,scale,token){
+  const layer=document.getElementById('editorTextLayer');if(!layer)return;
+  layer.innerHTML='';
+  layer.style.width=editor.canvasW+'px';layer.style.height=editor.canvasH+'px';
+  try{
+    const content=await page.getTextContent();
+    if(token!==editor.renderToken)return;
+    const vp=page.getViewport({scale}),frag=document.createDocumentFragment();
+    for(const item of content.items){
+      if(!item.str||!item.str.trim())continue;
+      const tx=pdfjsLib.Util.transform(vp.transform,item.transform),fontHeight=Math.hypot(tx[2],tx[3]);
+      if(!isFinite(fontHeight)||fontHeight<=0)continue;
+      const span=document.createElement('span');
+      span.textContent=item.str;
+      span.style.left=tx[4]+'px';
+      span.style.top=(tx[5]-fontHeight)+'px';
+      span.style.fontSize=fontHeight+'px';
+      span.style.fontFamily=item.fontName||'sans-serif';
+      const target=Math.abs(item.width)*scale;
+      if(target>0)span.dataset.target=String(target);
+      frag.appendChild(span);
+    }
+    layer.appendChild(frag);
+    if(token!==editor.renderToken)return;
+    const spans=[...layer.children],widths=spans.map(span=>span.getBoundingClientRect().width);
+    spans.forEach((span,index)=>{
+      const target=Number(span.dataset.target||0);
+      if(target>0&&widths[index]>0)span.style.transform=`scaleX(${target/widths[index]})`;
+    });
+  }catch(error){}
 }
 function redrawEditorInk(){const ink=document.getElementById('editorInkCanvas');if(!ink)return;const ctx=ink.getContext('2d');ctx.clearRect(0,0,ink.width,ink.height);for(const item of editor.items[editor.page]||[])if(item.type==='ink')strokeEditorPath(ctx,item)}
 function strokeEditorPath(ctx,it){
@@ -470,7 +541,7 @@ function endEditorDrag(){
   window.removeEventListener('pointermove',moveEditorDrag);window.removeEventListener('pointerup',endEditorDrag);dragState=null;
 }
 function onEditorStagePointerDown(event){
-  if(!editor.doc||event.target.closest('.editor-item'))return;
+  if(!editor.doc||event.target.closest('.editor-item')||editor.tool==='select')return;
   const stage=document.getElementById('editorStage'),r=stage.getBoundingClientRect();
   const x=(event.clientX-r.left)/r.width,y=(event.clientY-r.top)/r.height;
   if(editor.tool==='ink'){
@@ -607,6 +678,8 @@ const DOC_PAPER_SIZES={
 const DOC_LAYOUT_DEFAULTS={paper:'a4',orientation:'portrait',marginTop:25.4,marginRight:25.4,marginBottom:25.4,marginLeft:25.4};
 const DOC_ZOOM_MIN=.6,DOC_ZOOM_MAX=2.4,DOC_ZOOM_STEP=.1;
 let docLayout={...DOC_LAYOUT_DEFAULTS},docZoom=1;
+function docTitleValue(){const el=document.getElementById('docTitle'),value=el&&el.value?el.value.trim():'';return value||'Dokumen baru'}
+function setDocTitle(value){const el=document.getElementById('docTitle');if(el)el.value=value||'Dokumen baru'}
 const DOC_COLUMN_GAP_CSS='1.5em';
 const docMmToPt=mm=>Math.max(0,Number(mm)||0)*72/25.4;
 const docMmToCssPx=mm=>Math.max(0,Number(mm)||0)*96/25.4;
@@ -689,7 +762,8 @@ document.getElementById('docLeaveCancel').addEventListener('click',()=>closeDocL
 document.getElementById('docLeaveConfirm').addEventListener('click',()=>{closeDocPage();showToast('Pembuat PDF ditutup. Dokumen tetap tersimpan di tab ini.')});
 document.getElementById('docLeaveDialog').addEventListener('click',e=>{if(e.target===e.currentTarget)closeDocLeaveDialog()});
 document.getElementById('docLeaveDialog').addEventListener('keydown',e=>{if(e.key!=='Tab')return;const focusable=[...e.currentTarget.querySelectorAll('button:not(:disabled)')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}});
-document.getElementById('docExport').addEventListener('click',async()=>{const b=document.getElementById('docExport');if(b.disabled)return;const token=++docExportToken;b.disabled=true;b.classList.add('loading');b.innerHTML='<span class="button-spinner" aria-hidden="true"></span><span>Menyusun…</span>';document.getElementById('docError').classList.remove('show');setDocProgress(null,'Menyiapkan…');try{download(await exportDocToPdf(f=>setDocProgress(25+f*.65,'Merakit halaman PDF…')),'paperly-dokumen.pdf');setDocProgress(100,'✓ PDF siap disimpan');showToast('PDF selesai dibuat. Beri nama file pada dialog simpan. Halaman tetap terbuka — tutup lewat tombol Kembali.');setTimeout(()=>{if(token===docExportToken)hideDocProgress()},1600)}catch(e){hideDocProgress();const el=document.getElementById('docError');el.textContent=e.message||'Terjadi kesalahan saat membuat PDF.';el.classList.add('show')}finally{b.disabled=false;b.classList.remove('loading');b.innerHTML='<span>Buat PDF</span><span>↗</span>'}});
+document.getElementById('docExport').addEventListener('click',async()=>{const b=document.getElementById('docExport');if(b.disabled)return;const token=++docExportToken;b.disabled=true;b.classList.add('loading');b.innerHTML='<span class="button-spinner" aria-hidden="true"></span><span>Menyusun…</span>';document.getElementById('docError').classList.remove('show');setDocProgress(null,'Menyiapkan…');try{download(await exportDocToPdf(f=>setDocProgress(25+f*.65,'Merakit halaman PDF…')),`${filenameBase(docTitleValue())}.pdf`);setDocProgress(100,'✓ PDF siap disimpan');showToast('PDF selesai dibuat. Beri nama file pada dialog simpan. Halaman tetap terbuka — tutup lewat tombol Kembali.');setTimeout(()=>{if(token===docExportToken)hideDocProgress()},1600)}catch(e){hideDocProgress();const el=document.getElementById('docError');el.textContent=e.message||'Terjadi kesalahan saat membuat PDF.';el.classList.add('show')}finally{b.disabled=false;b.classList.remove('loading');b.innerHTML='<span>Buat PDF</span><span>↗</span>'}});
+document.getElementById('docTitle')?.addEventListener('input',()=>{scheduleOfflineBackup('doc')});
 function docIsEmpty(){let has=false;document.querySelectorAll('.doc-page').forEach(p=>{if(p.textContent.trim()||p.querySelector('img')||p.querySelector('.doc-sheet'))has=true});return !has}
 const winAnsiMap={'\u2018':"'",'\u2019':"'",'\u201C':'"','\u201D':'"','\u2013':'-','\u2014':'-','\u2026':'...','\u00A0':' ','\u200B':'','\u200C':'','\u200D':'','\uFEFF':'','\u00AD':'-','\u2028':' ','\u2029':' '};
 function stripInvisible(s){return String(s).replace(/[\u200B\u200C\u200D\uFEFF]/g,'')}
@@ -823,6 +897,7 @@ async function exportDocToPdf(report){
   if(pi<pageEls.length-1)newPage();
  }
  if(report)report(.95);
+ doc.setTitle(docTitleValue());doc.setCreator('Paperly');doc.setProducer('Paperly');
  return doc.save({useObjectStreams:true});
 }
 function xmlEscape(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -2572,14 +2647,14 @@ async function offlineCapture(kind){
     if(kind==='edit'){
       const file=editor.file;
       if(!editPageIsOpen()||!file||!editor.doc||!editorHasChanges())return null;
-      return {pdf:await file.arrayBuffer(),name:file.name,type:file.type||'application/pdf',items:offlinePlain(editor.items),page:editor.page,tool:editor.tool,color:editor.color,size:editor.size,total:editor.total};
+      return {pdf:await file.arrayBuffer(),name:file.name,type:file.type||'application/pdf',items:offlinePlain(editor.items),page:editor.page,tool:editor.tool,color:editor.color,size:editor.size,zoom:editor.zoom,total:editor.total};
     }
     if(kind==='doc'){
       const page=document.getElementById('docWritePage');
       if(!page||!page.classList.contains('open'))return null;
       const pages=[...document.querySelectorAll('#docPages .doc-page')].map(el=>el.innerHTML);
       if(!pages.length)return null;
-      return {pages,layout:{...docLayout},zoom:docZoom,fonts:docCustomFonts.map(font=>({label:font.label,family:font.family,bytes:font.bytes.slice()}))};
+      return {pages,title:docTitleValue(),layout:{...docLayout},zoom:docZoom,fonts:docCustomFonts.map(font=>({label:font.label,family:font.family,bytes:font.bytes.slice()}))};
     }
     if(kind==='sheet'){
       const page=document.getElementById('sheetPage');
@@ -2670,11 +2745,11 @@ async function offlineRestoreEdit(data){
   selectedFiles=[file];
   editor.page=Math.max(1,Math.min(doc.numPages,+data.page||1));
   editor.items=data.items&&typeof data.items==='object'?data.items:{};
-  editor.tool=data.tool||'text';editor.color=data.color||'#4a5df0';editor.size=+data.size||16;editor.selected=null;editor.pendingImageAt=null;
+  editor.tool=data.tool||'text';editor.color=data.color||'#4a5df0';editor.size=+data.size||16;editor.zoom=Math.max(EDITOR_ZOOM_MIN,Math.min(EDITOR_ZOOM_MAX,+data.zoom||1));editor.selected=null;editor.pendingImageAt=null;
   document.querySelectorAll('#pdfEditor [data-etool]').forEach(button=>button.classList.toggle('active',button.dataset.etool===editor.tool));
   const color=document.getElementById('editorColor'),size=document.getElementById('editorSize');
   if(color)color.value=editor.color;if(size)size.value=String(editor.size);
-  setEditorHint();renderEditorChrome();renderEditorItems();redrawEditorInk();renderEditorPage();
+  setEditorHint();updateEditorInteractionMode();updateEditorZoomLabel();renderEditorChrome();renderEditorItems();redrawEditorInk();renderEditorPage();
 }
 function offlineRestoreDoc(data){
   openDocPage();
@@ -2692,6 +2767,7 @@ function offlineRestoreDoc(data){
       }
     }catch(error){}
   });
+  setDocTitle(data.title);
   docLayout={...DOC_LAYOUT_DEFAULTS,...(data.layout||{})};
   docZoom=Math.max(DOC_ZOOM_MIN,Math.min(DOC_ZOOM_MAX,+data.zoom||1));
   syncDocLayoutControls();setDocZoom(docZoom);
@@ -2804,6 +2880,7 @@ function wireBackupHistory(){
   document.getElementById('backupHistoryClose')?.addEventListener('click',()=>closeBackupHistory());
   document.getElementById('backupHistorySnapshot')?.addEventListener('click',async()=>{
     if(!backupHistoryKind)return;
+    clearTimeout(offlineTimers.get(backupHistoryKind));offlineTimers.delete(backupHistoryKind);
     const ok=await offlineSave(backupHistoryKind,true);
     renderBackupHistory();refreshBackupButtons();
     showToast(ok?'Salinan backup disimpan.':'Tidak ada pekerjaan untuk disalin.');
