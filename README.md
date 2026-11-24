@@ -112,16 +112,19 @@ Pekerjaan di grup **Tulis & Sunting** kini memiliki salinan lokal yang dibuat ot
 - Tata letak menyesuaikan layar ponsel, tablet, dan desktop. Pratinjau halaman tetap bisa digulirkan tanpa mengubah lebar jendela.
 - Pratinjau dirender mengikuti kerapatan piksel layar (high-DPI) sehingga teks dan garis tidak lagi blur, termasuk saat diperbesar.
 - Kontrol **zoom − / + / Fit** membantu membaca dan menempatkan anotasi dengan presisi; **100%** berarti halaman pas dengan lebar layar.
-- Mode **Pilih teks** mengaktifkan lapisan teks asli PDF agar pengguna dapat memblok dan menyalin isi dokumen. Anotasi dinonaktifkan sementara selama mode ini aktif.
+- Mode **Pilih teks** mengaktifkan lapisan teks asli PDF agar pengguna dapat memblok dan menyalin isi dokumen. Saat teks diblok, bilah anotasi muncul untuk menerapkan **Sorot**, **Garis bawah**, atau **Coret** langsung pada teks tersebut. Sorotan digambar sebagai lapisan datar sehingga teks tidak terlihat mengambang atau bergeser dari posisi aslinya.
+- Kotak **Ukuran** dapat diketik bebas (6–200) dan pilihan **Font** mendukung Sans/Serif/Mono serta font kustom TTF/OTF yang diunggah dari perangkat. Perubahan ukuran, font, atau warna langsung berlaku pada teks yang sedang dipilih.
 - Peringatan **Suntingan Anda belum disimpan** muncul saat menutup halaman, berpindah alat, atau memuat ulang tab selama masih ada anotasi.
 
 Anotasi yang tersedia langsung di atas pratinjau halaman:
 
-- **Teks** — klik untuk menambah teks yang bisa diketik dan dipindah.
-- **Sorot**, **Garis bawah**, **Coret**, dan **Kotak** — seret untuk menandai area; warna bisa dipilih dari toolbar.
+- **Teks** — klik untuk menambah teks yang bisa diketik, dipindah lewat handle ⠿, diubah ukuran/font/warnanya, diduplikasi, atau dihapus.
+- **Sorot**, **Garis bawah**, **Coret**, dan **Kotak** — seret untuk menandai area; warna bisa dipilih dari toolbar. Sorot/Garis bawah/Coret juga bisa diterapkan langsung pada teks lewat **Pilih teks**.
 - **Catatan** — klik untuk menaruh catatan berisi teks bebas.
 - **Gambar** — sisipkan PNG/JPG, lalu seret atau ubah ukurannya.
 - **Pensil** — gambar coretan bebas.
+
+Objek yang dipilih menampilkan handle geser, tombol hapus cepat, dan bilah aksi **Ubah / Duplikat / Hapus** yang ramah sentuh. Di ponsel, handle dan tombol diperbesar (30 px) agar mudah diakses tanpa perlu presisi tinggi.
 
 Semua anotasi ikut ditulis ke PDF saat **Simpan PDF** ditekan. Teks asli halaman tidak dirasterisasi, sehingga hasil tetap bisa dicari dan dipilih.
 

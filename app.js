@@ -252,17 +252,17 @@ function loadTesseract(){if(tesseractPromise)return tesseractPromise;tesseractPr
 const EDITOR_SHAPE_TOOLS=['highlight','underline','strikeout','rect','note'];
 const EDITOR_HINTS={
   text:'Klik halaman untuk menambah teks. Seret untuk memindah.',
-  highlight:'Seret di halaman untuk menyorot area.',
-  underline:'Seret di halaman untuk menggarisbawahi area.',
-  strikeout:'Seret di halaman untuk mencoret area.',
+  highlight:'Seret untuk menyorot area, atau pilih teks lalu tekan Sorot.',
+  underline:'Seret untuk garis bawah area, atau pilih teks lalu tekan Garis bawah.',
+  strikeout:'Seret untuk mencoret area, atau pilih teks lalu tekan Coret.',
   rect:'Seret di halaman untuk menggambar kotak.',
   note:'Klik halaman untuk menambah catatan, lalu ketik isinya.',
   image:'Pilih gambar dari perangkat, lalu klik halaman untuk menempatkannya.',
   ink:'Gambar bebas dengan pensil di atas halaman.',
-  select:'Seret di atas teks PDF untuk memilih dan menyalinnya. Anotasi dinonaktifkan sementara.'
+  select:'Seret di atas teks PDF untuk memilih, lalu pilih Sorot, Garis bawah, atau Coret. Anotasi objek dinonaktifkan sementara.'
 };
 const EDITOR_ZOOM_MIN=.5,EDITOR_ZOOM_MAX=3,EDITOR_ZOOM_STEP=.15;
-const editor={doc:null,file:null,total:0,page:1,items:{},tool:'text',color:'#4a5df0',size:16,zoom:1,token:0,renderToken:0,selected:null,canvasW:0,canvasH:0,pageW:595,pageH:842,pendingImageAt:null,drawing:null,preview:null,initialized:false};
+const editor={doc:null,file:null,total:0,page:1,items:{},tool:'text',color:'#4a5df0',size:16,font:'sans',customFonts:[],zoom:1,token:0,renderToken:0,selected:null,canvasW:0,canvasH:0,pageW:595,pageH:842,pendingImageAt:null,drawing:null,preview:null,markRects:null,initialized:false};
 let editorLeaveReturnFocus=null,editorLeaveNextAction=null,editPageReturnFocus=null,editorResizeTimer=0;
 
 function initEditor(){
@@ -281,12 +281,58 @@ function initEditor(){
     button.blur();setEditorZoom(editor.zoom+(Number(button.dataset.ezoom)||0)*EDITOR_ZOOM_STEP);
   }));
   document.getElementById('editorZoomFit')?.addEventListener('click',event=>{event.currentTarget.blur();setEditorZoom(1)});
-  document.getElementById('editorColor').addEventListener('input',event=>{editor.color=event.target.value});
-  document.getElementById('editorSize').addEventListener('change',event=>{editor.size=Number(event.target.value)||16});
+  document.getElementById('editorColor').addEventListener('input',event=>{editor.color=event.target.value;applyEditorStyleToSelected({color:editor.color})});
+  const sizeInput=document.getElementById('editorSize');
+  const syncEditorSize=final=>{
+    const raw=Number(sizeInput.value);
+    if(!Number.isFinite(raw))return;
+    if(final){
+      const value=Math.max(6,Math.min(200,Math.round(raw||16)));
+      editor.size=value;sizeInput.value=String(value);
+      applyEditorStyleToSelected({size:value});
+    }else if(raw>=6&&raw<=200){
+      editor.size=Math.round(raw);
+      applyEditorStyleToSelected({size:editor.size});
+    }
+  };
+  sizeInput.addEventListener('input',()=>syncEditorSize(false));
+  sizeInput.addEventListener('change',()=>syncEditorSize(true));
+  sizeInput.addEventListener('blur',()=>syncEditorSize(true));
+  const fontSelect=document.getElementById('editorFont');
+  fontSelect?.addEventListener('change',event=>{editor.font=event.target.value||'sans';applyEditorStyleToSelected({font:editor.font})});
+  document.getElementById('editorFontUpload')?.addEventListener('click',()=>document.getElementById('editorFontFile')?.click());
+  document.getElementById('editorFontFile')?.addEventListener('change',event=>{addEditorFont(event.target.files&&event.target.files[0]);event.target.value=''});
   document.getElementById('editorPrev').addEventListener('click',()=>gotoEditorPage(editor.page-1));
   document.getElementById('editorNext').addEventListener('click',()=>gotoEditorPage(editor.page+1));
   document.getElementById('editorImageInput').addEventListener('change',event=>{addEditorImage(event.target.files[0]);event.target.value=''});
   document.getElementById('editorStage').addEventListener('pointerdown',onEditorStagePointerDown);
+  const markBar=document.getElementById('editorMarkBar');
+  markBar?.addEventListener('pointerdown',event=>{if(event.target.closest('[data-mark],[data-mark-clear]'))event.preventDefault()});
+  markBar?.addEventListener('click',event=>{
+    const mark=event.target.closest('[data-mark]');
+    if(mark){applyEditorTextMark(mark.dataset.mark);return}
+    if(event.target.closest('[data-mark-clear]'))clearEditorSelection();
+  });
+  document.getElementById('editorObjectBar')?.addEventListener('click',event=>{
+    const action=event.target.closest('[data-object-act]');
+    if(!action)return;
+    const act=action.dataset.objectAct;
+    if(act==='delete')deleteEditorSelected();
+    else if(act==='duplicate')duplicateEditorSelected();
+    else if(act==='edit')focusEditorSelected();
+    else if(act==='close'){editor.selected=null;refreshEditorSelection();renderEditorItems()}
+  });
+  let selectionFrame=0;
+  document.addEventListener('selectionchange',()=>{
+    if(!editPageIsOpen()||editor.tool!=='select'||selectionFrame)return;
+    selectionFrame=requestAnimationFrame(()=>{selectionFrame=0;if(editPageIsOpen()&&editor.tool==='select')paintEditorSelection()});
+  });
+  document.querySelector('#editWorkspace .editor-scroll')?.addEventListener('scroll',()=>{if(editor.tool==='select')paintEditorSelection()},{passive:true});
+  document.addEventListener('keydown',event=>{
+    if(!editPageIsOpen()||editor.selected==null)return;
+    if(document.activeElement&&document.activeElement.isContentEditable)return;
+    if(event.key==='Delete'||event.key==='Backspace'){event.preventDefault();deleteEditorSelected()}
+  });
   window.addEventListener('resize',()=>{
     if(!editPageIsOpen()||!editor.doc)return;
     clearTimeout(editorResizeTimer);
@@ -311,6 +357,7 @@ function updateEditorInteractionMode(){
   if(stage){stage.classList.toggle('draw-mode',draw);stage.classList.toggle('select-mode',editor.tool==='select')}
   if(layer)layer.classList.toggle('active',editor.tool==='select');
   if(items)items.classList.toggle('text-selecting',editor.tool==='select');
+  if(editor.tool!=='select')clearEditorSelection();
 }
 function setEditorHint(){const hint=document.getElementById('editorHint');if(hint)hint.textContent=EDITOR_HINTS[editor.tool]||EDITOR_HINTS.text}
 function editPageIsOpen(){const page=document.getElementById('editPage');return !!page&&page.classList.contains('open')}
@@ -332,6 +379,7 @@ function closeEditPage(){
   const page=document.getElementById('editPage');
   if(!page||!page.classList.contains('open'))return;
   page.classList.remove('open');page.setAttribute('aria-hidden','true');document.body.classList.remove('editing');
+  clearEditorSelection();editor.selected=null;
   hideEditProgress();
   const target=editPageReturnFocus;editPageReturnFocus=null;
   if(target&&document.contains(target)){try{target.focus({preventScroll:true})}catch(error){}}
@@ -408,7 +456,7 @@ function renderEditorChrome(){
   if(prev)prev.disabled=editor.page<=1;if(next)next.disabled=!editor.total||editor.page>=editor.total;
   updateEditorChrome();
 }
-function gotoEditorPage(p){if(!editor.doc||p<1||p>editor.total)return;editor.page=p;editor.selected=null;renderEditorPage();renderEditorChrome();const scroll=document.querySelector('#editWorkspace .editor-scroll');if(scroll)scroll.scrollTop=0}
+function gotoEditorPage(p){if(!editor.doc||p<1||p>editor.total)return;editor.page=p;editor.selected=null;clearEditorSelection();renderEditorPage();renderEditorChrome();const scroll=document.querySelector('#editWorkspace .editor-scroll');if(scroll)scroll.scrollTop=0}
 async function renderEditorPage(){
   const canvas=document.getElementById('editorPageCanvas'),ink=document.getElementById('editorInkCanvas'),layer=document.getElementById('editorItems'),empty=document.getElementById('editorEmpty'),textLayer=document.getElementById('editorTextLayer');
   if(!canvas)return;
@@ -450,7 +498,10 @@ async function renderEditorTextLayer(page,scale,token){
       span.style.left=tx[4]+'px';
       span.style.top=(tx[5]-fontHeight)+'px';
       span.style.fontSize=fontHeight+'px';
-      span.style.fontFamily=item.fontName||'sans-serif';
+      span.style.lineHeight='1';
+      span.style.fontFamily='sans-serif';
+      span.style.color='transparent';
+      span.style.webkitTextFillColor='transparent';
       const target=Math.abs(item.width)*scale;
       if(target>0)span.dataset.target=String(target);
       frag.appendChild(span);
@@ -462,7 +513,69 @@ async function renderEditorTextLayer(page,scale,token){
       const target=Number(span.dataset.target||0);
       if(target>0&&widths[index]>0)span.style.transform=`scaleX(${target/widths[index]})`;
     });
+    if(editor.tool==='select')paintEditorSelection();
   }catch(error){}
+}
+function editorSelectionRange(){
+  const layer=document.getElementById('editorTextLayer'),sel=document.getSelection();
+  if(!layer||!sel||!sel.rangeCount||sel.isCollapsed)return null;
+  const range=sel.getRangeAt(0);
+  const inside=node=>node&&(layer.contains(node.nodeType===3?node.parentNode:node)||node===layer);
+  if(!inside(range.startContainer)&&!inside(range.endContainer))return null;
+  return range;
+}
+function editorSelectionRects(){
+  const range=editorSelectionRange();
+  if(!range)return [];
+  const stage=document.getElementById('editorStage');
+  if(!stage)return [];
+  const sr=stage.getBoundingClientRect();
+  if(!sr.width||!sr.height)return [];
+  return [...range.getClientRects()].filter(rect=>rect.width>1&&rect.height>1).map(rect=>({
+    x:Math.max(0,Math.min(1,(rect.left-sr.left)/sr.width)),
+    y:Math.max(0,Math.min(1,(rect.top-sr.top)/sr.height)),
+    w:Math.max(0,Math.min(1,rect.width/sr.width)),
+    h:Math.max(0,Math.min(1,rect.height/sr.height))
+  })).filter(rect=>rect.w>0&&rect.h>0);
+}
+function paintEditorSelection(){
+  const rects=editorSelectionRects(),layer=document.getElementById('editorSelectionLayer'),bar=document.getElementById('editorMarkBar');
+  editor.markRects=rects;
+  if(layer){
+    layer.innerHTML='';
+    for(const rect of rects){
+      const div=document.createElement('div');
+      div.className='editor-selection-rect';
+      div.style.left=rect.x*100+'%';div.style.top=rect.y*100+'%';
+      div.style.width=rect.w*100+'%';div.style.height=rect.h*100+'%';
+      layer.appendChild(div);
+    }
+  }
+  if(bar)bar.hidden=!(editor.tool==='select'&&rects.length);
+}
+function clearEditorSelection(){
+  editor.markRects=null;
+  const layer=document.getElementById('editorSelectionLayer');
+  if(layer)layer.innerHTML='';
+  const bar=document.getElementById('editorMarkBar');
+  if(bar)bar.hidden=true;
+  const sel=document.getSelection();
+  if(sel&&sel.rangeCount){
+    const layer2=document.getElementById('editorTextLayer');
+    const node=sel.anchorNode;
+    if(layer2&&node&&layer2.contains(node.nodeType===3?node.parentNode:node))sel.removeAllRanges();
+  }
+}
+function applyEditorTextMark(kind){
+  if(!['highlight','underline','strikeout'].includes(kind))return;
+  const rects=editor.markRects&&editor.markRects.length?editor.markRects:editorSelectionRects();
+  if(!rects.length){showToast('Pilih teks PDF terlebih dahulu.');return}
+  const it={type:kind,color:editor.color,rects:rects.map(rect=>({...rect}))};
+  (editor.items[editor.page]??=[]).push(it);
+  editor.selected=editor.items[editor.page].length-1;
+  clearEditorSelection();
+  renderEditorItems();updateEditorChrome();scheduleOfflineBackup('edit');
+  showToast(kind==='highlight'?'Teks disorot.':kind==='underline'?'Garis bawah ditambahkan pada teks.':'Coretan ditambahkan pada teks.');
 }
 function redrawEditorInk(){const ink=document.getElementById('editorInkCanvas');if(!ink)return;const ctx=ink.getContext('2d');ctx.clearRect(0,0,ink.width,ink.height);for(const item of editor.items[editor.page]||[])if(item.type==='ink')strokeEditorPath(ctx,item)}
 function strokeEditorPath(ctx,it){
@@ -473,72 +586,160 @@ function strokeEditorPath(ctx,it){
   for(const point of it.points.slice(1))ctx.lineTo(point.x*ctx.canvas.width,point.y*ctx.canvas.height);
   ctx.stroke();
 }
+function editorFontCss(key){
+  if(key&&String(key).startsWith('custom:')){
+    const rec=editor.customFonts.find(font=>'custom:'+font.family===key);
+    if(rec)return `'${rec.family}',sans-serif`;
+  }
+  return key==='serif'?'Georgia,"Times New Roman",serif':key==='mono'?'"Courier New",monospace':'Arial,Helvetica,sans-serif';
+}
+function editorItemBBox(it){
+  if(Array.isArray(it.rects)&&it.rects.length){
+    const xs=it.rects.map(r=>r.x),ys=it.rects.map(r=>r.y),x2=it.rects.map(r=>r.x+r.w),y2=it.rects.map(r=>r.y+r.h);
+    const x=Math.min(...xs),y=Math.min(...ys);
+    return {x,y,w:Math.max(...x2)-x,h:Math.max(...y2)-y};
+  }
+  return {x:it.x||0,y:it.y||0,w:it.w||0,h:it.h||0};
+}
 function renderEditorItems(){
   const layer=document.getElementById('editorItems');if(!layer)return;
   layer.innerHTML='';
   (editor.items[editor.page]||[]).forEach((item,index)=>{if(item.type!=='ink')layer.appendChild(makeEditorItemEl(item,index))});
+  updateEditorObjectBar();
 }
-function refreshEditorSelection(){document.querySelectorAll('.editor-item').forEach(el=>el.classList.toggle('selected',Number(el.dataset.idx)===editor.selected))}
+function refreshEditorSelection(){
+  document.querySelectorAll('.editor-item').forEach(el=>el.classList.toggle('selected',Number(el.dataset.idx)===editor.selected));
+  updateEditorObjectBar();
+}
 function makeEditorItemEl(it,idx){
   const el=document.createElement('div');
   el.className='editor-item'+(editor.selected===idx?' selected':'');
   el.dataset.idx=idx;
-  el.style.left=it.x*100+'%';el.style.top=it.y*100+'%';
+  const box=editorItemBBox(it);
+  el.style.left=box.x*100+'%';el.style.top=box.y*100+'%';
+  const isTextMark=Array.isArray(it.rects)&&['highlight','underline','strikeout'].includes(it.type);
   if(it.type==='text'){
     el.classList.add('is-text');
     const span=document.createElement('span');span.className='editor-item-text';span.contentEditable='true';span.spellcheck=false;span.textContent=it.text;
-    span.style.color=it.color;span.style.fontSize=(it.size*editor.canvasW/editor.pageW)+'px';
+    span.style.color=it.color;span.style.fontSize=(it.size*editor.canvasW/editor.pageW)+'px';span.style.fontFamily=editorFontCss(it.font);
     span.addEventListener('input',()=>{it.text=span.textContent;updateEditorChrome();scheduleOfflineBackup('edit')});
-    span.addEventListener('pointerdown',event=>event.stopPropagation());
+    span.addEventListener('pointerdown',event=>{event.stopPropagation();editor.selected=idx;refreshEditorSelection()});
+    span.addEventListener('focus',()=>{editor.selected=idx;refreshEditorSelection()});
     el.appendChild(span);
+  }else if(isTextMark){
+    el.classList.add('is-shape','is-textmark','is-'+it.type);
+    el.style.color=it.color;
+    el.style.width=box.w*100+'%';el.style.height=box.h*100+'%';
+    for(const rect of it.rects){
+      const mark=document.createElement('span');
+      mark.className='editor-mark-rect mark-'+it.type;
+      mark.style.left=((rect.x-box.x)/(box.w||1))*100+'%';
+      mark.style.top=((rect.y-box.y)/(box.h||1))*100+'%';
+      mark.style.width=(rect.w/(box.w||1))*100+'%';
+      mark.style.height=(rect.h/(box.h||1))*100+'%';
+      el.appendChild(mark);
+    }
   }else if(EDITOR_SHAPE_TOOLS.includes(it.type)){
     el.classList.add('is-shape','is-'+it.type);
     el.style.color=it.color;
-    el.style.width=(it.w||0)*100+'%';el.style.height=(it.h||0)*100+'%';
+    el.style.width=box.w*100+'%';el.style.height=box.h*100+'%';
     if(it.type==='note'){
       const note=document.createElement('span');note.className='editor-note-text';note.contentEditable='true';note.spellcheck=false;note.textContent=it.text||'';
       note.style.borderColor=it.color;
       note.addEventListener('input',()=>{it.text=note.textContent;scheduleOfflineBackup('edit')});
-      note.addEventListener('pointerdown',event=>event.stopPropagation());
+      note.addEventListener('pointerdown',event=>{event.stopPropagation();editor.selected=idx;refreshEditorSelection()});
+      note.addEventListener('focus',()=>{editor.selected=idx;refreshEditorSelection()});
       el.appendChild(note);
     }
-    const handle=document.createElement('span');handle.className='editor-item-resize';el.appendChild(handle);
+    const handle=document.createElement('span');handle.className='editor-item-resize';handle.title='Ubah ukuran';el.appendChild(handle);
   }else{
-    el.classList.add('is-image');el.style.width=it.w*100+'%';
+    el.classList.add('is-image');el.style.width=box.w*100+'%';
     const img=document.createElement('img');img.src=it.src;img.alt='Gambar sisipan';el.appendChild(img);
-    const handle=document.createElement('span');handle.className='editor-item-resize';el.appendChild(handle);
+    const handle=document.createElement('span');handle.className='editor-item-resize';handle.title='Ubah ukuran';el.appendChild(handle);
   }
+  if(!isTextMark){
+    const move=document.createElement('span');move.className='editor-item-move';move.textContent='⠿';move.title='Geser objek';move.setAttribute('aria-label','Geser objek');el.appendChild(move);
+  }
+  const remove=document.createElement('button');remove.type='button';remove.className='editor-item-delete';remove.textContent='×';remove.title='Hapus objek';remove.setAttribute('aria-label','Hapus objek');
+  remove.addEventListener('pointerdown',event=>event.stopPropagation());
+  remove.addEventListener('click',event=>{event.stopPropagation();editor.selected=idx;deleteEditorSelected()});
+  el.appendChild(remove);
   el.addEventListener('pointerdown',event=>startEditorDrag(event,it,el));
   return el;
 }
 function startEditorDrag(event,it,el){
+  if(event.target.closest('.editor-item-delete'))return;
   event.stopPropagation();
   const resizing=!!event.target.closest('.editor-item-resize');
   editor.selected=Number(el.dataset.idx);refreshEditorSelection();
-  const stage=document.getElementById('editorStage'),r=stage.getBoundingClientRect();
-  dragState={mode:resizing?'resize':'move',it,el,sx:event.clientX,sy:event.clientY,x0:resizing?(it.w||it.h):it.x,y0:it.y,w0:it.w,h0:it.h};
+  const stage=document.getElementById('editorStage'),r=stage.getBoundingClientRect(),box=editorItemBBox(it);
+  dragState={mode:resizing?'resize':'move',it,el,sx:event.clientX,sy:event.clientY,x0:resizing?(it.w||it.h):box.x,y0:box.y,w0:box.w,h0:box.h,rects0:Array.isArray(it.rects)?it.rects.map(rect=>({...rect})):null,moved:false};
   window.addEventListener('pointermove',moveEditorDrag);window.addEventListener('pointerup',endEditorDrag);
 }
 let dragState=null;
 function moveEditorDrag(event){
   if(!dragState)return;
+  const dx=event.clientX-dragState.sx,dy=event.clientY-dragState.sy;
+  if(!dragState.moved&&Math.hypot(dx,dy)<4)return;
+  dragState.moved=true;
   const stage=document.getElementById('editorStage'),r=stage.getBoundingClientRect();
   if(dragState.mode==='move'){
-    dragState.it.x=Math.min(.98,Math.max(-.3,dragState.x0+(event.clientX-dragState.sx)/r.width));
-    dragState.it.y=Math.min(.98,Math.max(-.3,dragState.y0+(event.clientY-dragState.sy)/r.height));
-    dragState.el.style.left=dragState.it.x*100+'%';dragState.el.style.top=dragState.it.y*100+'%';
+    const nx=Math.min(.98,Math.max(-.3,dragState.x0+dx/r.width)),ny=Math.min(.98,Math.max(-.3,dragState.y0+dy/r.height));
+    if(dragState.rects0){
+      const shiftX=nx-dragState.x0,shiftY=ny-dragState.y0;
+      dragState.it.rects=dragState.rects0.map(rect=>({...rect,x:rect.x+shiftX,y:rect.y+shiftY}));
+      dragState.el.style.left=nx*100+'%';dragState.el.style.top=ny*100+'%';
+    }else{
+      dragState.it.x=nx;dragState.it.y=ny;
+      dragState.el.style.left=nx*100+'%';dragState.el.style.top=ny*100+'%';
+    }
   }else if(dragState.it.type==='image'){
-    const w=Math.min(1,Math.max(.05,dragState.x0+(event.clientX-dragState.sx)/r.width));
+    const w=Math.min(1,Math.max(.05,dragState.x0+dx/r.width));
     dragState.it.w=w;dragState.el.style.width=w*100+'%';
   }else if(EDITOR_SHAPE_TOOLS.includes(dragState.it.type)){
-    dragState.it.w=Math.min(1-dragState.it.x,Math.max(.01,dragState.w0+(event.clientX-dragState.sx)/r.width));
-    dragState.it.h=Math.min(1-dragState.it.y,Math.max(.01,dragState.h0+(event.clientY-dragState.sy)/r.height));
+    dragState.it.w=Math.min(1-dragState.it.x,Math.max(.01,dragState.w0+dx/r.width));
+    dragState.it.h=Math.min(1-dragState.it.y,Math.max(.01,dragState.h0+dy/r.height));
     dragState.el.style.width=dragState.it.w*100+'%';dragState.el.style.height=dragState.it.h*100+'%';
   }
 }
 function endEditorDrag(){
-  if(dragState)scheduleOfflineBackup('edit');
+  if(dragState&&dragState.moved)scheduleOfflineBackup('edit');
   window.removeEventListener('pointermove',moveEditorDrag);window.removeEventListener('pointerup',endEditorDrag);dragState=null;
+}
+function updateEditorObjectBar(){
+  const bar=document.getElementById('editorObjectBar'),label=document.getElementById('editorObjectLabel');
+  if(!bar)return;
+  const list=editor.items[editor.page]||[],it=editor.selected!=null?list[editor.selected]:null;
+  if(!it){bar.hidden=true;return}
+  const names={text:'Teks',highlight:'Sorotan',underline:'Garis bawah',strikeout:'Coretan',rect:'Kotak',note:'Catatan',image:'Gambar'};
+  if(label)label.textContent=Array.isArray(it.rects)?'Anotasi teks':(names[it.type]||'Objek');
+  const edit=bar.querySelector('[data-object-act="edit"]');
+  if(edit)edit.hidden=!(it.type==='text'||it.type==='note');
+  bar.hidden=false;
+}
+function applyEditorStyleToSelected(patch){
+  const list=editor.items[editor.page],it=editor.selected!=null?list&&list[editor.selected]:null;
+  if(!it)return;
+  let changed=false;
+  if(patch.size!=null&&it.type==='text'){it.size=patch.size;changed=true}
+  if(patch.font!=null&&it.type==='text'){it.font=patch.font;changed=true}
+  if(patch.color!=null&&['text','highlight','underline','strikeout','rect','note'].includes(it.type)){it.color=patch.color;changed=true}
+  if(changed){renderEditorItems();scheduleOfflineBackup('edit')}
+}
+function focusEditorSelected(){
+  const it=(editor.items[editor.page]||[])[editor.selected];
+  if(!it)return;
+  const target=document.querySelector(`.editor-item[data-idx="${editor.selected}"] ${it.type==='note'?'.editor-note-text':'.editor-item-text'}`);
+  if(target){target.focus();try{document.getSelection().selectAllChildren(target)}catch(error){}}
+}
+function duplicateEditorSelected(){
+  const list=editor.items[editor.page];
+  if(editor.selected==null||!list||!list[editor.selected])return;
+  const copy=JSON.parse(JSON.stringify(list[editor.selected]));
+  if(Array.isArray(copy.rects))copy.rects=copy.rects.map(rect=>({...rect,x:rect.x+.02,y:rect.y+.02}));
+  else{copy.x=(copy.x||0)+.02;copy.y=(copy.y||0)+.02}
+  list.push(copy);editor.selected=list.length-1;renderEditorItems();updateEditorChrome();scheduleOfflineBackup('edit');
+  showToast('Objek diduplikasi.');
 }
 function onEditorStagePointerDown(event){
   if(!editor.doc||event.target.closest('.editor-item')||editor.tool==='select')return;
@@ -550,7 +751,7 @@ function onEditorStagePointerDown(event){
     const up=()=>{editor.drawing=null;window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);updateEditorChrome();scheduleOfflineBackup('edit')};
     window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
   }else if(editor.tool==='text'){
-    const it={type:'text',text:'Tulis di sini',color:editor.color,size:editor.size,x:Math.min(.85,Math.max(0,x)),y:Math.min(.93,Math.max(0,y))};
+    const it={type:'text',text:'Tulis di sini',color:editor.color,size:editor.size,font:editor.font||'sans',x:Math.min(.85,Math.max(0,x)),y:Math.min(.93,Math.max(0,y))};
     (editor.items[editor.page]??=[]).push(it);editor.selected=editor.items[editor.page].length-1;
     renderEditorItems();updateEditorChrome();scheduleOfflineBackup('edit');
     const span=document.querySelector(`.editor-item[data-idx="${editor.selected}"] .editor-item-text`);
@@ -593,6 +794,27 @@ async function addEditorImage(file){
   (editor.items[editor.page]??=[]).push(it);editor.selected=editor.items[editor.page].length-1;
   renderEditorItems();updateEditorChrome();scheduleOfflineBackup('edit');
 }
+async function addEditorFont(file){
+  if(!file)return;
+  if(!/\.(ttf|otf)$/i.test(file.name)){showError('Pilih file font TTF atau OTF.');return}
+  try{
+    const bytes=new Uint8Array(await file.arrayBuffer());
+    const family='PaperlyEditorFont'+Date.now();
+    const face=new FontFace(family,bytes.buffer);
+    await face.load();
+    document.fonts.add(face);
+    const label=file.name.replace(/\.(ttf|otf)$/i,'');
+    editor.customFonts.push({family,bytes,label});
+    const select=document.getElementById('editorFont');
+    if(select){
+      const option=document.createElement('option');
+      option.value='custom:'+family;option.textContent=label;
+      select.appendChild(option);select.value=option.value;
+    }
+    editor.font='custom:'+family;
+    showToast(`Font ${label} siap dipakai untuk teks baru.`);
+  }catch(error){showError('Font tidak dapat dimuat. Pastikan file TTF/OTF valid dan tidak rusak.')}
+}
 function deleteEditorSelected(){const list=editor.items[editor.page];if(editor.selected==null||!list||!list[editor.selected])return;list.splice(editor.selected,1);editor.selected=null;renderEditorItems();redrawEditorInk();updateEditorChrome();scheduleOfflineBackup('edit')}
 function clearEditorPage(){editor.items[editor.page]=[];editor.selected=null;renderEditorItems();redrawEditorInk();updateEditorChrome();scheduleOfflineBackup('edit')}
 function editorHasChanges(){return Object.values(editor.items).some(list=>Array.isArray(list)&&list.length>0)}
@@ -615,7 +837,25 @@ async function saveEditorPDF(onPage){
   if(!editor.doc||!editor.file)throw Error('Pilih file PDF terlebih dahulu.');
   const allItems=Object.values(editor.items).flat();
   if(!allItems.length)throw Error('Tambahkan minimal satu teks, gambar, anotasi, atau coretan sebelum menyimpan.');
-  const {doc}=await readPDF(editor.file),font=await doc.embedFont(StandardFonts.Helvetica),pages=doc.getPages();
+  const {doc}=await readPDF(editor.file),pages=doc.getPages();
+  const standardMap={sans:StandardFonts.Helvetica,serif:StandardFonts.TimesRoman,mono:StandardFonts.Courier};
+  const fontCache={};let fontkitReady=false;
+  const customFontFor=key=>String(key||'').startsWith('custom:')?editor.customFonts.find(rec=>'custom:'+rec.family===key)||null:null;
+  async function editorFontFor(key){
+    const fam=customFontFor(key)?key:(standardMap[key]?key:'sans');
+    if(fontCache[fam])return fontCache[fam];
+    let font=null;
+    const rec=customFontFor(key);
+    if(rec){
+      try{
+        if(!fontkitReady){doc.registerFontkit(await ensureFontkit());fontkitReady=true}
+        font=await doc.embedFont(rec.bytes,{subset:true});
+      }catch(error){font=null}
+    }
+    if(!font)font=await doc.embedFont(standardMap[fam]||StandardFonts.Helvetica);
+    fontCache[fam]=font;return font;
+  }
+  const noteFont=await doc.embedFont(StandardFonts.Helvetica);
   for(let i=0;i<pages.length;i++){
     const list=editor.items[i+1]||[];if(!list.length){if(onPage)onPage((i+1)/pages.length);continue}
     const page=pages[i],{width,height}=page.getSize(),color=hexToRgbColor;
@@ -631,7 +871,15 @@ async function saveEditorPDF(onPage){
       const image=it.src.startsWith('data:image/png')?await doc.embedPng(it.src):await doc.embedJpg(it.src);
       const w=it.w*width,h=w*it.aspect;page.drawImage(image,{x:it.x*width,y:height-it.y*height-h,width:w,height:h});
     }
-    for(const it of list)if(EDITOR_SHAPE_TOOLS.includes(it.type)){
+    for(const it of list)if(Array.isArray(it.rects)&&it.rects.length&&['highlight','underline','strikeout'].includes(it.type)){
+      for(const rect of it.rects){
+        const x=rect.x*width,y=height-(rect.y+rect.h)*height,w=rect.w*width,h=rect.h*height;
+        if(it.type==='highlight')page.drawRectangle({x,y,width:w,height:h,color:color(it.color),opacity:.35});
+        else if(it.type==='underline')page.drawLine({start:{x,y},end:{x:x+w,y},thickness:Math.max(1.2,h*.08),color:color(it.color)});
+        else page.drawLine({start:{x,y:y+h/2},end:{x:x+w,y:y+h/2},thickness:Math.max(1.2,h*.07),color:color(it.color)});
+      }
+    }
+    for(const it of list)if(EDITOR_SHAPE_TOOLS.includes(it.type)&&!Array.isArray(it.rects)){
       const x=it.x*width,y=height-(it.y+(it.h||0))*height,w=(it.w||0)*width,h=(it.h||0)*height;
       if(it.type==='highlight')page.drawRectangle({x,y,width:w,height:h,color:color(it.color),opacity:.38});
       else if(it.type==='rect')page.drawRectangle({x,y,width:w,height:h,borderColor:color(it.color),borderWidth:1.5,color:color(it.color),opacity:.08});
@@ -639,12 +887,23 @@ async function saveEditorPDF(onPage){
       else if(it.type==='strikeout')page.drawLine({start:{x,y:y+h/2},end:{x:x+w,y:y+h/2},thickness:2,color:color(it.color)});
       else if(it.type==='note'){
         page.drawRectangle({x,y:y+Math.max(0,h-16),width:Math.min(w,26),height:Math.min(h,16),color:color(it.color)});
-        String(it.text||'').split('\n').slice(0,6).forEach((line,index)=>page.drawText(line.slice(0,80),{x:x+3,y:y+Math.max(0,h-16)-12-index*11,size:8,font,color:color('#3a3019')}));
+        String(it.text||'').split('\n').slice(0,6).forEach((line,index)=>page.drawText(line.slice(0,80),{x:x+3,y:y+Math.max(0,h-16)-12-index*11,size:8,font:noteFont,color:color('#3a3019')}));
       }
     }
     for(const it of list)if(it.type==='text'){
-      const text=(it.text||'').trim();if(!text)continue;
-      page.drawText(text,{x:Math.min(it.x*width,width-20),y:height-it.y*height-it.size*.8,size:it.size,font,color:color(it.color)});
+      const text=String(it.text||'');if(!text.trim())continue;
+      const font=await editorFontFor(it.font);
+      const custom=!!customFontFor(it.font);
+      const size=Math.max(6,Math.min(200,Number(it.size)||16));
+      const lines=text.split('\n');
+      let ty=height-it.y*height-size*.8;
+      for(const line of lines){
+        if(line.trim()){
+          const safe=custom?line:sanitizeWinAnsi(line);
+          try{page.drawText(safe,{x:Math.min(it.x*width,width-20),y:ty,size,font,color:color(it.color)})}catch(error){}
+        }
+        ty-=size*1.2;
+      }
     }
     if(onPage)onPage((i+1)/pages.length);
   }

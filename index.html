@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="styles.css?v=53">
+  <link rel="stylesheet" href="styles.css?v=54">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -110,17 +110,19 @@
           <div class="editor-toolbar" role="toolbar" aria-label="Alat sunting dan anotasi PDF">
             <div class="editor-tools" role="group" aria-label="Jenis anotasi">
               <button type="button" class="editor-btn active" data-etool="text" title="Tambah teks">Teks</button>
-              <button type="button" class="editor-btn" data-etool="highlight" title="Sorot area">Sorot</button>
-              <button type="button" class="editor-btn" data-etool="underline" title="Garis bawah area">Garis bawah</button>
-              <button type="button" class="editor-btn" data-etool="strikeout" title="Coret area">Coret</button>
+              <button type="button" class="editor-btn" data-etool="highlight" title="Sorot area atau teks">Sorot</button>
+              <button type="button" class="editor-btn" data-etool="underline" title="Garis bawah area atau teks">Garis bawah</button>
+              <button type="button" class="editor-btn" data-etool="strikeout" title="Coret area atau teks">Coret</button>
               <button type="button" class="editor-btn" data-etool="rect" title="Gambar kotak">Kotak</button>
               <button type="button" class="editor-btn" data-etool="note" title="Tambah catatan">Catatan</button>
               <button type="button" class="editor-btn" data-etool="image" title="Sisip gambar">Gambar</button>
               <button type="button" class="editor-btn" data-etool="ink" title="Gambar bebas">Pensil</button>
-              <button type="button" class="editor-btn" data-etool="select" title="Pilih dan salin teks PDF">Pilih teks</button>
+              <button type="button" class="editor-btn" data-etool="select" title="Pilih teks PDF untuk disalin atau dianotasi">Pilih teks</button>
             </div>
             <label class="editor-field">Warna <input type="color" id="editorColor" value="#4a5df0"></label>
-            <label class="editor-field">Ukuran teks <select id="editorSize" aria-label="Ukuran teks"><option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option></select></label>
+            <label class="editor-field">Font <select id="editorFont" aria-label="Font teks"><option value="sans">Sans (Helvetica)</option><option value="serif">Serif (Times)</option><option value="mono">Mono (Courier)</option></select></label>
+            <button type="button" class="editor-btn" id="editorFontUpload" title="Unggah font kustom (TTF/OTF)">Font+</button>
+            <label class="editor-field">Ukuran <input type="number" id="editorSize" class="editor-size-input" min="6" max="200" step="1" value="16" aria-label="Ukuran teks"></label>
             <div class="editor-zoom" role="group" aria-label="Zoom tampilan halaman">
               <button type="button" class="editor-btn" data-ezoom="-1" title="Perkecil tampilan" aria-label="Perkecil tampilan">−</button>
               <span class="editor-zoom-label" id="editorZoomLabel" aria-live="polite">100%</span>
@@ -132,7 +134,21 @@
               <button type="button" class="editor-btn ghost" data-eact="clear-page">Kosongkan halaman</button>
             </div>
           </div>
-          <div class="editor-scroll"><div class="editor-stage" id="editorStage"><canvas id="editorPageCanvas"></canvas><canvas id="editorInkCanvas"></canvas><div class="editor-text-layer" id="editorTextLayer" aria-hidden="true"></div><div class="editor-items" id="editorItems"></div><div class="editor-empty" id="editorEmpty" hidden>Pilih file PDF untuk mulai menyunting.</div></div></div>
+          <div class="editor-scroll"><div class="editor-stage" id="editorStage"><canvas id="editorPageCanvas"></canvas><canvas id="editorInkCanvas"></canvas><div class="editor-selection-layer" id="editorSelectionLayer" aria-hidden="true"></div><div class="editor-text-layer" id="editorTextLayer" aria-hidden="true"></div><div class="editor-items" id="editorItems"></div><div class="editor-empty" id="editorEmpty" hidden>Pilih file PDF untuk mulai menyunting.</div></div></div>
+          <div class="editor-mark-bar" id="editorMarkBar" role="toolbar" aria-label="Anotasi teks terpilih" hidden>
+            <span class="editor-mark-label">Teks dipilih</span>
+            <button type="button" class="editor-btn mark-highlight" data-mark="highlight">Sorot</button>
+            <button type="button" class="editor-btn mark-underline" data-mark="underline">Garis bawah</button>
+            <button type="button" class="editor-btn mark-strikeout" data-mark="strikeout">Coret</button>
+            <button type="button" class="editor-btn ghost" data-mark-clear aria-label="Batalkan pilihan teks">×</button>
+          </div>
+          <div class="editor-object-bar" id="editorObjectBar" role="toolbar" aria-label="Aksi objek terpilih" hidden>
+            <span class="editor-object-label" id="editorObjectLabel">Objek</span>
+            <button type="button" class="editor-btn" data-object-act="edit">Ubah</button>
+            <button type="button" class="editor-btn" data-object-act="duplicate">Duplikat</button>
+            <button type="button" class="editor-btn ghost" data-object-act="delete">Hapus</button>
+            <button type="button" class="editor-btn ghost" data-object-act="close" aria-label="Tutup aksi objek">×</button>
+          </div>
           <div class="editor-footer">
             <button type="button" class="mini-button" id="editorPrev" disabled>← Sebelumnya</button>
             <span class="editor-page-label" id="editorPageLabel">Halaman — dari —</span>
@@ -149,6 +165,7 @@
     </div>
     <input type="file" id="editPdfInput" accept=".pdf,application/pdf" hidden>
     <input type="file" id="editorImageInput" accept="image/png,image/jpeg" hidden>
+    <input type="file" id="editorFontFile" accept=".ttf,.otf,font/ttf,font/otf" hidden>
   </section>
   <section class="doc-write" id="docWritePage" aria-hidden="true">
     <header class="doc-write-topbar">
@@ -532,6 +549,6 @@
   <script src="vendor/pdf.min.js"></script>
   <script src="vendor/fflate.js"></script>
   <script src="vendor/sql-wasm.js"></script>
-  <script src="app.js?v=53"></script>
+  <script src="app.js?v=54"></script>
 </body>
 </html>
