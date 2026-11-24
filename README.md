@@ -27,7 +27,7 @@
 - Orientasi halaman portrait atau landscape.
 - Pratinjau kertas memakai proporsi dan pembungkusan baris yang sama dengan PDF, dengan kontrol zoom serta tombol Fit untuk layar kecil.
 - Jumlah kolom yang berlaku khusus pada teks yang dipilih/diblok, bukan seluruh dokumen.
-- Inden kiri, inden baris pertama, spasi baris, dan spasi paragraf.
+- Inden kiri, inden baris pertama, spasi baris, spasi paragraf, dan spasi huruf.
 - Perataan teks rata kiri, tengah, kanan, dan rata kiri-kanan (justify).
 
 Semua proses dokumen berjalan lokal di perangkat; tidak ada file yang diunggah ke server.
@@ -43,6 +43,13 @@ Semua proses dokumen berjalan lokal di perangkat; tidak ada file yang diunggah k
 - Tabel dengan kunci utama tetap bisa disunting, termasuk tabel `WITHOUT ROWID`.
 
 Mesin SQLite memakai [sql.js](https://sql.js.org/) yang disimpan lokal di `vendor/`. Lisensinya ada di `vendor/SQLJS-LICENSE.txt`. File database tidak pernah dikirim ke server dan hanya disimpan di tab sampai pengguna mengunduhnya.
+
+## PDF Sheet
+
+**PDF Sheet** menyediakan spreadsheet ringan di browser dengan formula bar, variabel, format sel, dan ekspor PDF.
+
+- Rumus kondisional didukung: `IF(kondisi; nilai_benar; nilai_salah)`, `IFS(...)` untuk beberapa kondisi, `IFERROR(rumus; cadangan)`, dan fungsi `ELSE(nilai)` sebagai penanda nilai cadangan.
+- Contoh: `=IF(B2>=75;"Lulus";ELSE("Belum"))`, `=IFS(A1>=90;"A";A1>=75;"B";A1>=0;"C")`.
 
 ## Perbaikan progress bar
 
