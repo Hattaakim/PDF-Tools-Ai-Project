@@ -1,11 +1,11 @@
 /* Paperly — cache aset antarmuka untuk pemakaian offline.
    Dokumen pengguna tidak disimpan di sini; salinan dokumen ada di IndexedDB (lihat app.js). */
-const CACHE_NAME='paperly-ui-v53';
+const CACHE_NAME='paperly-ui-v54';
 const MAX_ENTRIES=120;
 const MAX_AGE=30*24*60*60*1000;
 
 const PRECACHE=[
-  './','./index.html','./favicon.svg','./styles.css?v=53','./app.js?v=53',
+  './','./index.html','./favicon.svg','./styles.css?v=54','./app.js?v=54',
   './vendor/pdf-lib.min.js','./vendor/pdf-lib-cantoo.min.js','./vendor/pdf.min.js',
   './vendor/pdf.worker.min.js','./vendor/fflate.js','./vendor/fontkit.umd.min.js',
   './vendor/sql-wasm.js','./vendor/sql-wasm.wasm','./vendor/srgb.icc',
