@@ -450,7 +450,10 @@ async function renderEditorTextLayer(page,scale,token){
       span.style.left=tx[4]+'px';
       span.style.top=(tx[5]-fontHeight)+'px';
       span.style.fontSize=fontHeight+'px';
-      span.style.fontFamily=item.fontName||'sans-serif';
+      span.style.lineHeight='1';
+      span.style.fontFamily='sans-serif';
+      span.style.color='transparent';
+      span.style.webkitTextFillColor='transparent';
       const target=Math.abs(item.width)*scale;
       if(target>0)span.dataset.target=String(target);
       frag.appendChild(span);

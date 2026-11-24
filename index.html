@@ -120,7 +120,8 @@
               <button type="button" class="editor-btn" data-etool="select" title="Pilih dan salin teks PDF">Pilih teks</button>
             </div>
             <label class="editor-field">Warna <input type="color" id="editorColor" value="#4a5df0"></label>
-            <label class="editor-field">Ukuran teks <select id="editorSize" aria-label="Ukuran teks"><option value="12">12</option><option value="16" selected>16</option><option value="20">20</option><option value="28">28</option></select></label>
+            <label class="editor-field">Font <select id="editorFont" aria-label="Font teks"><option value="sans">Sans (Helvetica)</option><option value="serif">Serif (Times)</option><option value="mono">Mono (Courier)</option></select><button type="button" class="editor-btn" id="editorFontUpload" title="Unggah font kustom (TTF/OTF)">Font+</button></label>
+            <label class="editor-field">Ukuran <input type="number" id="editorSize" class="editor-size-input" min="6" max="200" step="1" value="16" aria-label="Ukuran teks"></label>
             <div class="editor-zoom" role="group" aria-label="Zoom tampilan halaman">
               <button type="button" class="editor-btn" data-ezoom="-1" title="Perkecil tampilan" aria-label="Perkecil tampilan">−</button>
               <span class="editor-zoom-label" id="editorZoomLabel" aria-live="polite">100%</span>
