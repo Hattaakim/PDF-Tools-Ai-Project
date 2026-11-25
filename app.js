@@ -262,7 +262,7 @@ const EDITOR_HINTS={
   select:'Seret di atas teks PDF untuk memilih, lalu pilih Sorot, Garis bawah, atau Coret. Anotasi objek dinonaktifkan sementara.'
 };
 const EDITOR_ZOOM_MIN=.5,EDITOR_ZOOM_MAX=3,EDITOR_ZOOM_STEP=.15;
-const editor={doc:null,file:null,total:0,page:1,items:{},tool:'text',color:'#4a5df0',size:16,font:'sans',customFonts:[],zoom:1,token:0,renderToken:0,selected:null,canvasW:0,canvasH:0,pageW:595,pageH:842,pendingImageAt:null,drawing:null,preview:null,markRects:null,initialized:false};
+const editor={doc:null,file:null,docKey:null,total:0,page:1,items:{},tool:'text',color:'#4a5df0',size:16,font:'sans',customFonts:[],zoom:1,token:0,renderToken:0,selected:null,canvasW:0,canvasH:0,pageW:595,pageH:842,pendingImageAt:null,drawing:null,preview:null,markRects:null,initialized:false};
 let editorLeaveReturnFocus=null,editorLeaveNextAction=null,editPageReturnFocus=null,editorResizeTimer=0;
 
 function initEditor(){
@@ -425,7 +425,7 @@ async function setEditorFile(file){
   if(file.size>100*1024*1024){showError('Ukuran PDF maksimal 100 MB.');return}
   setEditProgress(null,'Membaca PDF…');
   if(editor.doc){try{editor.doc.destroy()}catch(error){}}
-  editor.file=file;editor.doc=null;editor.total=0;editor.page=1;editor.items={};editor.selected=null;editor.pendingImageAt=null;editor.zoom=1;
+  editor.file=file;editor.doc=null;editor.docKey=null;editor.total=0;editor.page=1;editor.items={};editor.selected=null;editor.pendingImageAt=null;editor.zoom=1;
   selectedFiles=[file];updateEditorChrome();
   const token=++editor.token;
   try{
@@ -2913,25 +2913,38 @@ function offlinePlain(value){return JSON.parse(JSON.stringify(value||{}))}
 function offlineNewId(kind){return `${kind}-${Date.now()}-${Math.random().toString(36).slice(2,9)}`}
 function offlineSort(records){return records.slice().sort((a,b)=>(b.savedAt||0)-(a.savedAt||0))}
 
+function offlineEditDocKey(file){
+  if(!file)return 'edit:unknown';
+  if(editor.docKey)return editor.docKey;
+  return `edit:${file.name||'dokumen'}|${file.size||0}|${file.lastModified||0}`;
+}
+function offlineRecordMatchesDoc(record,kind,data){
+  if(!record||!data)return false;
+  if(record.docKey&&data.docKey)return record.docKey===data.docKey;
+  if(kind==='edit')return record.name&&record.name===data.name;
+  return (record.name||'')===(data.name||'')&&record.name!==undefined;
+}
 async function offlineCapture(kind){
   if(offlineRestoring)return null;
   try{
     if(kind==='edit'){
       const file=editor.file;
       if(!editPageIsOpen()||!file||!editor.doc||!editorHasChanges())return null;
-      return {pdf:await file.arrayBuffer(),name:file.name,type:file.type||'application/pdf',items:offlinePlain(editor.items),page:editor.page,tool:editor.tool,color:editor.color,size:editor.size,zoom:editor.zoom,total:editor.total};
+      return {pdf:await file.arrayBuffer(),name:file.name,type:file.type||'application/pdf',docKey:offlineEditDocKey(file),items:offlinePlain(editor.items),page:editor.page,tool:editor.tool,color:editor.color,size:editor.size,zoom:editor.zoom,total:editor.total};
     }
     if(kind==='doc'){
       const page=document.getElementById('docWritePage');
       if(!page||!page.classList.contains('open'))return null;
       const pages=[...document.querySelectorAll('#docPages .doc-page')].map(el=>el.innerHTML);
       if(!pages.length)return null;
-      return {pages,title:docTitleValue(),layout:{...docLayout},zoom:docZoom,fonts:docCustomFonts.map(font=>({label:font.label,family:font.family,bytes:font.bytes.slice()}))};
+      const title=docTitleValue();
+      return {pages,title,name:title,docKey:`doc:${title}`,layout:{...docLayout},zoom:docZoom,fonts:docCustomFonts.map(font=>({label:font.label,family:font.family,bytes:font.bytes.slice()}))};
     }
     if(kind==='sheet'){
       const page=document.getElementById('sheetPage');
       if(!page||!page.classList.contains('open'))return null;
-      return {snapshot:sheetSnapshot(),name:sheetNameValue(),options:sheetPdfState.options?{...sheetPdfState.options}:null,exported:sheet.exported};
+      const name=sheetNameValue();
+      return {snapshot:sheetSnapshot(),name,docKey:`sheet:${name}`,options:sheetPdfState.options?{...sheetPdfState.options}:null,exported:sheet.exported};
     }
     if(kind==='database'){
       const page=document.getElementById('dbPage');
@@ -2939,9 +2952,10 @@ async function offlineCapture(kind){
       const wizard=offlinePlain(dbWizardState);
       if(!databaseState.db){
         const started=wizard.step>1||(wizard.tables||[]).some(table=>(table.columns||[]).length)||String(wizard.name||'')!=='database-baru';
-        return started?{wizard,name:'',dirty:true,view:'wizard'}:null;
+        return started?{wizard,name:'',docKey:`db:wizard:${wizard.name||''}`,dirty:true,view:'wizard'}:null;
       }
-      return {db:databaseState.db.export(),name:databaseState.name,dirty:databaseState.dirty,view:databaseState.view,wizard};
+      const name=databaseState.name;
+      return {db:databaseState.db.export(),name,docKey:`db:${name}`,dirty:databaseState.dirty,view:databaseState.view,wizard};
     }
   }catch(error){}
   return null;
@@ -2977,11 +2991,12 @@ async function offlineSave(kind,force=false){
   const data=await offlineCapture(kind);
   if(!data)return false;
   const now=Date.now(),records=await offlineGetAll()||[];
-  const existing=force?null:offlineSort(records.filter(record=>record.kind===kind))[0];
+  const sameDoc=force?[]:offlineSort(records.filter(record=>record&&record.kind===kind&&offlineRecordMatchesDoc(record,kind,data)));
+  const existing=sameDoc[0]||null;
   const canUpdate=existing&&now-(existing.savedAt||0)<2*60*1000;
   const record={
     id:canUpdate?existing.id:offlineNewId(kind),kind,label:OFFLINE_LABELS[kind]||kind,
-    name:data.name||'',savedAt:now,lastAccessed:now,size:offlineSize(data),data,
+    docKey:data.docKey||'',name:data.name||'',savedAt:now,lastAccessed:now,size:offlineSize(data),data,
     auto:!force
   };
   const ok=await offlinePut(record);
@@ -3008,13 +3023,17 @@ function wireOfflineAutosave(){
 }
 
 async function offlineRestoreEdit(data){
-  const pdf=data.pdf;
-  if(!pdf||!(pdf instanceof ArrayBuffer))throw Error('PDF backup tidak ditemukan');
-  const file=new File([pdf],data.name||'dokumen.pdf',{type:data.type||'application/pdf'});
-  const doc=await pdfjsLib.getDocument({data:new Uint8Array(pdf)}).promise;
+  const raw=data&&data.pdf;
+  let bytes=null;
+  if(raw instanceof ArrayBuffer)bytes=new Uint8Array(raw);
+  else if(ArrayBuffer.isView(raw))bytes=new Uint8Array(raw.buffer,raw.byteOffset,raw.byteLength);
+  else if(typeof Blob==='function'&&raw instanceof Blob)bytes=new Uint8Array(await raw.arrayBuffer());
+  if(!bytes||!bytes.byteLength)throw Error('PDF backup tidak ditemukan');
+  const file=new File([bytes],data.name||'dokumen.pdf',{type:data.type||'application/pdf'});
+  const doc=await pdfjsLib.getDocument({data:bytes}).promise;
   openEditPage();
   if(editor.doc){try{editor.doc.destroy()}catch(error){}}
-  editor.doc=doc;editor.file=file;editor.total=doc.numPages;
+  editor.doc=doc;editor.file=file;editor.docKey=data.docKey||null;editor.total=doc.numPages;
   selectedFiles=[file];
   editor.page=Math.max(1,Math.min(doc.numPages,+data.page||1));
   editor.items=data.items&&typeof data.items==='object'?data.items:{};
