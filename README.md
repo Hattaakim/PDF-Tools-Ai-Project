@@ -135,4 +135,6 @@ Penyimpanan lokal tidak lagi dibatasi satu salinan per fitur:
 - Tombol **Riwayat backup** muncul otomatis pada **Edit PDF, Pembuat PDF, PDF Sheet, dan Database SQLite** begitu ada backup untuk fitur tersebut. Di layar sempit tombol ini tampil sebagai ikon riwayat agar tidak menutupi judul sheet atau bilah alat.
 - Dialog riwayat menampilkan setiap salinan beserta waktu, ukuran, dan jenisnya (otomatis atau manual). Salinan dapat **dipulihkan** atau **dihapus** satu per satu.
 - Tombol **Simpan salinan sekarang** membuat salinan manual tambahan tanpa menunggu penulisan otomatis.
+- Setiap dokumen memiliki identitas backup sendiri. Membuka **file PDF baru** di Edit PDF tidak lagi menimpa backup file sebelumnya, meski dilakukan dalam jendela 2 menit; backup lama tetap muncul di riwayat dan dapat dipulihkan. Autosave hanya menggabungkan perubahan pada dokumen yang sama.
+- Pemulihan menerima backup lama yang tersimpan sebagai `ArrayBuffer`, `Uint8Array`, maupun `Blob`, dan tetap bekerja walau halaman kerjanya sedang tertutup.
 - Autosave memakai ID unik per salinan, menggabungkan penulisan dalam jendela 2 menit, dan membatasi penyimpanan menjadi 5 salinan per fitur / 12 salinan total / 80 MB / 30 hari.
