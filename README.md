@@ -92,6 +92,7 @@ Warna kaca kini memakai satu set token untuk kedua tema, sehingga tidak ada lagi
 - Ilustrasi hero, kartu panduan, banner privasi, dan halaman Tentang mengikuti tema yang sama; gradien emas tetap dipakai sebagai aksen, bukan sebagai latar yang membanjiri layar.
 - Warna `theme-color` dan scrollbar browser ikut berubah saat tema diganti, termasuk scrollbar akar halaman.
 - Kontras teks sekunder pada modal, tabel rentang halaman, dan catatan pratinjau dinaikkan agar tetap terbaca di latar gelap.
+- Wizard pembuatan database SQLite ikut memakai palet gelap penuh: kepala, isi, dan kaki wizard, kartu tabel, kolom, pratinjau data, serta stepper langkah tidak lagi menyisakan panel krem terang yang membuat judul dan label sulit dibaca.
 
 ## Penyimpanan offline dan pemulihan otomatis
 
